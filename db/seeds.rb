@@ -7,3 +7,15 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+ChecksumAlgorithm.find_or_create_by!(
+	name: 'SHA256', empty_value: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+)
+
+ChecksumAlgorithm.find_or_create_by!(
+	name: 'MD5', empty_value: 'd41d8cd98f00b204e9800998ecf8427e'
+)
+
+ChecksumAlgorithm.find_or_create_by!(
+	name: 'CRC32C', empty_value: '00000000'
+)
