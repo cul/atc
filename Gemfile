@@ -26,6 +26,8 @@ gem 'resque'
 gem "redis", ">= 4.0.1"
 gem "kredis"
 
+gem "digest-crc"
+
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 gem "bootsnap", require: false
