@@ -31,7 +31,7 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "bootsnap", require: false
 
 group :development, :test do
-  gem "sqlite3", "~> 1.4"
+  gem "sqlite3"
   # Use Capistrano for deployment
   gem 'capistrano', '~> 3.17.3', require: false
   # Rails and Bundler integrations were moved out from Capistrano 3
