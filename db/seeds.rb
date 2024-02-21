@@ -19,3 +19,7 @@ ChecksumAlgorithm.find_or_create_by!(
 ChecksumAlgorithm.find_or_create_by!(
 	name: 'CRC32C', empty_value: '00000000'
 )
+
+StorageProvider.find_or_create_by!(name: 'AWS')
+StorageProvider.find_or_create_by!(name: 'GCP')
+StorageProvider.find_or_create_by!(name: 'NETAPP', on_prem: true)
