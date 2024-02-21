@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_02_21_222949) do
+ActiveRecord::Schema[7.1].define(version: 2024_02_21_230506) do
   create_table "checksum_algorithms", force: :cascade do |t|
     t.string "name", null: false
     t.string "empty_value", null: false
@@ -66,6 +66,17 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_21_222949) do
     t.datetime "updated_at", null: false
     t.index ["path_hash"], name: "index_transfer_sources_on_path_hash", unique: true
     t.index ["repository_id"], name: "index_transfer_sources_on_repository_id"
+  end
+
+  create_table "transfer_verifications", force: :cascade do |t|
+    t.string "checksum_value", null: false
+    t.bigint "object_size", null: false
+    t.integer "object_transfer_id", null: false
+    t.integer "checksum_algorithm_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["checksum_algorithm_id"], name: "index_transfer_verifications_on_checksum_algorithm_id"
+    t.index ["object_transfer_id"], name: "index_transfer_verifications_on_object_transfer_id"
   end
 
 end

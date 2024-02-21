@@ -16,7 +16,7 @@ describe ObjectTransfer do
 	describe 'validations' do
 		let(:object_size) { 2048 } # any vaue fine for these tests
 		let(:transfer_source) { TransferSource.create!(path: well_known_input, object_size: object_size) }
-		let(:storage_provider) { StorageProvider.find_by(name: 'NETAPP') }
+		let(:storage_provider) { StorageProvider.create(name: 'TEST') }
 		subject(:object_transfer) do
 			described_class.create!(
 				transfer_source: transfer_source,
