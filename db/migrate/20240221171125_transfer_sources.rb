@@ -8,7 +8,7 @@ class TransferSources < ActiveRecord::Migration[7.1]
       t.string :path, null: false
       t.binary :path_hash, limit: 32, null: false
       t.bigint :object_size, null: false
-      t.datetime :on_prem_deleted, null: true
+      t.datetime :on_prem_deleted_at, null: true
       t.references :repository, null: true
 
       t.timestamps

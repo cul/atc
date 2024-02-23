@@ -50,7 +50,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_21_230506) do
 
   create_table "storage_providers", force: :cascade do |t|
     t.string "name", null: false
-    t.boolean "on_prem", default: false
+    t.boolean "on_prem", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_storage_providers_on_name", unique: true
@@ -60,7 +60,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_21_230506) do
     t.string "path", null: false
     t.binary "path_hash", limit: 32, null: false
     t.bigint "object_size", null: false
-    t.datetime "on_prem_deleted"
+    t.datetime "on_prem_deleted_at"
     t.integer "repository_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
