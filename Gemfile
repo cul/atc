@@ -26,11 +26,18 @@ gem 'resque'
 gem "redis", ">= 4.0.1"
 gem "kredis"
 
-gem "digest-crc"
-
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 gem "bootsnap", require: false
+
+# Amazon S3 SDK
+gem 'aws-sdk-s3', '~> 1'
+# Additional gem enabling the AWS SDK to calculate CRC32C checksums
+gem 'aws-crt', '~> 0.2.0'
+
+# Add CRC32C support to the Ruby Digest module
+gem 'digest-crc', '~> 0.6.5'
+
 
 group :development, :test do
   gem "sqlite3"
