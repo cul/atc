@@ -1,7 +1,9 @@
-class PathValidator < ActiveModel::Validator
-	def validate(record)
-		return unless record.changed_attributes.include? :path
+# frozen_string_literal: true
 
-		record.errors.add :path, "path cannot be updated after source creation"
-	end
+class PathValidator < ActiveModel::Validator
+  def validate(record)
+    return unless record.changed_attributes.include? :path
+
+    record.errors.add :path, 'path cannot be updated after source creation'
+  end
 end

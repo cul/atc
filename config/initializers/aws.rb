@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 AWS_CONFIG = Rails.application.config_for(:aws).deep_symbolize_keys
 
 S3_CLIENT = Aws::S3::Client.new(

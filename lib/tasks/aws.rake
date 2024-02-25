@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 MULTIPART_THRESHOLD = 100.megabytes # must be >= 5.megabytes due to AWS restriction
 AWS_FORCED_MULTIPART_THRESHOLD = 5.gigabytes # AWS requires multipart uploads for any files larger than 5.gigabytes
 
@@ -67,11 +69,11 @@ namespace :atc do
 
       begin
         puts "Attempting upload of #{local_file_path} to #{AWS_CONFIG[:preservation_bucket_name]} ..."
-        s3_object = Aws::S3::Object.new(AWS_CONFIG[:preservation_bucket_name], target_object_key, {client: S3_CLIENT})
+        s3_object = Aws::S3::Object.new(AWS_CONFIG[:preservation_bucket_name], target_object_key, { client: S3_CLIENT })
 
         if !overwrite && s3_object.exists?
           puts Rainbow("Cancelling upload because existing object was found at: #{s3_object.key}").red
-          puts Rainbow("If you want to replace the existing object, run this task again with: overwrite=true").red
+          puts Rainbow('If you want to replace the existing object, run this task again with: overwrite=true').red
           next
         end
 
