@@ -3,7 +3,7 @@
 if ['development', 'test'].include?(Rails.env)
   require 'rubocop/rake_task'
 
-  namespace :cul do
+  namespace :atc do
     namespace :rubocop do
       desc 'Automatically fix safe errors (quotes and frozen string literal comments)'
       rules = [
