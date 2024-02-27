@@ -14,6 +14,8 @@ gem 'digest-crc', '~> 0.6.5'
 gem 'importmap-rails'
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem 'jbuilder'
+# Use mysql as a database option for Active Record
+gem 'mysql2', '~> 0.5.6'
 # Use the Puma web server for local development [https://github.com/puma/puma]
 gem 'puma', '~> 6.0'
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
