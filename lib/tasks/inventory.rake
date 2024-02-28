@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+def print_readability_check_progress(file_count, unreadable_directory_count, unreadable_file_count)
+  print "\rReadability check progress: Found file count = #{file_count}, "\
+        "Unreadable directory count = #{unreadable_directory_count}, "\
+        "Unreadable file count = #{unreadable_file_count}"
+end
+
 namespace :atc do
   namespace :inventory do
     desc 'Scan a directory and add all of its files to the '
@@ -25,24 +31,28 @@ namespace :atc do
         puts "Skipping readability check because skip_readability_check=#{skip_readability_check}"
       else
         file_counter = 0
-        unreadable_file_counter = 0
         unreadable_directory_path_error_list = []
-        print "\rReadability check progress: #{file_counter}"
+        unreadable_file_path_list = []
+        print_readability_check_progress(file_counter, 0, 0)
         Atc::Utils::FileUtils.stream_recursive_directory_read(path, unreadable_directory_path_error_list) do |file_path|
           file_counter += 1
 
-          unreadable_file_counter += 1 unless File.readable?(file_path)
+          unreadable_file_path_list << file_path unless File.readable?(file_path)
 
-          print "\rReadability check progress: #{file_counter}" if file_counter % 1000 == 0
+          if file_counter % 1000 == 0
+            print_readability_check_progress(file_counter, unreadable_directory_path_error_list.length, unreadable_file_path_list.length)
+          end
         end
-        print "\rReadability check progress: #{file_counter}"
+        print_readability_check_progress(file_counter, unreadable_directory_path_error_list.length, unreadable_file_path_list.length)
         puts "\n"
 
-        if unreadable_directory_path_error_list.present? || unreadable_file_counter > 0
-          puts Rainbow("\nReadability check failed. Encountered the following errors:").red
-          puts Rainbow("- Number of unreadable files:\n\t#{unreadable_file_counter}").red if unreadable_file_counter.present?
+        if unreadable_directory_path_error_list.present? || unreadable_file_path_list.present?
+          puts Rainbow("\nReadability check failed. Encountered the following errors:\n").red
           if unreadable_directory_path_error_list.present?
-            puts Rainbow("- The following directories were not readable (and any files inside them could not be read):\n\t" + unreadable_directory_path_error_list.join("\n\t")).red
+            puts Rainbow("- Found #{unreadable_directory_path_error_list.length} unreadable #{unreadable_directory_path_error_list.length == 1 ? 'directory' : 'directories'}:\n\t" + unreadable_directory_path_error_list.join("\n\t")).red
+          end
+          if unreadable_file_path_list.present?
+            puts Rainbow("- Found #{unreadable_file_path_list.length} unreadable #{unreadable_file_path_list.length == 1 ? 'file' : 'files'}:\n\t" + unreadable_file_path_list.join("\n\t")).red
           end
           next
         end
