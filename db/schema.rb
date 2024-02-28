@@ -24,6 +24,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_21_230506) do
     t.string "value", null: false
     t.integer "checksum_algorithm_id", null: false
     t.integer "transfer_source_id", null: false
+    t.integer "chunk_size"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["checksum_algorithm_id"], name: "index_checksums_on_checksum_algorithm_id"
