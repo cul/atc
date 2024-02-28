@@ -8,10 +8,10 @@ module Atc::Utils::FileUtils
     Dir.foreach(dir) do |filename|
       next if filename == '.' or filename == '..'
       full_file_or_directory_path = File.join(dir, filename)
-      if File.file?(full_file_or_directory_path)
-        block.call(full_file_or_directory_path)
-      else
+      if File.directory?(full_file_or_directory_path)
         stream_recursive_directory_read(full_file_or_directory_path, unreadable_directory_path_error_list, &block)
+      else
+        block.call(full_file_or_directory_path)
       end
     end
   rescue Errno::EACCES => e
