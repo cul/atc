@@ -6,6 +6,10 @@ def print_readability_check_progress(file_count, unreadable_directory_count, unr
         "Unreadable file count = #{unreadable_file_count}"
 end
 
+def print_inventory_addition_progress(transfer_source_count)
+  print "\rTransferSource records created: #{transfer_source_count}"
+end
+
 namespace :atc do
   namespace :inventory do
     desc 'Scan a directory and add all of its files to the '
@@ -66,13 +70,24 @@ namespace :atc do
       end
 
       puts "\nStep 2: Adding files to the inventory database..."
+
+      transfer_source_counter = 0
+      print_inventory_addition_progress(transfer_source_counter)
       Atc::Utils::FileUtils.stream_recursive_directory_read(path, false) do |file_path|
         size = File.size(file_path)
         transfer_source = TransferSource.create!(
           path: file_path,
           object_size: size,
         )
+        transfer_source_counter += 1
+        if transfer_source_counter % 1000 == 0
+          print_inventory_addition_progress(transfer_source_counter)
+        end
       end
+      print_inventory_addition_progress(transfer_source_counter)
+      puts "\nStep 2: Done!"
+
+      puts "\nProcess complete!"
     end
   end
 end
