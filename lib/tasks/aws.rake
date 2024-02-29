@@ -70,6 +70,7 @@ namespace :atc do
       begin
         puts "Calculating sha256 checksum for #{local_file_path} ..."
         sha256_hexdigest = Digest::SHA256.file(local_file_path).hexdigest
+        puts "sha256 checksum is: #{sha256_hexdigest}"
 
         puts "Attempting upload of #{local_file_path} to #{AWS_CONFIG[:preservation_bucket_name]} ..."
         s3_object = Aws::S3::Object.new(AWS_CONFIG[:preservation_bucket_name], target_object_key, { client: S3_CLIENT })
