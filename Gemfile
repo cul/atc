@@ -54,14 +54,10 @@ end
 
 group :development do
   # Use Capistrano for deployment
-  gem 'capistrano', '~> 3.17.3', require: false
-  gem 'capistrano-bundler', '~> 1.1', require: false
-  # The `deploy:restart` hook for passenger applications is now in a separate gem
-  # Just add it to your Gemfile and require it in your Capfile.
-  gem 'capistrano-passenger', '~> 0.2', require: false
-  # Rails and Bundler integrations were moved out from Capistrano 3
+  gem 'capistrano', '~> 3.18.0', require: false
+  gem 'capistrano-cul', require: false
+  gem 'capistrano-passenger', '~> 0.1', require: false
   gem 'capistrano-rails', '~> 1.4', require: false
-  gem 'capistrano-rvm', '~> 0.1', require: false
 
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem 'web-console'
