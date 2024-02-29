@@ -13,15 +13,16 @@ UPLOAD_OPTS = {
   progress_callback: PROGRESS_DISPLAY_PROC,
   multipart_threshold: MULTIPART_THRESHOLD,
   thread_count: 10, # The number of parallel multipart uploads
-  # This checksum_algorithm parameter makes the S3 Ruby SDK automatically calculate CRC32C checksums
-  # locally before sending the file (for both multipart and single part).
+  # It's unclear whether the checksum_algorithm parameter makes the S3 Ruby SDK automatically
+  # calculate local CRC32C checksums before sending the file (for both multipart and single part
+  # uploads).  When the checksum_algorithm param is provided, with value 'CRC32C', we receive a
+  # CRC32C checksum in the response, but is this only from an S3 server-side calculation?
+  #
+  # Related note from AWS docs:
   # "When you're using an SDK, you can set the value of the x-amz-sdk-checksum-algorithm parameter
   # to the algorithm that you want Amazon S3 to use when calculating the checksum. Amazon S3
   # automatically calculates the checksum value."
   # - https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html
-  # We can confirm that this is working because the upload response will include a checksum_crc32c
-  # value, and the object in S3 will have a checksum associated with it (using the algorithm
-  # specified below.)
   checksum_algorithm: 'CRC32C'
 }
 
