@@ -68,6 +68,9 @@ namespace :atc do
       target_object_key = File.basename(local_file_path)
 
       begin
+        puts "Calculating sha256 checksum for #{local_file_path} ..."
+        sha256_hexdigest = Digest::SHA256.file(local_file_path).hexdigest
+
         puts "Attempting upload of #{local_file_path} to #{AWS_CONFIG[:preservation_bucket_name]} ..."
         s3_object = Aws::S3::Object.new(AWS_CONFIG[:preservation_bucket_name], target_object_key, { client: S3_CLIENT })
 
@@ -81,7 +84,9 @@ namespace :atc do
 
         success = s3_object.upload_file(
           local_file_path,
-          UPLOAD_OPTS
+          UPLOAD_OPTS.merge({
+            tagging: "checksum-sha256=#{sha256_hexdigest}"
+          })
         ) do |resp|
           aws_reported_checksum = resp.checksum_crc32c
           if aws_reported_checksum.present?
