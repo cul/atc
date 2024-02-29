@@ -17,7 +17,7 @@ describe ObjectTransfer do
 
     let(:object_size) { 2048 } # any vaue fine for these tests
     let(:transfer_source) { TransferSource.create!(path: well_known_input, object_size: object_size) }
-    let(:storage_provider) { StorageProvider.create(name: 'TEST') }
+    let(:storage_provider) { FactoryBot.create(:storage_provider) }
 
     it 'has a path_hash of 32 bytes' do
       expect(object_transfer.path_hash.bytesize).to be 32

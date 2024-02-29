@@ -13,7 +13,7 @@ describe TransferVerification do
     let(:checksum) do
       Checksum.create!(transfer_source: transfer_source, checksum_algorithm: checksum_algorithm, value: checksum_value)
     end
-    let(:storage_provider) { StorageProvider.create!(name: 'TEST') }
+    let(:storage_provider) { FactoryBot.create(:storage_provider) }
     let(:object_transfer) do
       ObjectTransfer.create!(
         transfer_source: transfer_source,

@@ -20,6 +20,6 @@ ChecksumAlgorithm.find_or_create_by!(
 	name: 'CRC32C', empty_value: '00000000'
 )
 
-StorageProvider.find_or_create_by!(name: 'AWS')
-StorageProvider.find_or_create_by!(name: 'GCP')
-StorageProvider.find_or_create_by!(name: 'NETAPP', on_prem: true)
+StorageProvider.find_or_create_by!(storage_type: StorageProvider.storage_types[:aws], container_name: 'cul-dlstor-digital-preservation')
+StorageProvider.find_or_create_by!(storage_type: StorageProvider.storage_types[:gcp], container_name: 'cul-dlstor-digital-preservation')
+StorageProvider.find_or_create_by!(storage_type: StorageProvider.storage_types[:cul], container_name: 'netapp')

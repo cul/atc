@@ -23,8 +23,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_21_230506) do
   create_table "checksums", force: :cascade do |t|
     t.string "value", null: false
     t.integer "checksum_algorithm_id", null: false
-    t.integer "transfer_source_id", null: false
     t.integer "chunk_size"
+    t.integer "transfer_source_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["checksum_algorithm_id"], name: "index_checksums_on_checksum_algorithm_id"
@@ -50,11 +50,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_21_230506) do
   end
 
   create_table "storage_providers", force: :cascade do |t|
-    t.string "name", null: false
-    t.boolean "on_prem", default: false, null: false
+    t.integer "storage_type", null: false
+    t.string "container_name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["name"], name: "index_storage_providers_on_name", unique: true
+    t.index ["container_name"], name: "index_storage_providers_on_container_name"
+    t.index ["storage_type", "container_name"], name: "index_storage_providers_on_storage_type_and_container_name", unique: true
+    t.index ["storage_type"], name: "index_storage_providers_on_storage_type"
   end
 
   create_table "transfer_sources", force: :cascade do |t|
@@ -71,9 +73,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_21_230506) do
 
   create_table "transfer_verifications", force: :cascade do |t|
     t.string "checksum_value", null: false
+    t.integer "checksum_algorithm_id", null: false
+    t.integer "checksum_chunk_size"
     t.bigint "object_size", null: false
     t.integer "object_transfer_id", null: false
-    t.integer "checksum_algorithm_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["checksum_algorithm_id"], name: "index_transfer_verifications_on_checksum_algorithm_id"
