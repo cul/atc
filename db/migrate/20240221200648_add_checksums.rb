@@ -11,8 +11,8 @@ class AddChecksums < ActiveRecord::Migration[7.1]
     create_table :checksums do |t|
       t.string :value, null: false
       t.references :checksum_algorithm, null: false
-      t.references :transfer_source, null: false
       t.integer :chunk_size, null: true
+      t.references :transfer_source, null: false
       t.timestamps
     end
   end
