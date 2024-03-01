@@ -98,26 +98,35 @@ namespace :atc do
       puts "\nProcess complete!"
     end
 
-    desc 'Scan a directory and add all of its files to the transfer_sources table'
+    desc 'Create a checksum entry for a TransferSource at the given transfer_source_path.  '\
+      'If sha256_checksum_hexdigest is given, uses the given value.  Otherwise reads the file '\
+      'and generates a sha256 checksum.'
     task add_transfer_source_sha256_checksum: :environment do
-      next unless validate_required_keys_and_print_error_messages('transfer_source_path', 'sha256_checksum_hexdigest')
+      next unless validate_required_keys_and_print_error_messages('transfer_source_path')
       transfer_source_path = ENV['transfer_source_path']
       sha256_checksum_hexdigest = ENV['sha256_checksum_hexdigest']
 
-      unless sha256_checksum_hexdigest =~ /^[A-Fa-f0-9]{64}$/
-        puts Rainbow("Not a valid sha256 checksum: #{sha256_checksum_hexdigest}").red
-        next
-      end
-
       transfer_source = TransferSource.find_by(path_hash: Digest::SHA256.digest(transfer_source_path))
-
       if transfer_source.nil?
         puts Rainbow("Could not find TransferSource record with path: #{transfer_source_path}")
         next
       end
 
+      if sha256_checksum_hexdigest.nil?
+        # Generate checksum
+        sha256_checksum_hexdigest = Digest::SHA256.file(transfer_source_path).hexdigest
+      elsif !(sha256_checksum_hexdigest.match?(/^[A-Fa-f0-9]{64}$/))
+        puts Rainbow("Not a valid sha256 checksum: #{sha256_checksum_hexdigest}").red
+        next
+      else
+        # For consistency, convert user-supplied sha256 to lower case.
+        # NOTE: This is fine for hex digests but would NOT be okay for a base64
+        # digest, which is case-sensitive.
+        sha256_checksum_hexdigest = sha256_checksum_hexdigest.downcase
+      end
+
       puts "Found transfer_source with path: #{transfer_source_path}"
-      puts "Adding sha256 checksum: #{sha256_checksum_hexdigest}"
+      puts "Adding sha256 checksum hexdigest: #{sha256_checksum_hexdigest}"
 
       checksum_algorithm = ChecksumAlgorithm.find_by(name: 'SHA256')
       Checksum.create!(
