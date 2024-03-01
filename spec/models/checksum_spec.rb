@@ -9,7 +9,7 @@ describe Checksum do
     )
   end
 
-  let(:algorithm) { ChecksumAlgorithm.find_by(name: 'MD5') }
+  let(:algorithm) { ChecksumAlgorithm.find_by(name: 'SHA256') }
   let(:value) { 'unverifiedValue' }
 
   context 'no transfer source defined' do

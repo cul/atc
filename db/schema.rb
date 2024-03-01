@@ -32,7 +32,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_21_230506) do
   end
 
   create_table "object_transfers", force: :cascade do |t|
-    t.string "path", null: false
+    t.string "path", limit: 4096, null: false
     t.binary "path_hash", limit: 32, null: false
     t.integer "transfer_source_id", null: false
     t.integer "storage_provider_id", null: false
@@ -60,7 +60,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_21_230506) do
   end
 
   create_table "transfer_sources", force: :cascade do |t|
-    t.string "path", null: false
+    t.string "path", limit: 4096, null: false
     t.binary "path_hash", limit: 32, null: false
     t.bigint "object_size", null: false
     t.datetime "on_prem_deleted_at"

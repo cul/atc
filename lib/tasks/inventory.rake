@@ -10,9 +10,17 @@ def print_inventory_addition_progress(transfer_source_count)
   print "\rTransferSource records created: #{transfer_source_count}"
 end
 
+def validate_required_keys_and_print_error_messages(*keys)
+  missing_keys = keys.select { |key| !ENV.key?(key) }
+  return true if missing_keys.blank?
+
+  puts Rainbow("Missing required arguments: #{missing_keys.join(', ')}").red
+  false
+end
+
 namespace :atc do
   namespace :inventory do
-    desc 'Scan a directory and add all of its files to the '
+    desc 'Scan a directory and add all of its files to the transfer_sources table'
     task add_transfer_sources: :environment do
       path = ENV['path']
       dry_run = ENV['dry_run'] == 'true'
@@ -88,6 +96,35 @@ namespace :atc do
       puts "\nStep 2: Done!"
 
       puts "\nProcess complete!"
+    end
+
+    desc 'Scan a directory and add all of its files to the transfer_sources table'
+    task add_transfer_source_sha256_checksum: :environment do
+      next unless validate_required_keys_and_print_error_messages('transfer_source_path', 'sha256_checksum_hexdigest')
+      transfer_source_path = ENV['transfer_source_path']
+      sha256_checksum_hexdigest = ENV['sha256_checksum_hexdigest']
+
+      unless sha256_checksum_hexdigest =~ /^[A-Fa-f0-9]{64}$/
+        puts Rainbow("Not a valid sha256 checksum: #{sha256_checksum_hexdigest}").red
+        next
+      end
+
+      transfer_source = TransferSource.find_by(path_hash: Digest::SHA256.digest(transfer_source_path))
+
+      if transfer_source.nil?
+        puts Rainbow("Could not find TransferSource record with path: #{transfer_source_path}")
+        next
+      end
+
+      puts "Found transfer_source with path: #{transfer_source_path}"
+      puts "Adding sha256 checksum: #{sha256_checksum_hexdigest}"
+
+      checksum_algorithm = ChecksumAlgorithm.find_by(name: 'SHA256')
+      Checksum.create!(
+        checksum_algorithm: checksum_algorithm,
+        transfer_source: transfer_source,
+        value: sha256_checksum_hexdigest
+      )
     end
   end
 end

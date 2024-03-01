@@ -8,7 +8,7 @@ describe TransferVerification do
   describe 'validations' do
     let(:source_size) { 2048 } # any value fine for these tests
     let(:transfer_source) { TransferSource.create!(path: well_known_input, object_size: source_size) }
-    let(:checksum_algorithm) { ChecksumAlgorithm.find_by(name: 'MD5') }
+    let(:checksum_algorithm) { ChecksumAlgorithm.find_by(name: 'SHA256') }
     let(:checksum_value) { 'unverified_value' }
     let(:checksum) do
       Checksum.create!(transfer_source: transfer_source, checksum_algorithm: checksum_algorithm, value: checksum_value)
