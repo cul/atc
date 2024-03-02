@@ -21,6 +21,7 @@ namespace :atc do
             transfer_source_path: transfer_source_path,
             checksum_value: checksum_value,
             dry_run: dry_run,
+            start_time: start,
             log_io: log
           )
         end
@@ -62,6 +63,7 @@ namespace :atc do
                 transfer_source_path: transfer_source_path,
                 checksum_value: checksum_value,
                 dry_run: dry_run,
+                start_time: start,
                 log_io: log
               )
             end

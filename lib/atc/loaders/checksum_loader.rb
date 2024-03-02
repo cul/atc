@@ -1,5 +1,5 @@
 module Atc::Loaders::ChecksumLoader
-  def self.load(checksum_algorithm:, transfer_source_path:, checksum_value:, dry_run:, log_io:)
+  def self.load(checksum_algorithm:, transfer_source_path:, checksum_value:, dry_run:, log_io:, start_time:)
     if dry_run
       # we're generous about checksum alg being missing on a dry run
       log_io.print("skip,#{checksum_algorithm&.name || 'MISSING'},#{checksum_value},#{transfer_source_path}\n")
