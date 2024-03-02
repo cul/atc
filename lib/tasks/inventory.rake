@@ -108,7 +108,7 @@ namespace :atc do
 
       transfer_source = TransferSource.find_by(path_hash: Digest::SHA256.digest(transfer_source_path))
       if transfer_source.nil?
-        puts Rainbow("Could not find TransferSource record with path: #{transfer_source_path}")
+        puts Rainbow("Could not find TransferSource record with path: #{transfer_source_path}").red
         next
       end
 
