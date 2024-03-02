@@ -15,7 +15,7 @@ jobs:
       NOKOGIRI_USE_SYSTEM_LIBRARIES: true
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Add --no-document option to .gemrc file to speed up bundle install
         run: "echo 'gem: --no-document' > ~/.gemrc"
       - name: Set up Ruby
@@ -23,5 +23,7 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - name: Set up default config files
+        run: bundle exec rake atc:setup:config_files
       - name: Run CI task
         run: bundle exec rspec
