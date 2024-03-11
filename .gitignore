@@ -35,5 +35,7 @@
 /config/master.key
 
 # Config file ignores
-/config/database.yml
 /config/aws.yml
+/config/database.yml
+/config/redis.yml
+/config/resque.yml
