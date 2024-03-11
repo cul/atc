@@ -35,6 +35,7 @@
 /config/master.key
 
 # Config file ignores
+/config/atc.yml
 /config/aws.yml
 /config/database.yml
 /config/redis.yml

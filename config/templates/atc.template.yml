@@ -1,0 +1,4 @@
+development:
+
+test:
+  run_queued_jobs_inline: true
