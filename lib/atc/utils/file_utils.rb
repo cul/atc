@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Atc::Utils::FileUtils
   # Recursively read the files in a directory by streaming the read operations
   # instead of trying to gather and load all of them into memory at the same time.
