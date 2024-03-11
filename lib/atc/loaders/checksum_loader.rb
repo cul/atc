@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Atc::Loaders::ChecksumLoader
   def self.load(checksum_algorithm:, transfer_source_path:, checksum_value:, dry_run:, log_io:, start_time:)
     if dry_run
@@ -11,7 +13,11 @@ module Atc::Loaders::ChecksumLoader
       log_io.print("xsrc,#{checksum_algorithm.name},#{checksum_value},#{transfer_source_path}\n")
       return
     end
-    unless checksum = Checksum.find_or_create_by(value: checksum_value, transfer_source: transfer_source, checksum_algorithm: checksum_algorithm)
+    unless (checksum = Checksum.find_or_create_by(
+      value: checksum_value,
+      transfer_source: transfer_source,
+      checksum_algorithm: checksum_algorithm
+    ))
       log_io.print("fail,#{checksum_algorithm.name},#{checksum_value},#{transfer_source_path}\n")
       return
     end
