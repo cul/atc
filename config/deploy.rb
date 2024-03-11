@@ -21,9 +21,11 @@ set :deploy_to, "/opt/passenger/#{fetch(:deploy_name)}"
 
 # Default value for :linked_files is []
 append  :linked_files,
-        'config/database.yml',
         'config/aws.yml',
-        'config/master.key'
+        'config/database.yml',
+        'config/master.key',
+        'config/redis.yml',
+        'config/resque.yml'
 
 # Default value for linked_dirs is []
 append :linked_dirs, 'log', 'tmp/pids', 'node_modules'
@@ -80,22 +82,22 @@ end
 # Uncomment the following to require manually verifying the host key before first deploy.
 # set :ssh_options, verify_host_key: :secure
 
-# after 'deploy:finished', 'atc:restart_resque_workers'
+after 'deploy:finished', 'atc:restart_resque_workers'
 
-# namespace :atc do
-#   desc 'Restart the resque workers'
-#   task :restart_resque_workers do
-#     on roles(:web) do
-#       within release_path do
-#         with rails_env: fetch(:rails_env) do
-#           resque_restart_err_and_out_log = './log/resque_restart_err_and_out.log'
-#           # With Ruby > 3.0, we need to redirect stdout and stderr to a file, otherwise
-#           # capistrano hangs on this task (waiting for more output).
-#           execute :rake, 'resque:restart_workers', '>', resque_restart_err_and_out_log, '2>&1'
-#           # Show the restart log output
-#           execute :cat, resque_restart_err_and_out_log
-#         end
-#       end
-#     end
-#   end
-# end
+namespace :atc do
+  desc 'Restart the resque workers'
+  task :restart_resque_workers do
+    on roles(:web) do
+      within release_path do
+        with rails_env: fetch(:rails_env) do
+          resque_restart_err_and_out_log = './log/resque_restart_err_and_out.log'
+          # With Ruby > 3.0, we need to redirect stdout and stderr to a file, otherwise
+          # capistrano hangs on this task (waiting for more output).
+          execute :rake, 'resque:restart_workers', '>', resque_restart_err_and_out_log, '2>&1'
+          # Show the restart log output
+          execute :cat, resque_restart_err_and_out_log
+        end
+      end
+    end
+  end
+end
