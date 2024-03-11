@@ -90,7 +90,12 @@ namespace :atc do
             tagging: "checksum-sha256=#{sha256_hexdigest}"
           })
         ) do |resp|
+          # Question: If we receive a crc32c chekcsum back from the AWS response (in `resp.checksum_crc32c`),
+          # does that mean that the Ruby SDK generated a CRC32C locally, verified it with Amazon after the upload,
+          # and verification was successful?  And would we have received an error if the checksum verification failed?
+
           aws_reported_checksum = resp.checksum_crc32c
+
           if aws_reported_checksum.present?
             is_multipart_upload = (aws_reported_checksum =~ /[^-]-\d+/) != nil
             puts "\nCRC32C checksum reported back from AWS (#{is_multipart_upload ? 'for combined multi-part upload parts' : 'for single PUT operation upload'}): #{aws_reported_checksum}"

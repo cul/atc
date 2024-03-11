@@ -9,16 +9,15 @@
 #   end
 
 ChecksumAlgorithm.find_or_create_by!(
-	name: 'SHA256', empty_value: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+	name: 'SHA256', empty_value: Digest::SHA256.new.digest
 )
 
-# Uncomment this later if we actually want to use MD5 checksume
-# ChecksumAlgorithm.find_or_create_by!(
-# 	name: 'MD5', empty_value: 'd41d8cd98f00b204e9800998ecf8427e'
-# )
+ChecksumAlgorithm.find_or_create_by!(
+	name: 'SHA512', empty_value: Digest::SHA512.new.digest
+)
 
 ChecksumAlgorithm.find_or_create_by!(
-	name: 'CRC32C', empty_value: '00000000'
+	name: 'CRC32C', empty_value: Digest::CRC32c.new.digest
 )
 
 StorageProvider.find_or_create_by!(storage_type: StorageProvider.storage_types[:aws], container_name: 'cul-dlstor-digital-preservation')

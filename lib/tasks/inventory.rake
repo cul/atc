@@ -6,8 +6,8 @@ def print_readability_check_progress(file_count, unreadable_directory_count, unr
         "Unreadable file count = #{unreadable_file_count}"
 end
 
-def print_inventory_addition_progress(transfer_source_count)
-  print "\rTransferSource records created: #{transfer_source_count}"
+def print_inventory_addition_progress(source_object_count)
+  print "\rSourceObject records created: #{source_object_count}"
 end
 
 def validate_required_keys_and_print_error_messages(*keys)
@@ -20,8 +20,8 @@ end
 
 namespace :atc do
   namespace :inventory do
-    desc 'Scan a directory and add all of its files to the transfer_sources table'
-    task add_transfer_sources: :environment do
+    desc 'Scan a directory and add all of its files to the source_objects table'
+    task add_source_objects: :environment do
       path = ENV['path']
       dry_run = ENV['dry_run'] == 'true'
       skip_readability_check = ENV['skip_readability_check'] == 'true'
@@ -79,42 +79,42 @@ namespace :atc do
 
       puts "\nStep 2: Adding files to the inventory database..."
 
-      transfer_source_counter = 0
-      print_inventory_addition_progress(transfer_source_counter)
+      source_object_counter = 0
+      print_inventory_addition_progress(source_object_counter)
       Atc::Utils::FileUtils.stream_recursive_directory_read(path, false) do |file_path|
         size = File.size(file_path)
-        transfer_source = TransferSource.create!(
+        source_object = SourceObject.create!(
           path: file_path,
           object_size: size,
         )
-        transfer_source_counter += 1
-        if transfer_source_counter % 1000 == 0
-          print_inventory_addition_progress(transfer_source_counter)
+        source_object_counter += 1
+        if source_object_counter % 1000 == 0
+          print_inventory_addition_progress(source_object_counter)
         end
       end
-      print_inventory_addition_progress(transfer_source_counter)
+      print_inventory_addition_progress(source_object_counter)
       puts "\nStep 2: Done!"
 
       puts "\nProcess complete!"
     end
 
-    desc 'Create a checksum entry for a TransferSource at the given transfer_source_path.  '\
+    desc 'Create a checksum entry for a SourceObject at the given source_object_path.  '\
       'If sha256_checksum_hexdigest is given, uses the given value.  Otherwise reads the file '\
       'and generates a sha256 checksum.'
-    task add_transfer_source_sha256_checksum: :environment do
-      next unless validate_required_keys_and_print_error_messages('transfer_source_path')
-      transfer_source_path = ENV['transfer_source_path']
+    task add_source_object_sha256_checksum: :environment do
+      next unless validate_required_keys_and_print_error_messages('source_object_path')
+      source_object_path = ENV['source_object_path']
       sha256_checksum_hexdigest = ENV['sha256_checksum_hexdigest']
 
-      transfer_source = TransferSource.find_by(path_hash: Digest::SHA256.digest(transfer_source_path))
-      if transfer_source.nil?
-        puts Rainbow("Could not find TransferSource record with path: #{transfer_source_path}").red
+      source_object = SourceObject.find_by(path_hash: Digest::SHA256.digest(source_object_path))
+      if source_object.nil?
+        puts Rainbow("Could not find SourceObject record with path: #{source_object_path}").red
         next
       end
 
       if sha256_checksum_hexdigest.nil?
         # Generate checksum
-        sha256_checksum_hexdigest = Digest::SHA256.file(transfer_source_path).hexdigest
+        sha256_checksum_hexdigest = Digest::SHA256.file(source_object_path).hexdigest
       elsif !(sha256_checksum_hexdigest.match?(/^[A-Fa-f0-9]{64}$/))
         puts Rainbow("Not a valid sha256 checksum: #{sha256_checksum_hexdigest}").red
         next
@@ -125,13 +125,13 @@ namespace :atc do
         sha256_checksum_hexdigest = sha256_checksum_hexdigest.downcase
       end
 
-      puts "Found transfer_source with path: #{transfer_source_path}"
+      puts "Found source_object with path: #{source_object_path}"
       puts "Adding sha256 checksum hexdigest: #{sha256_checksum_hexdigest}"
 
       checksum_algorithm = ChecksumAlgorithm.find_by(name: 'SHA256')
       Checksum.create!(
         checksum_algorithm: checksum_algorithm,
-        transfer_source: transfer_source,
+        source_object: source_object,
         value: sha256_checksum_hexdigest
       )
     end

@@ -44,7 +44,8 @@ if ['development', 'test'].include?(Rails.env)
         'Layout/IndentationConsistency',
         'Style/NumericPredicate',
         'Style/WhileUntilDo',
-        'Style/PercentLiteralDelimiters'
+        'Style/PercentLiteralDelimiters',
+        'Layout/ArgumentAlignment',
       ]
       RuboCop::RakeTask.new(:auto_fix_safe_errors) do |t|
         t.options = [
