@@ -28,6 +28,8 @@ gem 'rails', '~> 7.1.3', '>= 7.1.3.2'
 gem 'rainbow', '~> 3.0'
 # Use Redis adapter to run Action Cable in production
 gem 'redis', '>= 4.0.1'
+# Resque for queued jobs
+gem 'resque', '~> 2.6'
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem 'sprockets-rails'
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
