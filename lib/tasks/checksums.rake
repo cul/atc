@@ -14,15 +14,15 @@ namespace :atc do
       start = Time.now
       open("log/checksum-csv-#{start.to_i}#{'-dry_run' if dry_run}.log", "w") do |log|
         CSV.foreach(csv_path, headers: true).each do |row|
-          # checksum_algorithm_name,checksum_value,transfer_source_path
+          # checksum_algorithm_name,checksum_value,source_object_path
           checksum_algorithm_name = row['checksum_algorithm_name']
           # For consistency, always store SHA256 checksum value as downcased hex string
           checksum_value = checksum_algorithm_name == sha256_checksum_algorithm.name ? row['checksum_value'].downcase : row['checksum_value']
-          transfer_source_path = row['transfer_source_path']
+          source_object_path = row['source_object_path']
           checksum_algorithm = (checksum_algorithms[checksum_algorithm_name] ||= ChecksumAlgorithm.find_by(name: checksum_algorithm_name))
           Atc::Loaders::ChecksumLoader.load(
             checksum_algorithm: checksum_algorithm,
-            transfer_source_path: transfer_source_path,
+            source_object_path: source_object_path,
             checksum_value: checksum_value,
             dry_run: dry_run,
             start_time: start,
@@ -62,10 +62,10 @@ namespace :atc do
               # For consistency, always store SHA256 checksum value as downcased hex string
               checksum_value, rel_path = line.split(' ').downcase
               rel_path = rel_path.sub(/^\.\//, '')
-              transfer_source_path = File.join(aip_path, rel_path)
+              source_object_path = File.join(aip_path, rel_path)
               Atc::Loaders::ChecksumLoader.load(
                 checksum_algorithm: checksum_algorithm,
-                transfer_source_path: transfer_source_path,
+                source_object_path: source_object_path,
                 checksum_value: checksum_value,
                 dry_run: dry_run,
                 start_time: start,

@@ -17,3 +17,7 @@ AllCops:
     - 'lib/tasks/**/*'
     - 'tmp/**/*'
 
+
+Metrics/MethodLength:
+  Exclude:
+    - lib/atc/loaders/checksum_loader.rb
