@@ -9,3 +9,7 @@ S3_CLIENT = Aws::S3::Client.new(
     AWS_CONFIG[:aws_secret_access_key]
   )
 )
+
+# Setting this here to satisfy expectation for standalone call to
+# Aws::S3::MultipartFileUploader#compute_default_part_size.
+ENV['AWS_REGION'] = AWS_CONFIG[:aws_region]

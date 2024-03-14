@@ -13,16 +13,10 @@ UPLOAD_OPTS = {
   progress_callback: PROGRESS_DISPLAY_PROC,
   multipart_threshold: MULTIPART_THRESHOLD,
   thread_count: 10, # The number of parallel multipart uploads
-  # It's unclear whether the checksum_algorithm parameter makes the S3 Ruby SDK automatically
-  # calculate local CRC32C checksums before sending the file (for both multipart and single part
-  # uploads).  When the checksum_algorithm param is provided, with value 'CRC32C', we receive a
-  # CRC32C checksum in the response, but is this only from an S3 server-side calculation?
-  #
-  # Related note from AWS docs:
-  # "When you're using an SDK, you can set the value of the x-amz-sdk-checksum-algorithm parameter
-  # to the algorithm that you want Amazon S3 to use when calculating the checksum. Amazon S3
-  # automatically calculates the checksum value."
-  # - https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html
+  # NOTE: Supplying a checksum_algorithm option with value 'CRC32C' will make the AWS SDK
+  # automatically calculate a local CRC32C checksums before sending the file to S3 (for both
+  # multipart and single part uploads).  The upload will fail if the corresponding checksum
+  # calculated by S3 does not match.
   checksum_algorithm: 'CRC32C'
 }
 
@@ -90,10 +84,7 @@ namespace :atc do
             tagging: "checksum-sha256=#{sha256_hexdigest}"
           })
         ) do |resp|
-          # Question: If we receive a crc32c chekcsum back from the AWS response (in `resp.checksum_crc32c`),
-          # does that mean that the Ruby SDK generated a CRC32C locally, verified it with Amazon after the upload,
-          # and verification was successful?  And would we have received an error if the checksum verification failed?
-
+          # The AWS response will contain the verified checksum in the `checksum_crc32c` field.
           aws_reported_checksum = resp.checksum_crc32c
 
           if aws_reported_checksum.present?

@@ -25,34 +25,36 @@ describe StoredObject do
     end
 
     it 'fails to save when a positive size object has a zero-byte checksum value' do
-      stored_object.transfer_checksum_value = stored_object.transfer_checksum_algorithm.empty_value
+      stored_object.transfer_checksum_value = stored_object.transfer_checksum_algorithm.empty_binary_value
       expect(stored_object.save).to eq(false)
       expect(stored_object.errors).to include(:transfer_checksum_value)
     end
   end
 
   context 'with a no-content checksum' do
-    let(:stored_object_with_zero_byte_size_and_empty_value_checksum) do
+    let(:stored_object_with_zero_byte_size_and_empty_binary_value_checksum) do
       obj = FactoryBot.build(
         :stored_object,
         source_object: FactoryBot.create(:source_object, :with_zero_byte_object_size)
       )
-      obj.transfer_checksum_value = obj.transfer_checksum_algorithm.empty_value
+      obj.transfer_checksum_value = obj.transfer_checksum_algorithm.empty_binary_value
       obj
     end
-    let(:stored_object_with_positive_byte_size_and_empty_value_checksum) do
+    let(:stored_object_with_positive_byte_size_and_empty_binary_value_checksum) do
       obj = FactoryBot.build(:stored_object)
-      obj.transfer_checksum_value = obj.transfer_checksum_algorithm.empty_value
+      obj.transfer_checksum_value = obj.transfer_checksum_algorithm.empty_binary_value
       obj
     end
 
     it 'saves without error the object size is zero' do
-      expect(stored_object_with_zero_byte_size_and_empty_value_checksum.save).to eq(true)
+      expect(stored_object_with_zero_byte_size_and_empty_binary_value_checksum.save).to eq(true)
     end
 
     it 'fails to save when object size is a positive number' do
-      expect(stored_object_with_positive_byte_size_and_empty_value_checksum.save).to eq(false)
-      expect(stored_object_with_positive_byte_size_and_empty_value_checksum.errors).to include(:transfer_checksum_value)
+      expect(stored_object_with_positive_byte_size_and_empty_binary_value_checksum.save).to eq(false)
+      expect(
+        stored_object_with_positive_byte_size_and_empty_binary_value_checksum.errors
+      ).to include(:transfer_checksum_value)
     end
   end
 

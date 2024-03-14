@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'digest'
-
 class StoredObject < ApplicationRecord
   belongs_to :source_object
   belongs_to :storage_provider

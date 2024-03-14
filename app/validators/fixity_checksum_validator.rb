@@ -13,7 +13,7 @@ class FixityChecksumValidator < ActiveModel::Validator
   end
 
   def validate_checksum_for_zero_byte_file(record)
-    return if record.fixity_checksum_value == record.fixity_checksum_algorithm.empty_value
+    return if record.fixity_checksum_value == record.fixity_checksum_algorithm.empty_binary_value
 
     record.errors.add(
       :fixity_checksum_value,
@@ -22,7 +22,7 @@ class FixityChecksumValidator < ActiveModel::Validator
   end
 
   def validate_checksum_for_positive_size_file(record)
-    return if record.fixity_checksum_value != record.fixity_checksum_algorithm.empty_value
+    return if record.fixity_checksum_value != record.fixity_checksum_algorithm.empty_binary_value
 
     record.errors.add(
       :fixity_checksum_value,

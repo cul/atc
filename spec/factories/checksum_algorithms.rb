@@ -6,7 +6,7 @@ FactoryBot.define do
       initialize_with do
         ChecksumAlgorithm.find_by(name: 'SHA256') || ChecksumAlgorithm.create(
           name: 'SHA256',
-          empty_value: Digest::SHA256.new.digest
+          empty_binary_value: Digest::SHA256.new.digest
         )
       end
     end
@@ -15,7 +15,7 @@ FactoryBot.define do
       initialize_with do
         ChecksumAlgorithm.find_by(name: 'SHA512') || ChecksumAlgorithm.create(
           name: 'SHA512',
-          empty_value: Digest::SHA512.new.digest
+          empty_binary_value: Digest::SHA512.new.digest
         )
       end
     end
@@ -24,7 +24,7 @@ FactoryBot.define do
       initialize_with do
         ChecksumAlgorithm.find_by(name: 'CRC32C') || ChecksumAlgorithm.create(
           name: 'CRC32C',
-          empty_value: Digest::CRC32c.new.digest
+          empty_binary_value: Digest::CRC32c.new.digest
         )
       end
     end

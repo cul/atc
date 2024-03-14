@@ -10,30 +10,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_08_101504) do
-  create_table "checksum_algorithms", force: :cascade do |t|
+ActiveRecord::Schema[7.1].define(version: 2024_03_12_021908) do
+  create_table "checksum_algorithms", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "name", null: false
-    t.binary "empty_value"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["empty_value"], name: "index_checksum_algorithms_on_empty_value", unique: true
+    t.binary "empty_binary_value", null: false
     t.index ["name"], name: "index_checksum_algorithms_on_name", unique: true
   end
 
-  create_table "checksums", force: :cascade do |t|
+  create_table "checksums", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "value", null: false
-    t.integer "checksum_algorithm_id", null: false
+    t.bigint "checksum_algorithm_id", null: false
     t.integer "chunk_size"
-    t.integer "transfer_source_id", null: false
+    t.bigint "source_object_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["checksum_algorithm_id"], name: "index_checksums_on_checksum_algorithm_id"
-    t.index ["transfer_source_id"], name: "index_checksums_on_transfer_source_id"
+    t.index ["source_object_id"], name: "index_checksums_on_source_object_id"
   end
 
-  create_table "fixity_verifications", force: :cascade do |t|
-    t.integer "source_object_id", null: false
-    t.integer "stored_object_id", null: false
+  create_table "fixity_verifications", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "source_object_id", null: false
+    t.bigint "stored_object_id", null: false
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -42,12 +41,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_08_101504) do
     t.index ["stored_object_id"], name: "index_fixity_verifications_on_stored_object_id"
   end
 
-  create_table "pending_transfers", force: :cascade do |t|
-    t.integer "transfer_checksum_algorithm_id", null: false
+  create_table "pending_transfers", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "transfer_checksum_algorithm_id", null: false
     t.binary "transfer_checksum_value", limit: 4, null: false
-    t.integer "transfer_checksum_chunk_size"
-    t.integer "storage_provider_id", null: false
-    t.integer "source_object_id", null: false
+    t.integer "transfer_checksum_part_size"
+    t.integer "transfer_checksum_part_count"
+    t.bigint "storage_provider_id", null: false
+    t.bigint "source_object_id", null: false
     t.integer "status", default: 0, null: false
     t.text "error_message"
     t.datetime "created_at", null: false
@@ -56,23 +56,25 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_08_101504) do
     t.index ["source_object_id"], name: "index_pending_transfers_on_source_object_id"
     t.index ["storage_provider_id"], name: "index_pending_transfers_on_storage_provider_id"
     t.index ["transfer_checksum_algorithm_id"], name: "index_pending_transfers_on_transfer_checksum_algorithm_id"
+    t.index ["transfer_checksum_part_count"], name: "index_pending_transfers_on_transfer_checksum_part_count"
+    t.index ["transfer_checksum_part_size"], name: "index_pending_transfers_on_transfer_checksum_part_size"
   end
 
-  create_table "repositories", force: :cascade do |t|
+  create_table "repositories", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "source_objects", force: :cascade do |t|
+  create_table "source_objects", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "path", limit: 4096, null: false
     t.binary "path_hash", limit: 32, null: false
     t.bigint "object_size", null: false
     t.datetime "on_prem_deleted_at"
-    t.integer "repository_id"
+    t.bigint "repository_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "fixity_checksum_algorithm_id"
+    t.bigint "fixity_checksum_algorithm_id"
     t.binary "fixity_checksum_value", limit: 64
     t.index ["fixity_checksum_algorithm_id"], name: "index_source_objects_on_fixity_checksum_algorithm_id"
     t.index ["fixity_checksum_value"], name: "index_source_objects_on_fixity_checksum_value"
@@ -80,7 +82,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_08_101504) do
     t.index ["repository_id"], name: "index_source_objects_on_repository_id"
   end
 
-  create_table "storage_providers", force: :cascade do |t|
+  create_table "storage_providers", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.integer "storage_type", null: false
     t.string "container_name", null: false
     t.datetime "created_at", null: false
@@ -90,21 +92,23 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_08_101504) do
     t.index ["storage_type"], name: "index_storage_providers_on_storage_type"
   end
 
-  create_table "stored_objects", force: :cascade do |t|
+  create_table "stored_objects", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "path", limit: 4096, null: false
     t.binary "path_hash", limit: 32, null: false
-    t.integer "source_object_id", null: false
-    t.integer "storage_provider_id", null: false
+    t.bigint "source_object_id", null: false
+    t.bigint "storage_provider_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "transfer_checksum_algorithm_id"
+    t.bigint "transfer_checksum_algorithm_id"
     t.binary "transfer_checksum_value", limit: 4
-    t.integer "transfer_checksum_chunk_size"
+    t.integer "transfer_checksum_part_size"
+    t.integer "transfer_checksum_part_count"
     t.index ["source_object_id"], name: "index_stored_objects_on_source_object_id"
     t.index ["storage_provider_id", "path_hash"], name: "index_stored_objects_on_storage_provider_id_and_path_hash", unique: true
     t.index ["storage_provider_id"], name: "index_stored_objects_on_storage_provider_id"
     t.index ["transfer_checksum_algorithm_id"], name: "index_stored_objects_on_transfer_checksum_algorithm_id"
-    t.index ["transfer_checksum_chunk_size"], name: "index_stored_objects_on_transfer_checksum_chunk_size"
+    t.index ["transfer_checksum_part_count"], name: "index_stored_objects_on_transfer_checksum_part_count"
+    t.index ["transfer_checksum_part_size"], name: "index_stored_objects_on_transfer_checksum_part_size"
     t.index ["transfer_checksum_value"], name: "index_stored_objects_on_transfer_checksum_value"
   end
 

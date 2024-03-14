@@ -9,15 +9,15 @@
 #   end
 
 ChecksumAlgorithm.find_or_create_by!(
-	name: 'SHA256', empty_value: Digest::SHA256.new.digest
+	name: 'SHA256', empty_binary_value: Digest::SHA256.new.digest
 )
 
 ChecksumAlgorithm.find_or_create_by!(
-	name: 'SHA512', empty_value: Digest::SHA512.new.digest
+	name: 'SHA512', empty_binary_value: Digest::SHA512.new.digest
 )
 
 ChecksumAlgorithm.find_or_create_by!(
-	name: 'CRC32C', empty_value: Digest::CRC32c.new.digest
+	name: 'CRC32C', empty_binary_value: Digest::CRC32c.new.digest
 )
 
 StorageProvider.find_or_create_by!(storage_type: StorageProvider.storage_types[:aws], container_name: 'cul-dlstor-digital-preservation')

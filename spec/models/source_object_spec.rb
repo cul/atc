@@ -18,30 +18,32 @@ describe SourceObject do
   end
 
   context 'with a no-content checksum' do
-    let(:source_object_with_zero_byte_size_and_empty_value_checksum) do
+    let(:source_object_with_zero_byte_size_and_empty_binary_value_checksum) do
       FactoryBot.build(
         :source_object,
         object_size: 0,
         fixity_checksum_algorithm: sha256_checksum_algorithm,
-        fixity_checksum_value: sha256_checksum_algorithm.empty_value
+        fixity_checksum_value: sha256_checksum_algorithm.empty_binary_value
       )
     end
-    let(:source_object_with_positive_byte_size_and_empty_value_checksum) do
+    let(:source_object_with_positive_byte_size_and_empty_binary_value_checksum) do
       FactoryBot.build(
         :source_object,
         object_size: 1,
         fixity_checksum_algorithm: sha256_checksum_algorithm,
-        fixity_checksum_value: sha256_checksum_algorithm.empty_value
+        fixity_checksum_value: sha256_checksum_algorithm.empty_binary_value
       )
     end
 
     it 'saves without error the object size is zero' do
-      expect(source_object_with_zero_byte_size_and_empty_value_checksum.save).to eq(true)
+      expect(source_object_with_zero_byte_size_and_empty_binary_value_checksum.save).to eq(true)
     end
 
     it 'fails to save when object size is a positive number' do
-      expect(source_object_with_positive_byte_size_and_empty_value_checksum.save).to eq(false)
-      expect(source_object_with_positive_byte_size_and_empty_value_checksum.errors).to include(:fixity_checksum_value)
+      expect(source_object_with_positive_byte_size_and_empty_binary_value_checksum.save).to eq(false)
+      expect(
+        source_object_with_positive_byte_size_and_empty_binary_value_checksum.errors
+      ).to include(:fixity_checksum_value)
     end
   end
 

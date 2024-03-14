@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
-class PendingTransfer < ApplicationRecord
+class FixityVerification < ApplicationRecord
   belongs_to :source_object
-  belongs_to :storage_provider
-  belongs_to :transfer_checksum_algorithm, class_name: 'ChecksumAlgorithm'
+  belongs_to :stored_object
 
-  enum status: { pending: 0, failure: 1 }
+  enum status: { pending: 0, failure: 1, success: 2 }
 
   # Some db backends don't enforce a limit on binary field length,
   # so the limit below is meant to ensure that we don't ever
