@@ -2,8 +2,8 @@
 
 FactoryBot.define do
   factory :source_object do
-    path { '/path/to/file' }
-    object_size { 100 }
+    path { 'spec/fixtures/files/sample.jpg' }
+    object_size { 1_259_574 }
 
     trait :with_zero_byte_object_size do
       object_size { 0 }
