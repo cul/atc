@@ -10,12 +10,10 @@ describe CreatePendingTransferJob do
   let(:aws_id) { StorageProvider.find_by!(storage_type: StorageProvider.storage_types[:aws]).id }
   let(:gcp_id) { StorageProvider.find_by!(storage_type: StorageProvider.storage_types[:gcp]).id }
 
-  it 'creates the expected PendingTransfer record for a smaller file' do
+  it 'creates the expected PendingTransfer record' do
     create_pending_transfer_job.perform(source_object.id)
     aws = PendingTransfer.find_by(source_object_id: source_object.id, storage_provider_id: aws_id)
     gcp = PendingTransfer.find_by(source_object_id: source_object.id, storage_provider_id: gcp_id)
-
-    puts aws
 
     expect(aws).not_to be_nil
     expect(gcp).not_to be_nil
