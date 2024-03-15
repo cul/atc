@@ -23,8 +23,9 @@ describe CreatePendingTransferJob do
   end
 
   it 'creates the expected PendingTransfer record for a file above the multipart threshold' do
-    Tempfile.create(source_object_with_tempfile.path) do |f|
+    Tempfile.create(source_object_with_tempfile.path, binmode: true) do |f|
       f.write('A' * (multipart_threshold + 1.megabytes))
+      f.flush
       allow(File).to receive(:open).with(source_object_with_tempfile.path, 'rb').and_return(f)
       allow(File).to receive(:size).with(source_object_with_tempfile.path).and_return(multipart_threshold + 1.megabytes)
 
