@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 describe Atc::Utils::FileUtils do
-  context '.stream_recursive_directory_read' do
+  describe '.stream_recursive_directory_read' do
     let(:test_dir_with_files) { Rails.root.join('tmp/file-utils-test-dir') }
     let(:sample_file_paths) do
       [
@@ -17,16 +17,17 @@ describe Atc::Utils::FileUtils do
         'subdirectory2/file1.txt',
         'subdirectory2/file2.txt',
         'subdirectory2/file3.txt',
-        'subdirectory3/.dotfile',
-      ].map { |relative_path| File.join(test_dir_with_files, relative_path)}
+        'subdirectory3/.dotfile'
+      ].map { |relative_path| File.join(test_dir_with_files, relative_path) }
     end
-    before {
+
+    before do
       FileUtils.rm_rf(test_dir_with_files) if File.exist?(test_dir_with_files)
       sample_file_paths.each do |sample_file_path|
         FileUtils.mkdir_p(File.dirname(sample_file_path))
         FileUtils.touch(sample_file_path)
       end
-    }
+    end
 
     it 'yields the expected results' do
       results = []
