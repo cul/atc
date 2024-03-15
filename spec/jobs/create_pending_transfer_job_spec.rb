@@ -8,9 +8,9 @@ describe CreatePendingTransferJob do
   let(:invalid_source_object_id) { 987_654 }
   let(:expected_checksum) { [12, 60, 211, 11].pack('C*') }
   let(:aws_id) { StorageProvider.find_by!(storage_type: StorageProvider.storage_types[:aws]).id }
-  let(gcp_id) { StorageProvider.find_by!(storage_type: StorageProvider.storage_types[:gcp]).id }
+  let(:gcp_id) { StorageProvider.find_by!(storage_type: StorageProvider.storage_types[:gcp]).id }
 
-  it 'creates the expected PendingTransfer record' do
+  it 'creates the expected PendingTransfer record for a smaller file' do
     create_pending_transfer_job.perform(source_object.id)
     aws = PendingTransfer.find_by(source_object_id: source_object.id, storage_provider_id: aws_id)
     gcp = PendingTransfer.find_by(source_object_id: source_object.id, storage_provider_id: gcp_id)
