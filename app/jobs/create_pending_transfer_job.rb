@@ -9,9 +9,10 @@ class CreatePendingTransferJob < ApplicationJob
     source_object, file_size, whole_file_checksum = calculate_whole_file_checksum source_object_id
 
     if file_size.to_i > MULTI_PART_REQUIRED_SIZE
-      part_size = Aws::S3::MultipartFileUploader.new.send(:compute_default_part_size, file_size)
+      ENV['AWS_REGION'] = AWS_CONFIG['aws_region']
+      part_size = Aws::S3::MultipartFileUploader.new(region: AWS_CONFIG['aws_region']).send(:compute_default_part_size, file_size)
 
-      multi_part_checksum = calculate_multi_part_checksum(source_object.file_path, part_size)
+      multi_part_checksum = calculate_multi_part_checksum(source_object.path, part_size)
       create_pending_transfer('CRC32C', multi_part_checksum, part_size, :aws, source_object_id)
     else
       create_pending_transfer('CRC32C', whole_file_checksum, nil, :aws, source_object_id)
