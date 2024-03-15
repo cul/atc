@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-MULTI_PART_REQUIRED_SIZE = 100.megabytes
+MULTIPART_THRESHOLD = 100.megabytes
 
 class CreatePendingTransferJob < ApplicationJob
   queue_as Atc::Queues::CREATE_PENDING_TRANSFER
@@ -8,7 +8,9 @@ class CreatePendingTransferJob < ApplicationJob
   def perform(source_object_id)
     source_object, file_size, whole_file_checksum = calculate_whole_file_checksum source_object_id
 
-    if file_size.to_i > MULTI_PART_REQUIRED_SIZE
+    puts file_size
+
+    if file_size.to_i > MULTIPART_THRESHOLD
       ENV['AWS_REGION'] = AWS_CONFIG['aws_region']
 
       part_size, multi_part_checksum = calculate_multi_part_checksum(source_object.path, file_size)
