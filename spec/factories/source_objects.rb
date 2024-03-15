@@ -9,6 +9,10 @@ FactoryBot.define do
       object_size { 0 }
     end
 
+    trait :with_tempfile do
+      path { 'tempfile.txt' }
+    end
+
     trait :with_checksum do
       fixity_checksum_algorithm { association :checksum_algorithm, :sha256 }
       fixity_checksum_value { Digest::SHA256.digest('A' * object_size) }
