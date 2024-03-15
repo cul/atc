@@ -22,3 +22,21 @@ Metrics/MethodLength:
   Exclude:
     - 'lib/atc/loaders/checksum_loader.rb'
     - 'lib/atc/utils/aws_multipart_checksum_utils.rb'
+    - 'lib/atc/aws/s3_uploader.rb'
+    - 'lib/atc/utils/aws_checksum_utils.rb'
+
+Rails/Output:
+  Exclude:
+    - 'lib/atc/aws/s3_uploader.rb'
+
+Metrics/AbcSize:
+  Exclude:
+    - 'lib/atc/aws/s3_uploader.rb'
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - 'lib/atc/aws/s3_uploader.rb'
+
+Metrics/PerceivedComplexity:
+  Exclude:
+    - 'lib/atc/aws/s3_uploader.rb'

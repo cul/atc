@@ -2,8 +2,12 @@
 
 source 'https://rubygems.org'
 
+# URL encoding
+gem 'addressable', '~> 2.8'
 # Amazon S3 SDK
 gem 'aws-sdk-s3', '~> 1'
+# gem 'aws-sdk-s3', git: 'https://github.com/elohanlon/aws-sdk-ruby',
+#  branch: 's3_allow_custom_multipart_part_size_during_object_upload', glob: 'gems/aws-sdk-s3/*.gemspec'
 # Additional gem enabling the AWS SDK to calculate CRC32C checksums
 gem 'aws-crt', '~> 0.2.0'
 # Reduces boot times through caching; required in config/boot.rb
