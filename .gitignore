@@ -40,3 +40,6 @@
 /config/database.yml
 /config/redis.yml
 /config/resque.yml
+
+# simplecov coverage report
+/coverage
