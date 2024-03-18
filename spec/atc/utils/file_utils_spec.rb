@@ -20,13 +20,14 @@ describe Atc::Utils::FileUtils do
         'subdirectory3/.dotfile'
       ].map { |relative_path| File.join(test_dir_with_files, relative_path) }
     end
-    before {
+
+    before do
       FileUtils.rm_rf(test_dir_with_files) if File.exist?(test_dir_with_files)
       sample_file_paths.each do |sample_file_path|
         FileUtils.mkdir_p(File.dirname(sample_file_path))
         FileUtils.touch(sample_file_path)
       end
-    }
+    end
 
     it 'yields the expected results' do
       results = []

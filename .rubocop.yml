@@ -28,3 +28,8 @@ Metrics/MethodLength:
 Rails/Output:
   Exclude:
     - 'lib/atc/aws/s3_uploader.rb'
+
+RSpec/ExampleLength:
+  Exclude:
+    # Temporary
+    - 'spec/jobs/create_pending_transfer_job_spec.rb'

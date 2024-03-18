@@ -8,8 +8,6 @@ class CreatePendingTransferJob < ApplicationJob
   def perform(source_object_id)
     source_object, file_size, whole_file_checksum = calculate_whole_file_checksum source_object_id
 
-    puts file_size
-
     if file_size.to_i > MULTIPART_THRESHOLD
       ENV['AWS_REGION'] = AWS_CONFIG['aws_region']
 
@@ -22,11 +20,11 @@ class CreatePendingTransferJob < ApplicationJob
   end
 
   def create_pending_transfer(transfer_checksum_algorithm, transfer_checksum_value,
-                              transfer_checksum_chunk_size, storage_type, source_object_id)
+                              transfer_checksum_part_size, storage_type, source_object_id)
     PendingTransfer.create(
       transfer_checksum_algorithm_id: ChecksumAlgorithm.find_by!(name: transfer_checksum_algorithm).id,
       transfer_checksum_value: transfer_checksum_value,
-      transfer_checksum_chunk_size: transfer_checksum_chunk_size,
+      transfer_checksum_part_size: transfer_checksum_part_size,
       storage_provider_id: StorageProvider.find_by!(storage_type: StorageProvider.storage_types[storage_type]).id,
       source_object_id: source_object_id
     )

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Atc::Loaders::ChecksumLoader
   def self.load(checksum_algorithm:, source_object_path:, checksum_value:, dry_run:, log_io:)
     if dry_run
