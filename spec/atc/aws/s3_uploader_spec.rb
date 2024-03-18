@@ -24,13 +24,13 @@ describe Atc::Aws::S3Uploader do
     uploader
   end
 
-  describe '.initialize' do
+  describe '#initialize' do
     it 'can be instantiated' do
       expect(s3_uploader).to be_a(described_class)
     end
   end
 
-  describe '.upload_file' do
+  describe '#upload_file' do
     let(:multipart_threshold) { 5.megabytes }
 
     context 'single part upload' do
@@ -71,7 +71,7 @@ describe Atc::Aws::S3Uploader do
         Tempfile.create('example-file-to-checksum') do |f|
           f.write('A')
           f.flush
-          expect(Atc::Utils::AwsChecksumUtils).not_to receive(:checksum_string_for_file)
+          expect(s3_uploader).not_to receive(:calculate_aws_crc32c)
           s3_uploader.upload_file(f.path, bucket_name, precalculated_aws_crc32c: '4W3N7g==')
         end
       end
@@ -126,6 +126,32 @@ describe Atc::Aws::S3Uploader do
           }.not_to raise_error
         end
       end
+    end
+  end
+
+  describe '.tags_to_query_string' do
+    it 'properly formats a single tag' do
+      expect(
+        described_class.tags_to_query_string({ 'key-1': 'value-1' })
+      ).to eq(
+        'key-1=value-1'
+      )
+    end
+
+    it 'properly formats multiple tags' do
+      expect(
+        described_class.tags_to_query_string({ 'key-1': 'value-1', 'key-2': 'value-2' })
+      ).to eq(
+        'key-1=value-1&key-2=value-2'
+      )
+    end
+
+    it 'url-encodes special characters in tags' do
+      expect(
+        described_class.tags_to_query_string({ 'animals': 'cats & dogs', 'kirby': '<(^_^)>' })
+      ).to eq(
+        'animals=cats%20&%20dogs&kirby=%3C(%5E_%5E)%3E'
+      )
     end
   end
 end

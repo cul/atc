@@ -28,15 +28,3 @@ Metrics/MethodLength:
 Rails/Output:
   Exclude:
     - 'lib/atc/aws/s3_uploader.rb'
-
-Metrics/AbcSize:
-  Exclude:
-    - 'lib/atc/aws/s3_uploader.rb'
-
-Metrics/CyclomaticComplexity:
-  Exclude:
-    - 'lib/atc/aws/s3_uploader.rb'
-
-Metrics/PerceivedComplexity:
-  Exclude:
-    - 'lib/atc/aws/s3_uploader.rb'

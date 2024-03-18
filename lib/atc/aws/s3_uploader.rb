@@ -12,10 +12,6 @@ class Atc::Aws::S3Uploader
     @bucket_name = bucket_name
   end
 
-  def generate_s3_object(bucket_key)
-    Aws::S3::Object.new(@bucket_name, bucket_key, { client: @s3_client })
-  end
-
   # Uploads a file to S3
   # @param options [Hash] A hash of options.
   # @option options [Boolean] :overwrite (boolean)
@@ -40,42 +36,65 @@ class Atc::Aws::S3Uploader
     verbose = options[:verbose]
     multipart_threshold = options[:multipart_threshold] || DEFAULT_MULTIPART_THRESHOLD
 
-    if !options[:overwrite] && s3_object.exists?
-      raise Atc::Exceptions::ObjectExists,
-            "Cancelling upload because existing object was found (at: #{s3_object.key}). "\
-            'If you want to replace the existing object, set option { overwrite: true }'
-    end
+    perform_overwrite_check!(options[:overwrite], s3_object)
 
-    precalculated_aws_crc32c = options[:precalculated_aws_crc32c] || begin
-      puts 'Calculating precalculated_aws_crc32c because one was not provided...' if verbose
-      checksum = Atc::Utils::AwsChecksumUtils.checksum_string_for_file(local_file_path, multipart_threshold)
-      puts "Done calculating local crc32c checksum (#{checksum})." if verbose
-      checksum
-    end
+    precalculated_aws_crc32c = options[:precalculated_aws_crc32c] ||
+                               calculate_aws_crc32c(local_file_path, multipart_threshold, verbose)
 
     puts 'Performing upload...' if verbose
     s3_object.upload_file(
-      local_file_path,
-      s3_object_upload_opts(multipart_threshold, options[:tags])
+      local_file_path, s3_object_upload_opts(multipart_threshold, options[:tags])
     ) do |resp|
-      aws_reported_checksum = resp.checksum_crc32c
-      if aws_reported_checksum.present?
-        if aws_reported_checksum != precalculated_aws_crc32c
-          raise Atc::Exceptions::TransferError,
-                'AWS local SDK checksum and remote S3 checksums matched, '\
-                'but they did not match our precalculated checksum. '\
-                "AWS checksum: #{aws_reported_checksum}, Our local checksum: #{precalculated_aws_crc32c}"
-        end
-      else
-        raise Atc::Exceptions::TransferError,
-              'Expected AWS S3 confirmation checksum after transfer completion, but it was missing.'
-      end
+      verify_aws_response_checksum!(resp.checksum_crc32c, precalculated_aws_crc32c)
     end
     puts "\nUpload complete!" if verbose
   rescue Aws::Errors::ServiceError => e
+    wrap_and_re_raise_aws_service_error(e, local_file_path)
+  end
+
+  def self.tags_to_query_string(tags)
+    tags.map { |key, value| "#{key}=#{Addressable::URI.encode_component(value)}" }.join('&')
+  end
+
+  private
+
+  def perform_overwrite_check!(allow_overwrite, s3_object)
+    return if allow_overwrite || !s3_object.exists?
+
+    raise Atc::Exceptions::ObjectExists,
+          "Cancelling upload because existing object was found (at: #{s3_object.key}). "\
+          'If you want to replace the existing object, set option { overwrite: true }'
+  end
+
+  def wrap_and_re_raise_aws_service_error(err, local_file_path)
     raise Atc::Exceptions::TransferError,
           "An AWS service error occurred while attempting to upload file #{local_file_path} to "\
-          "#{s3_object.key}. Error message: #{e.message}"
+          "#{s3_object.key}. Error message: #{err.message}"
+  end
+
+  def calculate_aws_crc32c(local_file_path, multipart_threshold, verbose)
+    puts 'Calculating precalculated_aws_crc32c because one was not provided...' if verbose
+    checksum = Atc::Utils::AwsChecksumUtils.checksum_string_for_file(local_file_path, multipart_threshold)
+    puts "Done calculating local crc32c checksum (#{checksum})." if verbose
+    checksum
+  end
+
+  def generate_s3_object(bucket_key)
+    Aws::S3::Object.new(@bucket_name, bucket_key, { client: @s3_client })
+  end
+
+  def verify_aws_response_checksum!(aws_reported_checksum, precalculated_aws_crc32c)
+    if aws_reported_checksum.present?
+      if aws_reported_checksum != precalculated_aws_crc32c
+        raise Atc::Exceptions::TransferError,
+              'AWS local SDK checksum and remote S3 checksums matched, '\
+              'but they did not match our precalculated checksum. '\
+              "AWS checksum: #{aws_reported_checksum}, Our local checksum: #{precalculated_aws_crc32c}"
+      end
+    else
+      raise Atc::Exceptions::TransferError,
+            'Expected AWS S3 confirmation checksum after transfer completion, but it was missing.'
+    end
   end
 
   def s3_object_upload_opts(multipart_threshold, tags = nil)
@@ -90,10 +109,7 @@ class Atc::Aws::S3Uploader
       thread_count: 10 # The number of parallel multipart uploads
     }
 
-    if tags.present?
-      opts[:tagging] = tags.map { |key, value| "#{key}=#{Addressable::URI.encode_component(value)}" }.join('&')
-    end
-
+    opts[:tagging] = self.class.tags_to_query_string(tags) if tags.present?
     opts
   end
 end
