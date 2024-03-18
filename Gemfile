@@ -40,6 +40,8 @@ gem 'sinatra', '~> 3.0'
 gem 'sprockets-rails'
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem 'stimulus-rails'
+# Unicode to ASCII transliteration [https://rubygems.org/gems/stringex/]
+gem 'stringex', '~> 2.8', '>= 2.8.6'
 # Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
 gem 'turbo-rails'
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
