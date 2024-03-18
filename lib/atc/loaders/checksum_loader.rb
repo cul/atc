@@ -32,7 +32,8 @@ module Atc::Loaders::ChecksumLoader
 
   # Returns true if the given checksum_algorithm and checksum_value
   # are both already assigned to the given source_object.
-  def checksum_already_assigned?(source_object, checksum_algorithm, checksum_value)
-    source_object.fixity_checksum_value == checksum_value && fixity_checksum_algorithm == checksum_algorithm
+  def self.checksum_already_assigned?(source_object, checksum_algorithm, checksum_value)
+    source_object.fixity_checksum_value == checksum_value &&
+      source_object.fixity_checksum_algorithm == checksum_algorithm
   end
 end
