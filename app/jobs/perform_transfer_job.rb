@@ -3,7 +3,7 @@
 # rubocop:disable Metrics/MethodLength
 # rubocop:disable Metrics/AbcSize
 
-NUM_STORED_PATH_COLLISION_RETRIES = 3 # TODO: Actually retry later, once we have remediated path logic
+NUM_STORED_PATH_COLLISION_RETRIES = 0 # TODO: Actually retry later, once we have remediated path logic
 
 class PerformTransferJob < ApplicationJob
   queue_as Atc::Queues::PERFORM_TRANSFER
