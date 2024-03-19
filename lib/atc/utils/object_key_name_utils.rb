@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'pathname'
-require 'stringex'
 module Atc::Utils::ObjectKeyNameUtils
   # About Cloud Storage objects: https://cloud.google.com/storage/docs/objects
   # According to the above (and quite probably most Google Cloud Storage documentation),
