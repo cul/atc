@@ -4,8 +4,19 @@ require 'rails_helper'
 
 describe Atc::Utils::ObjectKeyNameUtils do
   describe '.valid_key_name?' do
-    let(:sample_invalid_absolute_paths) do
+    let(:sample_invalid_path_key_names) do
       [
+        '',
+        '/',
+        '.',
+        './',
+        './file',
+        '../',
+        '../file',
+        'top_dir/sub_dir/file',
+        '/.top_dir/sub_dir/file',
+        '/top_dir/sub_dir/file ',
+        '/top_dir/sub_dir/ file',
         '/top_dîr/sub_dir/file',
         '/top_dir/sub_dîr/file',
         '/top_dir/sub_dir/fîle',
@@ -19,10 +30,11 @@ describe Atc::Utils::ObjectKeyNameUtils do
         '/top_dir/../file',
         '/top_dir/.../file',
         '/top_dir/sub_dir/..',
-        '/top_dir/sub_dir/...'
+        '/top_dir/sub_dir/...',
+        '/top_dir/我能/我能.我能.我能'
       ]
     end
-    let(:sample_valid_absolute_paths) do
+    let(:sample_valid_path_key_names) do
       [
         '/top_dir/sub_dir/file',
         '/top_dir/sub_dir/.hidden_file',
@@ -32,14 +44,14 @@ describe Atc::Utils::ObjectKeyNameUtils do
     end
 
     it 'returns false for all sample invalid paths' do
-      sample_invalid_absolute_paths.each do |path|
-        expect(described_class.valid_key_name?(path)).to (be false), -> { "Test failed on path #{path}" }
+      sample_invalid_path_key_names.each do |path|
+        expect(described_class.valid_key_name?(path)).to (be false), -> { "Test failed on path '#{path}'" }
       end
     end
 
     it 'returns true for all sample valid paths' do
-      sample_valid_absolute_paths.each do |path|
-        expect(described_class.valid_key_name?(path)).to (be true), -> { "Test failed on path #{path}" }
+      sample_valid_path_key_names.each do |path|
+        expect(described_class.valid_key_name?(path)).to (be true), -> { "Test failed on path '#{path}'" }
       end
     end
   end
