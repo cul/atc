@@ -69,7 +69,7 @@ namespace :atc do
         upload_options = {
           overwrite: overwrite,
           verbose: true,
-          precalculated_aws_crc32c: pending_transfer.checksum_value,
+          precalculated_aws_crc32c: pending_transfer.transfer_checksum_value,
           tags: {
             "checksum-#{source_object.fixity_checksum_algorithm.name.downcase}" =>
               Atc::Utils::HexUtils.bin_to_hex(source_object.fixity_checksum_value)
