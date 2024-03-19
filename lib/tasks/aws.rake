@@ -83,6 +83,7 @@ namespace :atc do
           target_object_key,
           **upload_options
         )
+          puts Rainbow("stored s3://#{storage_provider.container_name}<#{target_object_key}> for #{local_file_path}").green
           stored_object = StoredObject.create!(
             path: target_object_key,
             source_object: source_object,
