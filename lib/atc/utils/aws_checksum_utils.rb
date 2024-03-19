@@ -14,7 +14,9 @@ module Atc::Utils::AwsChecksumUtils
     Digest::CRC32c.file(local_file_path).base64digest
   end
 
+  # rubocop:disable Layout/LineLength
   def self.checksum_data_for_file(local_file_path, multipart_threshold = Atc::Aws::S3Uploader::DEFAULT_MULTIPART_THRESHOLD)
+    # rubocop:enable Layout/LineLength
     file_size = File.size(local_file_path)
 
     return multipart_checksum_for_file(local_file_path) if file_size >= multipart_threshold
