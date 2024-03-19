@@ -71,12 +71,13 @@ namespace :atc do
           verbose: true,
           precalculated_aws_crc32c: pending_transfer.checksum_value,
           tags: {
-            "checksum-#{source_object.fixity_checksum_algorithm.name.downcase}" => source_object.fixity_checksum_value
+            "checksum-#{source_object.fixity_checksum_algorithm.name.downcase}" =>
+              Atc::Utils::HexUtils.bin_to_hex(source_object.fixity_checksum_value)
           }
         }
         s3_uploader = Atc::Aws::S3Uploader.new(S3_CLIENT, storage_provider.container_name)
         # TODO: Replace with actual path-to-key remediation
-        target_object_key = local_file_path.sub('/digital/preservation/', '')
+        target_object_key = local_file_path.sub('/digital/preservation/', '/')
         if s3_uploader.upload_file(
           local_file_path,
           target_object_key,
