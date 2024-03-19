@@ -13,7 +13,7 @@ describe CreateFixityChecksumJob do
     let(:expected_checksum) { Atc::Utils::HexUtils.hex_to_bin(sha256_hex) }
 
     it 'updates object with fixity checksum if none exists' do
-      create_fixity_checksum_job.perform(source_object.id)
+      create_fixity_checksum_job.perform(source_object.id, enqueue_successor: false)
       source_object.reload
       expect(source_object.fixity_checksum_value).to eql(expected_checksum)
       expect(source_object.fixity_checksum_algorithm).to eql(checksum_alg)
@@ -29,14 +29,24 @@ describe CreateFixityChecksumJob do
       end
 
       it 'return false without updating when override is false' do
-        expect(create_fixity_checksum_job.perform(source_object.id)).to be false
+        create_fixity_checksum_job.perform(source_object.id, enqueue_successor: false)
         source_object.reload
         expect(source_object.fixity_checksum_value).to eql(prior_checksum_value)
         expect(source_object.fixity_checksum_algorithm).to eql(prior_checksum_alg)
       end
 
       it 'updates object when override is true' do
-        expect(create_fixity_checksum_job.perform(source_object.id, true)).to be true
+        create_fixity_checksum_job.perform(source_object.id, override: true, enqueue_successor: false)
+        source_object.reload
+        expect(source_object.fixity_checksum_value).to eql(expected_checksum)
+        expect(source_object.fixity_checksum_algorithm).to eql(checksum_alg)
+      end
+    end
+
+    context 'when enqueuing successor' do
+      it 'calls PrepareTransferJob.perform_later' do
+        expect(PrepareTransferJob).to receive(:perform_later).with(source_object.id)
+        create_fixity_checksum_job.perform(source_object.id, enqueue_successor: true)
         source_object.reload
         expect(source_object.fixity_checksum_value).to eql(expected_checksum)
         expect(source_object.fixity_checksum_algorithm).to eql(checksum_alg)
