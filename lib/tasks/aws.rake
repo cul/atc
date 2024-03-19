@@ -77,7 +77,7 @@ namespace :atc do
         }
         s3_uploader = Atc::Aws::S3Uploader.new(S3_CLIENT, storage_provider.container_name)
         # TODO: Replace with actual path-to-key remediation
-        target_object_key = local_file_path.sub('/digital/preservation/', '/')
+        target_object_key = local_file_path.sub('/digital/preservation/', '')
         stored_object = StoredObject.new(
             path: target_object_key,
             source_object: source_object,
