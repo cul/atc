@@ -16,5 +16,5 @@ class PendingTransfer < ApplicationRecord
   validates :transfer_checksum_value, length: { maximum: 4 }
   validates_with TransferChecksumValidator
 
-  validates_with SourceObjectChecksumValidator
+  validates_with PendingTransfer::SourceObjectChecksumValidator
 end

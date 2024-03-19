@@ -19,6 +19,18 @@ describe PendingTransfer do
       expect(pending_transfer.save).to eq(false)
       expect(pending_transfer.errors).to include(:transfer_checksum_value)
     end
+
+    it 'fails to save its source object is missing a fixity_checksum_value' do
+      pending_transfer.source_object.fixity_checksum_value = nil
+      expect(pending_transfer.save).to eq(false)
+      expect(pending_transfer.errors).to include(:source_object)
+    end
+
+    it 'fails to save its source object is missing a fixity_checksum_algorithm' do
+      pending_transfer.source_object.fixity_checksum_algorithm = nil
+      expect(pending_transfer.save).to eq(false)
+      expect(pending_transfer.errors).to include(:source_object)
+    end
   end
 
   context 'with a no-content checksum' do
