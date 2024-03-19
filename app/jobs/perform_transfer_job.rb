@@ -3,7 +3,7 @@
 # rubocop:disable Metrics/MethodLength
 # rubocop:disable Metrics/AbcSize
 
-NUM_STORED_PATH_COLLISION_RETRIES = 0 # TODO: Actually retry later, once we have remediated path logic
+NUM_STORED_PATH_COLLISION_RETRIES = 0 # TODO: Actually retry later (2 times), once we have remediated path logic
 
 class PerformTransferJob < ApplicationJob
   queue_as Atc::Queues::PERFORM_TRANSFER
@@ -31,6 +31,10 @@ class PerformTransferJob < ApplicationJob
       tries: 1 + NUM_STORED_PATH_COLLISION_RETRIES,
       base_interval: 0, multiplier: 1, rand_factor: 0
     ) do
+      # TODO: Replace line below with this (after merging in path remediation branch):
+      # previously_attempted_stored_paths << Atc::Utils::ObjectKeyNameUtils.remediate_key_name(
+      #  original_path, previously_attempted_stored_paths
+      # )
       previously_attempted_stored_paths << storage_provider.local_path_to_stored_path(
         pending_transfer.source_object.path
       )
@@ -62,7 +66,7 @@ class PerformTransferJob < ApplicationJob
     )
 
     # And then delete the PendingTransfer record because it's no longer needed:
-    pending_transfer.delete
+    pending_transfer.destroy
   rescue StandardError => e
     unless e.is_a?(ActiveRecord::RecordNotFound)
       # If an unexpected error occurs, capture it and mark this job as a failure.

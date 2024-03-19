@@ -2,15 +2,11 @@
 
 FactoryBot.define do
   factory :source_object do
-    path { 'spec/fixtures/files/sample.jpg' }
+    path { Rails.root.join('spec/fixtures/files/sample.jpg') }
     object_size { 1_259_574 }
 
     trait :with_zero_byte_object_size do
       object_size { 0 }
-    end
-
-    trait :with_tempfile do
-      path { 'tempfile.txt' }
     end
 
     trait :with_checksum do

@@ -5,7 +5,7 @@ FactoryBot.define do
     trait :aws do
       initialize_with do
         storage_type = StorageProvider.storage_types[:aws]
-        container_name = 'example-aws-bucket'
+        container_name = AWS_CONFIG[:preservation_bucket_name]
         StorageProvider.find_by(storage_type: storage_type, container_name: container_name) || StorageProvider.create(
           storage_type: storage_type,
           container_name: container_name
@@ -16,7 +16,7 @@ FactoryBot.define do
     trait :gcp do
       initialize_with do
         storage_type = StorageProvider.storage_types[:gcp]
-        container_name = 'example-gcp-bucket'
+        container_name = GCP_CONFIG[:preservation_bucket_name]
         StorageProvider.find_by(storage_type: storage_type, container_name: container_name) || StorageProvider.create(
           storage_type: storage_type,
           container_name: container_name
