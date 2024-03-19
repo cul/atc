@@ -60,4 +60,28 @@ describe Atc::Utils::AwsChecksumUtils do
       end
     end
   end
+
+  describe '.checksum_data_for_file' do
+    let(:multipart_threshold) { 5.megabytes }
+
+    it 'returns multipart checksum data for a file with size greateer than the multipart_threshold' do
+      Tempfile.create('example-file-to-checksum') do |f|
+        f.write('A' * 15.megabytes)
+        expect(described_class.checksum_data_for_file(f.path, multipart_threshold)).to eq({
+          binary_checksum_of_checksums: Base64.strict_decode64('EUOQdQ=='),
+          num_parts: 3,
+          part_size: 5_242_880
+        })
+      end
+    end
+
+    it 'returns simple checksum data for a file with size less than to the multipart_threshold' do
+      Tempfile.create('example-file-to-checksum') do |f|
+        f.write('A' * (multipart_threshold - 1))
+        expect(described_class.checksum_data_for_file(f.path, multipart_threshold)).to eq({
+          binary_checksum: Base64.strict_decode64('g38HMg==')
+        })
+      end
+    end
+  end
 end

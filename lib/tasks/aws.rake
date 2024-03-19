@@ -26,12 +26,13 @@ namespace :atc do
         storage_type: StorageProvider.storage_types[:aws],
         container_name: 'cul-dlstor-digital-preservation'
       )
-      transfer_checksum_data = Atc::Utils::AwsMultipartChecksumUtils.multipart_checksum_for_file(local_file_path)
+      transfer_checksum_data = Atc::Utils::AwsChecksumUtils.checksum_data_for_file(local_file_path)
+      binary_checksum = transfer_checksum_data[:binary_checksum_of_checksums] || transfer_checksum_data[:binary_checksum]
       PendingTransfer.find_or_create_by!(
         source_object: source_object,
         storage_provider: storage_provider,
         transfer_checksum_algorithm: crc32c_alg,
-        transfer_checksum_value: transfer_checksum_data[:binary_checksum_of_checksums],
+        transfer_checksum_value: binary_checksum,
         transfer_checksum_part_size: transfer_checksum_data[:part_size],
         transfer_checksum_part_count: transfer_checksum_data[:num_parts]
       )

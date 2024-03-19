@@ -14,6 +14,17 @@ module Atc::Utils::AwsChecksumUtils
     Digest::CRC32c.file(local_file_path).base64digest
   end
 
+  def self.checksum_data_for_file(local_file_path, multipart_threshold)
+    file_size = File.size(local_file_path)
+
+    return multipart_checksum_for_file(local_file_path) if file_size >= multipart_threshold
+
+    # Fall back to simple base64 crc32c checksum string for single-part uploads
+    {
+      binary_checksum: Digest::CRC32c.file(local_file_path).digest
+    }
+  end
+
   # NOTE: This method calls Aws::S3::MultipartFileUploader#compute_default_part_size,
   # which is marked as API-private in the aws-sdk-s3 gem.
   # See original method here:

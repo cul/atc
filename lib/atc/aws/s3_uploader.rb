@@ -48,6 +48,7 @@ class Atc::Aws::S3Uploader
       verify_aws_response_checksum!(resp.checksum_crc32c, precalculated_aws_crc32c)
     end
     puts "\nUpload complete!" if verbose
+    true
   rescue Aws::Errors::ServiceError => e
     wrap_and_re_raise_aws_service_error(e, local_file_path)
   end
@@ -95,6 +96,7 @@ class Atc::Aws::S3Uploader
       raise Atc::Exceptions::TransferError,
             'Expected AWS S3 confirmation checksum after transfer completion, but it was missing.'
     end
+    true
   end
 
   def s3_object_upload_opts(multipart_threshold, tags = nil)
