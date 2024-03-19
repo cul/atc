@@ -78,13 +78,7 @@ namespace :atc do
         s3_uploader = Atc::Aws::S3Uploader.new(S3_CLIENT, storage_provider.container_name)
         # TODO: Replace with actual path-to-key remediation
         target_object_key = local_file_path.sub('/digital/preservation/', '/')
-        if s3_uploader.upload_file(
-          local_file_path,
-          target_object_key,
-          **upload_options
-        )
-          puts Rainbow("stored s3://#{storage_provider.container_name}<#{target_object_key}> for #{local_file_path}").green
-          stored_object = StoredObject.create!(
+        stored_object = StoredObject.new(
             path: target_object_key,
             source_object: source_object,
             storage_provider: storage_provider,
@@ -92,7 +86,18 @@ namespace :atc do
             transfer_checksum_value: pending_transfer.transfer_checksum_value,
             transfer_checksum_part_size: pending_transfer.transfer_checksum_part_size,
             transfer_checksum_part_count: pending_transfer.transfer_checksum_part_count
-          )
+        )
+        if stored_object.invalid?
+          puts Rainbow("Invalid prospective stored object: #{stored_object.errors.inspect}").red
+          next
+        end
+        if s3_uploader.upload_file(
+          local_file_path,
+          target_object_key,
+          **upload_options
+        )
+          puts Rainbow("stored s3://#{storage_provider.container_name}<#{target_object_key}> for #{local_file_path}").green
+          stored_object.save!
           pending_transfer.destroy
           puts Rainbow("StoredObject<#{stored_object.id}> for #{local_file_path}").green
           puts Rainbow(JSON.pretty_generate(upload_options)).blue
