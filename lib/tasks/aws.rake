@@ -95,6 +95,7 @@ namespace :atc do
           )
           pending_transfer.destroy
           puts Rainbow("StoredObject<#{stored_object.id}> for #{local_file_path}").green
+          puts Rainbow(JSON.pretty_generate(upload_options)).blue
         end
       else
         puts Rainbow('No pending transfer for: local_file_path').red
