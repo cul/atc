@@ -32,6 +32,10 @@ gem 'redis', '>= 4.0.1'
 gem 'resque', '~> 2.6'
 # Resque for retrying code after errors
 gem 'retriable', '~> 3.1'
+# We don't actually use sinatra directly, but it is used by resque.
+# We need to pin to 3.x because 4.x introduces a conflict.
+# The line below can be removed if resque ever stops requiring sinatra.
+gem 'sinatra', '~> 3.0'
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem 'sprockets-rails'
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]

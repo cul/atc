@@ -356,7 +356,7 @@ GEM
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.4)
-    sinatra (4.0.0)
+    sinatra (3.2.0)
       mustermann (~> 3.0)
       rack (~> 2.2, >= 2.2.4)
       rack-protection (= 3.2.0)
@@ -435,6 +435,7 @@ DEPENDENCIES
   rubocul (~> 4.0.10)
   selenium-webdriver
   simplecov (~> 0.22)
+  sinatra (~> 3.0)
   sprockets-rails
   sqlite3 (~> 1.4)
   stimulus-rails
