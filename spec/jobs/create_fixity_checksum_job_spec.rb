@@ -14,8 +14,9 @@ describe CreateFixityChecksumJob do
 
     it 'updates object with fixity checksum if none exists' do
       create_fixity_checksum_job.perform(source_object.id)
-      expect(source_object.reload.fixity_checksum_value).to eql(expected_checksum)
-      expect(source_object.reload.fixity_checksum_algorithm).to eql(checksum_alg)
+      source_object.reload
+      expect(source_object.fixity_checksum_value).to eql(expected_checksum)
+      expect(source_object.fixity_checksum_algorithm).to eql(checksum_alg)
     end
 
     context 'when fixity checksum exists' do
@@ -29,14 +30,16 @@ describe CreateFixityChecksumJob do
 
       it 'return false without updating when override is false' do
         expect(create_fixity_checksum_job.perform(source_object.id)).to be false
-        expect(source_object.reload.fixity_checksum_value).to eql(prior_checksum_value)
-        expect(source_object.reload.fixity_checksum_algorithm).to eql(prior_checksum_alg)
+        source_object.reload
+        expect(source_object.fixity_checksum_value).to eql(prior_checksum_value)
+        expect(source_object.fixity_checksum_algorithm).to eql(prior_checksum_alg)
       end
 
       it 'updates object when override is true' do
         expect(create_fixity_checksum_job.perform(source_object.id, true)).to be true
-        expect(source_object.reload.fixity_checksum_value).to eql(expected_checksum)
-        expect(source_object.reload.fixity_checksum_algorithm).to eql(checksum_alg)
+        source_object.reload
+        expect(source_object.fixity_checksum_value).to eql(expected_checksum)
+        expect(source_object.fixity_checksum_algorithm).to eql(checksum_alg)
       end
     end
   end
