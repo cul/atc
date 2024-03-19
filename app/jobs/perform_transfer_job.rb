@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/MethodLength
+# rubocop:disable Metrics/AbcSize
+
 NUM_STORED_PATH_COLLISION_RETRIES = 3 # TODO: Actually retry later, once we have remediated path logic
 
 class PerformTransferJob < ApplicationJob
@@ -28,7 +31,10 @@ class PerformTransferJob < ApplicationJob
       tries: 1 + NUM_STORED_PATH_COLLISION_RETRIES,
       base_interval: 0, multiplier: 1, rand_factor: 0
     ) do
-      previously_attempted_stored_paths << storage_provider.local_path_to_stored_path(pending_transfer.source_object.path)
+      previously_attempted_stored_paths << storage_provider.local_path_to_stored_path(
+        pending_transfer.source_object.path
+      )
+
       # Immediately assign this path to the pending transfer because there's a unique index on path.
       # This will prevent any concurrent transfer process from attempting to claim the same path.
       pending_transfer.update!(stored_object_path: previously_attempted_stored_paths.last)
@@ -38,9 +44,7 @@ class PerformTransferJob < ApplicationJob
           Atc::Utils::HexUtils.bin_to_hex(pending_transfer.source_object.fixity_checksum_value)
       }
 
-      if previously_attempted_stored_paths.length > 1
-        tags['original-path'] = previously_attempted_stored_paths.first
-      end
+      tags['original-path'] = previously_attempted_stored_paths.first if previously_attempted_stored_paths.length > 1
 
       storage_provider.perform_transfer(pending_transfer, previously_attempted_stored_paths.last, tags)
     end

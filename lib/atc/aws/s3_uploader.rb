@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop: disable Metrics/AbcSize
+
 class Atc::Aws::S3Uploader
   PROGRESS_DISPLAY_PROC = proc do |bytes, totals|
     print "\r                                               "
@@ -43,7 +45,6 @@ class Atc::Aws::S3Uploader
     s3_object = generate_s3_object(object_key)
     verbose = options[:verbose]
     file_size = File.size(local_file_path)
-
     multipart_threshold = multipart_threshold_for_upload_type(upload_type, file_size)
 
     perform_overwrite_check!(options[:overwrite], s3_object)
@@ -53,7 +54,7 @@ class Atc::Aws::S3Uploader
 
     puts 'Performing upload...' if verbose
     s3_object.upload_file(
-      local_file_path, s3_object_upload_opts(multipart_threshold, options[:tags], verbose)
+      local_file_path, s3_object_upload_opts(multipart_threshold, tags: options[:tags], verbose: verbose)
     ) do |resp|
       verify_aws_response_checksum!(resp.checksum_crc32c, precalculated_aws_crc32c)
     end
@@ -72,11 +73,11 @@ class Atc::Aws::S3Uploader
   def multipart_threshold_for_upload_type(upload_type, file_size)
     case upload_type
     when :whole_file
-      return file_size + 1
+      file_size + 1
     when :multipart
-      return file_size
+      file_size
     when :auto
-      return Atc::Constants::DEFAULT_MULTIPART_THRESHOLD
+      Atc::Constants::DEFAULT_MULTIPART_THRESHOLD
     else
       raise ArgumentError, "Invalid upload_type: #{upload_type}"
     end
@@ -121,7 +122,7 @@ class Atc::Aws::S3Uploader
     end
   end
 
-  def s3_object_upload_opts(multipart_threshold, tags = nil, verbose = false)
+  def s3_object_upload_opts(multipart_threshold, tags: nil, verbose: false)
     opts = {
       # NOTE: Supplying a checksum_algorithm option with value 'CRC32C' will make the AWS SDK
       # automatically calculate a local CRC32C checksums before sending the file to S3 (for both

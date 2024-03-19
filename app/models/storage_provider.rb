@@ -18,12 +18,7 @@ class StorageProvider < ApplicationRecord
         pending_transfer.source_object.path,
         stored_object_key,
         pending_transfer.transfer_checksum_part_size.nil? ? :whole_file : :multipart,
-        overwrite: false, # This will raise an Atc::Exceptions::ObjectExists error if the object exists
-        tags: tags,
-        precalculated_aws_crc32c: [
-          Base64.strict_encode64(pending_transfer.transfer_checksum_value),
-          pending_transfer.transfer_checksum_part_count
-        ].compact.join('-')
+        **upload_file_opts(pending_transfer, tags)
       )
       return true
     end
@@ -38,11 +33,27 @@ class StorageProvider < ApplicationRecord
         local_path.start_with?(local_file_prefix.to_s)
       end
 
-      raise "Could not find #{self.storage_type} storage provider mapping for #{local_path}" if matching_local_path_prefix.nil?
+      if matching_local_path_prefix.nil?
+        raise "Could not find #{self.storage_type} storage provider "\
+              "mapping for #{local_path}"
+      end
 
       return local_path.sub(matching_local_path_prefix.to_s, local_path_key_map[matching_local_path_prefix])
     end
 
     raise_unimplemented_storage_type_error!
+  end
+
+  private
+
+  def upload_file_opts(pending_transfer, tags)
+    {
+      overwrite: false, # This will raise an Atc::Exceptions::ObjectExists error if the object exists
+      tags: tags,
+      precalculated_aws_crc32c: [
+        Base64.strict_encode64(pending_transfer.transfer_checksum_value),
+        pending_transfer.transfer_checksum_part_count
+      ].compact.join('-')
+    }
   end
 end

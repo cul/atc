@@ -31,7 +31,7 @@ gem 'redis', '>= 4.0.1'
 # Resque for queued jobs
 gem 'resque', '~> 2.6'
 # Resque for retrying code after errors
-gem 'retriable', "~> 3.1"
+gem 'retriable', '~> 3.1'
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem 'sprockets-rails'
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]

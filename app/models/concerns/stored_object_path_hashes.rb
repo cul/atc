@@ -7,7 +7,9 @@ module StoredObjectPathHashes
     before_validation :assign_stored_object_path_hash
   end
 
+  # TODO: Add test for this
   def assign_stored_object_path_hash
-    self.stored_object_path_hash = self.stored_object_path.nil? ? nil : Digest::SHA256.digest(self.stored_object_path) # This is a binary digest
+    self.stored_object_path_hash =
+      self.stored_object_path.nil? ? nil : Digest::SHA256.digest(self.stored_object_path)
   end
 end
