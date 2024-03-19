@@ -5,7 +5,9 @@ class PendingTransfer < ApplicationRecord
   belongs_to :storage_provider
   belongs_to :transfer_checksum_algorithm, class_name: 'ChecksumAlgorithm'
 
-  enum status: { pending: 0, failure: 1 }
+  include StoredObjectPathHashes
+
+  enum status: { pending: 0, in_progress: 1, failure: 2 }
 
   # Some db backends don't enforce a limit on binary field length,
   # so the limit below is meant to ensure that we don't ever
@@ -13,4 +15,6 @@ class PendingTransfer < ApplicationRecord
   # value if the database limit ever changes.
   validates :transfer_checksum_value, length: { maximum: 4 }
   validates_with TransferChecksumValidator
+
+  validates_with SourceObjectChecksumValidator
 end

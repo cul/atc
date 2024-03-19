@@ -8,7 +8,7 @@ class AddStorageProvidersAndObjectTransfers < ActiveRecord::Migration[7.1]
     add_index(:storage_providers, [:storage_type, :container_name], unique: true)
 
     create_table :object_transfers do |t|
-      t.string :path, null: false, limit: 4096 # 4096 is the max path length on a linux filesystem
+      t.string :path, null: false, limit: 1024 # 1024 bytes is the max length of an AWS or GCP bucket key
       t.binary :path_hash, limit: 32, null: false
       t.references :transfer_source, null: false
       t.references :storage_provider, null: false

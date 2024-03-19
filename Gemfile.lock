@@ -284,6 +284,7 @@ GEM
       multi_json (~> 1.0)
       redis-namespace (~> 1.6)
       sinatra (>= 0.9.2)
+    retriable (3.1.2)
     rexml (3.2.6)
     rspec-core (3.13.0)
       rspec-support (~> 3.13.0)
@@ -429,6 +430,7 @@ DEPENDENCIES
   rainbow (~> 3.0)
   redis (>= 4.0.1)
   resque (~> 2.6)
+  retriable (~> 3.1)
   rspec-rails
   rubocul (~> 4.0.10)
   selenium-webdriver

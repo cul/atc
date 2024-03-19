@@ -19,5 +19,37 @@ namespace :atc do
         end
       end
     end
+
+    desc 'Set up checksum algirithm records'
+    task checksum_algorithms: :environment do
+      [
+        { name: 'SHA256', empty_binary_value: Digest::SHA256.new.digest },
+        { name: 'SHA512', empty_binary_value: Digest::SHA512.new.digest },
+        { name: 'CRC32C', empty_binary_value: Digest::CRC32c.new.digest }
+      ].each do |checksum_algorithm_args|
+        if ChecksumAlgorithm.exists?(name: checksum_algorithm_args[:name])
+          puts "#{Rainbow("ChecksumAlgorithm already exists (skipping): #{checksum_algorithm_args[:name]}").blue.bright}\n"
+        else
+          ChecksumAlgorithm.create!(**checksum_algorithm_args)
+          puts Rainbow("Created ChecksumAlgorithm: #{checksum_algorithm_args[:name]}").green
+        end
+      end
+    end
+
+    desc 'Set up test config files'
+    task test_storage_providers: :environment do
+      [
+        { storage_type: StorageProvider.storage_types[:aws], container_name: 'cul-dlstor-digital-testing1' },
+        { storage_type: StorageProvider.storage_types[:gcp], container_name: 'cul-dlstor-digital-testing1' },
+        { storage_type: StorageProvider.storage_types[:cul], container_name: '/cul/cul99' },
+      ].each do |storage_provider_args|
+        if StorageProvider.exists?(**storage_provider_args)
+          puts "#{Rainbow("StorageProvider already exists (skipping): #{StorageProvider.storage_types.key(storage_provider_args[:storage_type])} => #{storage_provider_args[:container_name]}").blue.bright}\n"
+        else
+          StorageProvider.create!(**storage_provider_args)
+          puts Rainbow("Created StorageProvider: #{StorageProvider.storage_types.key(storage_provider_args[:storage_type])} => #{storage_provider_args[:container_name]}").green
+        end
+      end
+    end
   end
 end

@@ -32,4 +32,7 @@ Rails/Output:
 RSpec/ExampleLength:
   Exclude:
     # Temporary
-    - 'spec/jobs/create_pending_transfer_job_spec.rb'
+    - 'spec/jobs/prepare_transfer_job_spec.rb'
+
+Lint/MissingCopEnableDirective:
+  Enabled: false
