@@ -16,7 +16,7 @@ module Atc::Utils::ObjectKeyNameUtils
     pathname = Pathname.new(path_filename)
 
     # a relative path is invalid
-    return false if pathname.relative?
+    return false if pathname.absolute?
 
     path_to_file, filename = pathname.split
 
@@ -25,17 +25,17 @@ module Atc::Utils::ObjectKeyNameUtils
     base_filename = filename.to_s.delete_suffix(filename_extension)
 
     # check filename extension
-    return false if filename_extension.present? && (/[^a-zA-Z0-9_]/ =~ filename_extension.delete_prefix('.'))
+    return false if filename_extension.present? && (/[^-a-zA-Z0-9_]/ =~ filename_extension.delete_prefix('.'))
 
     # check base filename
     # NOTE: "hidden files", in other words files that start with a '.' such as '.config', are considered
     # valid. This is also true if the file has an extension, such as '.config.txt'
     base_filename = base_filename.delete_prefix('.')
-    return false if /[^a-zA-Z0-9_]/.match? base_filename
+    return false if /[^-a-zA-Z0-9_]/.match? base_filename
 
     # check each component in the path to the file
     path_to_file.each_filename do |path_segment|
-      return false if /[^a-zA-Z0-9_]/.match? path_segment
+      return false if /[^-a-zA-Z0-9_]/.match? path_segment
     end
     true
   end
@@ -47,7 +47,7 @@ module Atc::Utils::ObjectKeyNameUtils
 
     # remediate each component in the path to the file
     path_to_file.each_filename do |path_segment|
-      remediated_path_segment = Stringex::Unidecoder.decode(path_segment).gsub(/[^a-zA-Z0-9_]/, '_')
+      remediated_path_segment = Stringex::Unidecoder.decode(path_segment).gsub(/[^-a-zA-Z0-9_]/, '_')
       remediated_pathname += remediated_path_segment
     end
 
@@ -71,15 +71,15 @@ module Atc::Utils::ObjectKeyNameUtils
     # remediate base filename. Do not replace starting '.' for hidden files
     base_ascii = Stringex::Unidecoder.decode(base)
     base_valid_ascii = if base_ascii.starts_with?('.')
-                         ".#{base_ascii.delete_prefix('.').gsub(/[^a-zA-Z0-9_]/, '_')}"
+                         ".#{base_ascii.delete_prefix('.').gsub(/[^-a-zA-Z0-9_]/, '_')}"
                        else
-                         base_ascii.gsub(/[^a-zA-Z0-9_]/, '_')
+                         base_ascii.gsub(/[^-a-zA-Z0-9_]/, '_')
                        end
 
     # remediate extension if present
     if extension.present?
       filename_valid_ascii =
-        "#{base_valid_ascii}.#{Stringex::Unidecoder.decode(extension.delete_prefix('.')).gsub(/[^a-zA-Z0-9_]/, '_')}"
+        "#{base_valid_ascii}.#{Stringex::Unidecoder.decode(extension.delete_prefix('.')).gsub(/[^-a-zA-Z0-9_]/, '_')}"
     else
       filename_valid_ascii = base_valid_ascii
     end

@@ -13,33 +13,34 @@ describe Atc::Utils::ObjectKeyNameUtils do
         './file',
         '../',
         '../file',
-        'top_dir/sub_dir/file',
-        '/.top_dir/sub_dir/file',
-        '/top_dir/sub_dir/file ',
-        '/top_dir/sub_dir/ file',
-        '/top_dîr/sub_dir/file',
-        '/top_dir/sub_dîr/file',
-        '/top_dir/sub_dir/fîle',
-        '/top dir/sub_dir/file',
-        '/top_dir/sub_dir/fîle.txt',
-        '/top_dir/sub_dir/file.îxt',
-        '/top_dir/sub.dir/file.txt',
-        '/top_dir/sub_dir/file.txt.txt',
-        '/top_dir/sub_dir/.ext.txt.txt',
-        '/top_dir/./file',
-        '/top_dir/../file',
-        '/top_dir/.../file',
-        '/top_dir/sub_dir/..',
-        '/top_dir/sub_dir/...',
-        '/top_dir/我能/我能.我能.我能'
+        '/top_dir/sub_dir/file',
+        '.top_dir/sub_dir/file',
+        'top_dir/sub_dir/file ',
+        'top_dir/sub_dir/ file',
+        'top_dîr/sub_dir/file',
+        'top_dir/sub_dîr/file',
+        'top_dir/sub_dir/fîle',
+        'top dir/sub_dir/file',
+        'top_dir/sub_dir/fîle.txt',
+        'top_dir/sub_dir/file.îxt',
+        'top_dir/sub.dir/file.txt',
+        'top_dir/sub_dir/file.txt.txt',
+        'top_dir/sub_dir/.ext.txt.txt',
+        'top_dir/./file',
+        'top_dir/../file',
+        'top_dir/.../file',
+        'top_dir/sub_dir/..',
+        'top_dir/sub_dir/...',
+        'top_dir/我能/我能.我能.我能'
       ]
     end
     let(:sample_valid_path_key_names) do
       [
-        '/top_dir/sub_dir/file',
-        '/top_dir/sub_dir/.hidden_file',
-        '/top_dir/sub_dir/.hidden_file.txt',
-        '/top_dir/sub_dir/file.txt'
+        'top_dir/sub_dir/file',
+        'top-dir/sub-dir/a-file.txt',
+        'top_dir/sub_dir/.hidden_file',
+        'top_dir/sub_dir/.hidden_file.txt',
+        'top_dir/sub_dir/file.txt'
       ]
     end
 
