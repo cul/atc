@@ -31,33 +31,52 @@ describe Atc::Aws::S3Uploader do
   end
 
   describe '#upload_file' do
-    let(:multipart_threshold) { 5.megabytes }
-
-    context 'single part upload' do
+    context 'whole file (single part) upload' do
       before do
-        allow(s3_object_file_upload_response).to receive(:checksum_crc32c).and_return('g38HMg==')
+        allow(s3_object_file_upload_response).to receive(:checksum_crc32c).and_return('BSABmg==')
       end
 
-      it 'successfully performs a single part upload when the file size is below the multipart_threshold' do
+      it 'successfully performs a single part upload' do
         Tempfile.create('example-file-to-checksum') do |f|
-          f.write('A' * (multipart_threshold - 1))
+          f.write('A' * 10.megabytes)
           f.flush
-
-          s3_uploader.upload_file(f.path, bucket_name, multipart_threshold: multipart_threshold)
+          expect(s3_uploader.upload_file(f.path, bucket_name, :whole_file)).to eq(true)
         end
       end
     end
 
     context 'multipart upload' do
       before do
-        allow(s3_object_file_upload_response).to receive(:checksum_crc32c).and_return('mBmGog==-1')
+        allow(s3_object_file_upload_response).to receive(:checksum_crc32c).and_return('UW/3VQ==-2')
       end
 
-      it 'successfully performs a multipart upload when the file is greater than or equal to the multipart_threshold' do
+      it 'successfully performs a multipart upload' do
         Tempfile.create('example-file-to-checksum') do |f|
-          f.write('A' * multipart_threshold)
+          f.write('A' * 10.megabytes)
           f.flush
-          s3_uploader.upload_file(f.path, bucket_name, multipart_threshold: multipart_threshold)
+          expect(s3_uploader.upload_file(f.path, bucket_name, :multipart)).to eq(true)
+        end
+      end
+    end
+
+    context 'auto-selection of single vs multipart' do
+      it 'performs a multipart upload when the file is greater than or equal to the internal multipart threshold' do
+        # multipart checksum format
+        allow(s3_object_file_upload_response).to receive(:checksum_crc32c).and_return('RCWvCw==-10')
+        Tempfile.create('example-file-to-checksum') do |f|
+          f.write('A' * Atc::Constants::DEFAULT_MULTIPART_THRESHOLD)
+          f.flush
+          expect(s3_uploader.upload_file(f.path, bucket_name, :auto)).to eq(true)
+        end
+      end
+
+      it 'performs a whole file (single part) upload when the file is below the internal multipart threshold' do
+        # whole file checksum format
+        allow(s3_object_file_upload_response).to receive(:checksum_crc32c).and_return('NL23Zw==')
+        Tempfile.create('example-file-to-checksum') do |f|
+          f.write('A' * (Atc::Constants::DEFAULT_MULTIPART_THRESHOLD - 1))
+          f.flush
+          expect(s3_uploader.upload_file(f.path, bucket_name, :auto)).to eq(true)
         end
       end
     end
@@ -72,7 +91,7 @@ describe Atc::Aws::S3Uploader do
           f.write('A')
           f.flush
           expect(s3_uploader).not_to receive(:calculate_aws_crc32c)
-          s3_uploader.upload_file(f.path, bucket_name, precalculated_aws_crc32c: '4W3N7g==')
+          s3_uploader.upload_file(f.path, bucket_name, :whole_file, precalculated_aws_crc32c: '4W3N7g==')
         end
       end
 
@@ -81,7 +100,7 @@ describe Atc::Aws::S3Uploader do
           f.write('A')
           f.flush
           expect {
-            s3_uploader.upload_file(f.path, bucket_name, precalculated_aws_crc32c: 'bad+checksum')
+            s3_uploader.upload_file(f.path, bucket_name, :whole_file, precalculated_aws_crc32c: 'bad+checksum')
           }.to raise_error(Atc::Exceptions::TransferError)
         end
       end
@@ -93,7 +112,7 @@ describe Atc::Aws::S3Uploader do
           expect(
             Atc::Utils::AwsChecksumUtils
           ).to receive(:checksum_string_for_file).with(f.path, Integer).and_call_original
-          s3_uploader.upload_file(f.path, bucket_name)
+          s3_uploader.upload_file(f.path, bucket_name, :whole_file)
         end
       end
     end
@@ -111,7 +130,7 @@ describe Atc::Aws::S3Uploader do
           f.flush
           expect(s3_object).not_to receive(:upload_file)
           expect {
-            s3_uploader.upload_file(f.path, bucket_name)
+            s3_uploader.upload_file(f.path, bucket_name, :whole_file)
           }.to raise_error(Atc::Exceptions::ObjectExists)
         end
       end
@@ -122,7 +141,7 @@ describe Atc::Aws::S3Uploader do
           f.flush
           expect(s3_object).to receive(:upload_file)
           expect {
-            s3_uploader.upload_file(f.path, bucket_name, overwrite: true)
+            s3_uploader.upload_file(f.path, bucket_name, :whole_file, overwrite: true)
           }.not_to raise_error
         end
       end

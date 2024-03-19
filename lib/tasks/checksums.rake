@@ -31,6 +31,7 @@ namespace :atc do
         end
       end
     end
+
     desc 'Pull SHA256 checksums from an Archivematica AIP'
     task aip: :environment do
       dry_run = ENV['dry_run'] == 'true'
@@ -74,6 +75,31 @@ namespace :atc do
             end
           end
         end
+      end
+    end
+
+    # TODO: Remove this later, since it's just a temporary task that's useful for early testing.
+    desc "Generates and saves a sha256 fixity checksum value for the specified SourceObject (if it doesn't have a checksum value already)"
+    task generate: :environment do
+      source_object_id = ENV['source_object_id']
+
+      unless source_object_id.match?(/[0-9]+/)
+        puts 'source_object_id must be an integer value'
+        next
+      end
+
+      source_object = SourceObject.find(source_object_id)
+      if source_object.fixity_checksum_value.present?
+        puts 'SourceObject already has a fixity checksum value. Nothing to do here.'
+        next
+      end
+      sha256_checksum_algorithm = ChecksumAlgorithm.find_by(name: 'SHA256')
+      source_object.fixity_checksum_algorithm = sha256_checksum_algorithm
+      source_object.fixity_checksum_value = Digest::SHA256.file(source_object.path).digest
+      if source_object.save
+        puts Rainbow('Checksum successfully added to SourceObject!').green
+      else
+        puts Rainbow("The following errors occurred while attempting to assign a checksum value: #{source_object.errors.full_messages}").red
       end
     end
   end

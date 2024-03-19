@@ -10,24 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_12_021908) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_18_035844) do
   create_table "checksum_algorithms", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.binary "empty_binary_value", null: false
     t.index ["name"], name: "index_checksum_algorithms_on_name", unique: true
-  end
-
-  create_table "checksums", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
-    t.string "value", null: false
-    t.bigint "checksum_algorithm_id", null: false
-    t.integer "chunk_size"
-    t.bigint "source_object_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["checksum_algorithm_id"], name: "index_checksums_on_checksum_algorithm_id"
-    t.index ["source_object_id"], name: "index_checksums_on_source_object_id"
   end
 
   create_table "fixity_verifications", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
@@ -52,6 +41,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_12_021908) do
     t.text "error_message"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "stored_object_path", limit: 1024
+    t.binary "stored_object_path_hash", limit: 32
     t.index ["source_object_id", "storage_provider_id"], name: "idx_on_source_object_id_storage_provider_id_c884dc9313", unique: true
     t.index ["source_object_id"], name: "index_pending_transfers_on_source_object_id"
     t.index ["storage_provider_id"], name: "index_pending_transfers_on_storage_provider_id"
@@ -93,7 +84,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_12_021908) do
   end
 
   create_table "stored_objects", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
-    t.string "path", limit: 4096, null: false
+    t.string "path", limit: 1024, null: false
     t.binary "path_hash", limit: 32, null: false
     t.bigint "source_object_id", null: false
     t.bigint "storage_provider_id", null: false

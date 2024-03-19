@@ -44,5 +44,9 @@ module Atc
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    config.active_job.queue_adapter = :resque
+    config.active_job.queue_name_prefix = "atc.#{Rails.env}"
+    config.active_job.queue_name_delimiter = '.'
   end
 end

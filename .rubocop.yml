@@ -28,3 +28,6 @@ Metrics/MethodLength:
 Rails/Output:
   Exclude:
     - 'lib/atc/aws/s3_uploader.rb'
+
+Lint/MissingCopEnableDirective:
+  Enabled: false

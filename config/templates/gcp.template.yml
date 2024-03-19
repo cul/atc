@@ -1,0 +1,10 @@
+default: &default
+  placeholder: 'placeholder'
+
+development:
+  <<: *default
+  preservation_bucket_name: 'example-dev-bucket'
+
+test:
+  <<: *default
+  preservation_bucket_name: 'example-test-bucket'

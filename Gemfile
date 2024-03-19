@@ -28,6 +28,14 @@ gem 'rails', '~> 7.1.3', '>= 7.1.3.2'
 gem 'rainbow', '~> 3.0'
 # Use Redis adapter to run Action Cable in production
 gem 'redis', '>= 4.0.1'
+# Resque for queued jobs
+gem 'resque', '~> 2.6'
+# Resque for retrying code after errors
+gem 'retriable', '~> 3.1'
+# We don't actually use sinatra directly, but it is used by resque.
+# We need to pin to 3.x because 4.x introduces a conflict.
+# The line below can be removed if resque ever stops requiring sinatra.
+gem 'sinatra', '~> 3.0'
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem 'sprockets-rails'
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
@@ -71,6 +79,9 @@ group :development do
 
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
+
+  # simplecov for test coverage
+  gem 'simplecov', '~> 0.22', require: false
 end
 
 group :test do

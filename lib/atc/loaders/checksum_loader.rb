@@ -15,6 +15,9 @@ module Atc::Loaders::ChecksumLoader
     end
 
     if checksum_already_assigned?(source_object, checksum_algorithm, checksum_value)
+      log_io.print("noop,#{checksum_algorithm.name},#{checksum_value},#{source_object_path}\n")
+      return
+    else
       update_result = source_object.update(
         { fixity_checksum_value: checksum_value, fixity_checksum_algorithm: checksum_algorithm }
       )
@@ -22,9 +25,6 @@ module Atc::Loaders::ChecksumLoader
         log_io.print("fail,#{checksum_algorithm.name},#{checksum_value},#{source_object_path}\n")
         return
       end
-    else
-      log_io.print("noop,#{checksum_algorithm.name},#{checksum_value},#{source_object_path}\n")
-      return
     end
 
     log_io.print("succ,#{checksum_algorithm.name},#{checksum_value},#{source_object_path}\n")

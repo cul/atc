@@ -32,7 +32,10 @@ namespace :atc do
         target_object_key,
         overwrite: overwrite,
         verbose: true,
-        tags: {'checksum-sha256': sha256_hexdigest}
+        tags: {
+          'checksum-sha256': sha256_hexdigest
+          # 'original-path': 'add this if applicable for the rake task context'
+        }
       )
     end
   end

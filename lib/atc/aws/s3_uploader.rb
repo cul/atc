@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
+# rubocop: disable Metrics/AbcSize
+
 class Atc::Aws::S3Uploader
-  DEFAULT_MULTIPART_THRESHOLD = 100.megabytes
   PROGRESS_DISPLAY_PROC = proc do |bytes, totals|
     print "\r                                               "
     print "\rProgress: #{(100.0 * bytes.sum / totals.sum).round(2)}% (uploading as #{totals.length} parts)"
@@ -13,9 +14,21 @@ class Atc::Aws::S3Uploader
   end
 
   # Uploads a file to S3
+  # @param local_file_path [String] Path to a local file to upload.
+  # @param object_key [String] Bucket key to use for the uploaded object.
+  # @param upload_type [String]
+  #   One of the following values:
+  #     :whole_file - Performs an AWS PUT operation, uploading the entire file at
+  #                   once (file must be < 5GB).
+  #     :multipart - Performs a multi-part upload, splitting the file up and sending multiple
+  #                  parts at the same time (original file must be > 5MB).
+  #     :auto - Automatically selects :whole_file or :multipart based on the file size,
+  #             internally using Atc::Constants::DEFAULT_MULTIPART_THRESHOLD.
+  #   NOTE: See this link for additional AWS multipart limit info:
+  #   https://docs.aws.amazon.com/AmazonS3/latest/userguide/qfacts.html
   # @param options [Hash] A hash of options.
   # @option options [Boolean] :overwrite (boolean)
-  #   If an object already exists at the target bucket_key, { overwrite: true } will overwrite it
+  #   If an object already exists at the target object_key, { overwrite: true } will overwrite it
   #   and { overwrite: false } will raise an exception.
   #   Default value: false
   # @option options [String] :precalculated_aws_crc32c
@@ -27,14 +40,12 @@ class Atc::Aws::S3Uploader
   #   Default value: false
   # @option options [Hash] :tags
   #   A Hash of key-value tag pairs
-  # @option options [Integer] :multipart_threshold
-  #   Any file with a size greater than or equal to this value will be uploaded via multipart upload
-  #   instead of single part (PUT) upload.  If provided, this option will override the default
-  #   multipart threshold, which is defined in Atc::Aws::S3Uploader::DEFAULT_MULTIPART_THRESHOLD.
-  def upload_file(local_file_path, bucket_key, **options)
-    s3_object = generate_s3_object(bucket_key)
+  # @return True if the upload succeeded, or throws Atc::Exceptions::TransferError if the transfer failed.
+  def upload_file(local_file_path, object_key, upload_type, **options)
+    s3_object = generate_s3_object(object_key)
     verbose = options[:verbose]
-    multipart_threshold = options[:multipart_threshold] || DEFAULT_MULTIPART_THRESHOLD
+    file_size = File.size(local_file_path)
+    multipart_threshold = multipart_threshold_for_upload_type(upload_type, file_size)
 
     perform_overwrite_check!(options[:overwrite], s3_object)
 
@@ -43,13 +54,14 @@ class Atc::Aws::S3Uploader
 
     puts 'Performing upload...' if verbose
     s3_object.upload_file(
-      local_file_path, s3_object_upload_opts(multipart_threshold, options[:tags])
+      local_file_path, s3_object_upload_opts(multipart_threshold, tags: options[:tags], verbose: verbose)
     ) do |resp|
       verify_aws_response_checksum!(resp.checksum_crc32c, precalculated_aws_crc32c)
     end
     puts "\nUpload complete!" if verbose
+    true
   rescue Aws::Errors::ServiceError => e
-    wrap_and_re_raise_aws_service_error(e, local_file_path)
+    wrap_and_re_raise_aws_service_error(e, local_file_path, object_key)
   end
 
   def self.tags_to_query_string(tags)
@@ -57,6 +69,19 @@ class Atc::Aws::S3Uploader
   end
 
   private
+
+  def multipart_threshold_for_upload_type(upload_type, file_size)
+    case upload_type
+    when :whole_file
+      file_size + 1
+    when :multipart
+      file_size
+    when :auto
+      Atc::Constants::DEFAULT_MULTIPART_THRESHOLD
+    else
+      raise ArgumentError, "Invalid upload_type: #{upload_type}"
+    end
+  end
 
   def perform_overwrite_check!(allow_overwrite, s3_object)
     return if allow_overwrite || !s3_object.exists?
@@ -66,10 +91,10 @@ class Atc::Aws::S3Uploader
           'If you want to replace the existing object, set option { overwrite: true }'
   end
 
-  def wrap_and_re_raise_aws_service_error(err, local_file_path)
+  def wrap_and_re_raise_aws_service_error(err, local_file_path, object_key)
     raise Atc::Exceptions::TransferError,
           "An AWS service error occurred while attempting to upload file #{local_file_path} to "\
-          "#{s3_object.key}. Error message: #{err.message}"
+          "#{object_key}. Error message: #{err.message}"
   end
 
   def calculate_aws_crc32c(local_file_path, multipart_threshold, verbose)
@@ -79,16 +104,16 @@ class Atc::Aws::S3Uploader
     checksum
   end
 
-  def generate_s3_object(bucket_key)
-    Aws::S3::Object.new(@bucket_name, bucket_key, { client: @s3_client })
+  def generate_s3_object(object_key)
+    Aws::S3::Object.new(@bucket_name, object_key, { client: @s3_client })
   end
 
   def verify_aws_response_checksum!(aws_reported_checksum, precalculated_aws_crc32c)
     if aws_reported_checksum.present?
       if aws_reported_checksum != precalculated_aws_crc32c
         raise Atc::Exceptions::TransferError,
-              'AWS local SDK checksum and remote S3 checksums matched, '\
-              'but they did not match our precalculated checksum. '\
+              'File was uploaded to Amazon, and AWS local SDK checksum and remote S3 checksums matched, '\
+              'but they did not match our precalculated checksum. This requires manual investigation. '\
               "AWS checksum: #{aws_reported_checksum}, Our local checksum: #{precalculated_aws_crc32c}"
       end
     else
@@ -97,18 +122,18 @@ class Atc::Aws::S3Uploader
     end
   end
 
-  def s3_object_upload_opts(multipart_threshold, tags = nil)
+  def s3_object_upload_opts(multipart_threshold, tags: nil, verbose: false)
     opts = {
       # NOTE: Supplying a checksum_algorithm option with value 'CRC32C' will make the AWS SDK
       # automatically calculate a local CRC32C checksums before sending the file to S3 (for both
       # multipart and single part uploads).  The upload will fail if the corresponding checksum
       # calculated by S3 does not match.
       checksum_algorithm: 'CRC32C',
-      progress_callback: PROGRESS_DISPLAY_PROC,
       multipart_threshold: multipart_threshold,
       thread_count: 10 # The number of parallel multipart uploads
     }
 
+    opts[:progress_callback] = PROGRESS_DISPLAY_PROC if verbose
     opts[:tagging] = self.class.tags_to_query_string(tags) if tags.present?
     opts
   end

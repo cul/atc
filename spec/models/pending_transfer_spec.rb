@@ -19,13 +19,25 @@ describe PendingTransfer do
       expect(pending_transfer.save).to eq(false)
       expect(pending_transfer.errors).to include(:transfer_checksum_value)
     end
+
+    it 'fails to save its source object is missing a fixity_checksum_value' do
+      pending_transfer.source_object.fixity_checksum_value = nil
+      expect(pending_transfer.save).to eq(false)
+      expect(pending_transfer.errors).to include(:source_object)
+    end
+
+    it 'fails to save its source object is missing a fixity_checksum_algorithm' do
+      pending_transfer.source_object.fixity_checksum_algorithm = nil
+      expect(pending_transfer.save).to eq(false)
+      expect(pending_transfer.errors).to include(:source_object)
+    end
   end
 
   context 'with a no-content checksum' do
     let(:pending_transfer_with_zero_byte_size_and_empty_binary_value_checksum) do
       obj = FactoryBot.build(
         :pending_transfer,
-        source_object: FactoryBot.create(:source_object, :with_zero_byte_object_size)
+        source_object: FactoryBot.create(:source_object, :with_zero_byte_object_size, :with_checksum)
       )
       obj.transfer_checksum_value = obj.transfer_checksum_algorithm.empty_binary_value
       obj
@@ -36,8 +48,10 @@ describe PendingTransfer do
       obj
     end
 
-    it 'saves without error the object size is zero' do
-      expect(pending_transfer_with_zero_byte_size_and_empty_binary_value_checksum.save).to eq(true)
+    it 'saves without error if the object size is zero' do
+      result = pending_transfer_with_zero_byte_size_and_empty_binary_value_checksum.save
+      expect(pending_transfer_with_zero_byte_size_and_empty_binary_value_checksum.errors).to be_blank
+      expect(result).to be(true)
     end
 
     it 'fails to save when object size is a positive number' do
