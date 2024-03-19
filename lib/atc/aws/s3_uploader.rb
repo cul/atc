@@ -50,7 +50,7 @@ class Atc::Aws::S3Uploader
     puts "\nUpload complete!" if verbose
     true
   rescue Aws::Errors::ServiceError => e
-    wrap_and_re_raise_aws_service_error(e, local_file_path)
+    wrap_and_re_raise_aws_service_error(s3_object, e, local_file_path)
   end
 
   def self.tags_to_query_string(tags)
@@ -67,10 +67,10 @@ class Atc::Aws::S3Uploader
           'If you want to replace the existing object, set option { overwrite: true }'
   end
 
-  def wrap_and_re_raise_aws_service_error(err, local_file_path)
+  def wrap_and_re_raise_aws_service_error(s3_object, err, local_file_path)
     raise Atc::Exceptions::TransferError,
           "An AWS service error occurred while attempting to upload file #{local_file_path} to "\
-          "#{s3_object.key}. Error message: #{err.message}"
+          "#{s3_object&.key}. Error message: #{err.message}"
   end
 
   def calculate_aws_crc32c(local_file_path, multipart_threshold, verbose)
