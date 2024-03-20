@@ -47,6 +47,15 @@ describe Atc::Loaders::ChecksumLoader do
         end
       end
 
+      context 'proposed value is bad' do
+        let(:checksum_value) { sha256_hex }
+
+        it 'does not update the object' do
+          expect(source_object.fixity_checksum_value).to be_nil
+          expect(source_object.fixity_checksum_algorithm).to be_nil
+        end
+      end
+
       context 'enqueue_successor is true' do
         let(:enqueue_successor) { true }
 

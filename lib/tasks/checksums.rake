@@ -39,7 +39,7 @@ namespace :atc do
           Atc::Loaders::ChecksumLoader.load(
             checksum_algorithm: checksum_algorithm,
             source_object_path: source_object_path,
-            checksum_value: checksum_value,
+            checksum_value: Atc::Utils::HexUtils.hex_to_bin(checksum_value),
             dry_run: dry_run,
             log_io: log,
             enqueue_successor: enqueue_successor
