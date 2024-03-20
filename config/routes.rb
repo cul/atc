@@ -12,5 +12,5 @@ Rails.application.routes.draw do
   mount Resque::Server.new, at: '/resque'
 
   # Defines the root path route ("/")
-  root "pages#home"
+  root 'pages#home'
 end
