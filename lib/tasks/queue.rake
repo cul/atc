@@ -18,11 +18,17 @@ namespace :atc do
       ENV['enqueue_successor'] == 'true'
     end
 
+    def parse_source_id_argument
+      return SourceObject.for_path(ENV['source_object_path'])&.id if ENV['source_object_path'].present?
+      parse_integer_argument('source_object_id')
+    end
+
     desc "Queue a CreateFixityChecksumJob that can optionally enqueue successor jobs. "\
           "This job calculates and stores a fixity checksum for a SourceObject."
     task create_fixity_checksum: :environment do
-      source_object_id = parse_integer_argument('source_object_id')
+      source_object_id = parse_source_id_argument()
       next if source_object_id.nil?
+
       enqueue_successor = parse_enqueue_successor_argument()
 
       CreateFixityChecksumJob.perform_later(source_object_id, enqueue_successor: enqueue_successor)
@@ -31,8 +37,9 @@ namespace :atc do
     desc "Queue a PrepareTransferJob that can optionally enqueue successor jobs. "\
           "This job creates PendingTransfers for a SourceObject."
     task prepare_transfer: :environment do
-      source_object_id = parse_integer_argument('source_object_id')
+      source_object_id = parse_source_id_argument()
       next if source_object_id.nil?
+
       enqueue_successor = parse_enqueue_successor_argument()
 
       PrepareTransferJob.perform_later(source_object_id.to_i, enqueue_successor: enqueue_successor)
