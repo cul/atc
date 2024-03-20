@@ -6,7 +6,7 @@
 class PrepareTransferJob < ApplicationJob
   queue_as Atc::Queues::PREPARE_TRANSFER
 
-  def perform(source_object_id)
+  def perform(source_object_id, enqueue_successor: true)
     source_object = SourceObject.find(source_object_id)
     whole_file_checksum = Digest::CRC32c.file(source_object.path).digest
     crc32c_checksum_algorithm = ChecksumAlgorithm.find_by!(name: 'CRC32C')
@@ -18,9 +18,10 @@ class PrepareTransferJob < ApplicationJob
       storage_type: StorageProvider.storage_types[:gcp], container_name: GCP_CONFIG[:preservation_bucket_name]
     )
 
+    pending_transfers = []
     # AWS uses whole file checksum for smaller files, and multipart checksum for larger files
     if File.size(source_object.path) < Atc::Constants::DEFAULT_MULTIPART_THRESHOLD
-      PendingTransfer.create!(
+      pending_transfers << PendingTransfer.create!(
         transfer_checksum_algorithm: crc32c_checksum_algorithm,
         transfer_checksum_value: whole_file_checksum,
         storage_provider: aws_storage_provider,
@@ -28,7 +29,7 @@ class PrepareTransferJob < ApplicationJob
       )
     else
       checksum_data = Atc::Utils::AwsChecksumUtils.multipart_checksum_for_file(source_object.path)
-      PendingTransfer.create!(
+      pending_transfers << PendingTransfer.create!(
         transfer_checksum_algorithm: crc32c_checksum_algorithm,
         transfer_checksum_value: checksum_data[:binary_checksum_of_checksums],
         transfer_checksum_part_size: checksum_data[:part_size],
@@ -39,11 +40,19 @@ class PrepareTransferJob < ApplicationJob
     end
 
     # GCP always uses whole file checksum
-    PendingTransfer.create!(
+    pending_transfers << PendingTransfer.create!(
       transfer_checksum_algorithm: crc32c_checksum_algorithm,
       transfer_checksum_value: whole_file_checksum,
       storage_provider: gcp_storage_provider,
       source_object: source_object
     )
+    return unless enqueue_successor
+
+    enqueue_successor_jobs(pending_transfers)
+  end
+
+  def enqueue_successor_jobs(pending_transfers)
+    pending_transfers.each { |pending_transfer| PerformTransferJob.perform_later(pending_transfer.id) }
+    true
   end
 end
