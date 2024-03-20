@@ -14,7 +14,7 @@ class PerformTransferJob < ApplicationJob
 
     # TODO: Add support for gcp!
     unless storage_provider.storage_type == 'aws'
-      Rails.logger.info "Skipping PendingTransfer #{pending_transfer.id} because its "\
+      Rails.logger.warn "Skipping PendingTransfer #{pending_transfer.id} because its "\
                         "storage_provider.storage_type value (#{storage_provider.storage_type}) "\
                         'is not yet implemented.'
       return
@@ -33,7 +33,7 @@ class PerformTransferJob < ApplicationJob
     # first_attempted_stored_key that would need to be modified for compatiblity with our
     # storage providers.
     unless Atc::Utils::ObjectKeyNameUtils.valid_key_name?(first_attempted_stored_key)
-      Rails.logger.info "Skipping PendingTransfer #{pending_transfer.id} because its source_object.path value "\
+      Rails.logger.warn "Skipping PendingTransfer #{pending_transfer.id} because its source_object.path value "\
             "(#{first_attempted_stored_key}) needs to be remediated and we are not currently transferring "\
             'files that require remediation.  Would have remediated to: '\
             "#{Atc::Utils::ObjectKeyNameUtils.remediate_key_name(first_attempted_stored_key, [])}"
