@@ -85,4 +85,89 @@ describe PrepareTransferJob do
       prepare_transfer_job.perform(source_object.id, enqueue_successor: true)
     end
   end
+
+  context 'skipping unnecessary PendingTransfer creation' do
+    context 'PendingTransfers already exist' do
+      it 'skips creation of an AWS-bound PendingTransfer if one already exists, '\
+         'and only creates a GCP-bound PendingTransfer' do
+        FactoryBot.create(
+          :pending_transfer, storage_provider: FactoryBot.create(:storage_provider, :aws), source_object: source_object
+        )
+        expect(PendingTransfer).to receive(:create!).once.with(
+          transfer_checksum_algorithm: crc32c_checksum_algorithm,
+          transfer_checksum_value: String,
+          storage_provider: gcp_storage_provider,
+          source_object: source_object
+        )
+        prepare_transfer_job.perform(source_object.id, enqueue_successor: false)
+      end
+
+      it 'skips creation of an GCP-bound PendingTransfer if one already exists, '\
+         'and only creates an AWS-bound PendingTransfer' do
+        FactoryBot.create(
+          :pending_transfer, storage_provider: FactoryBot.create(:storage_provider, :gcp), source_object: source_object
+        )
+        expect(PendingTransfer).to receive(:create!).once.with(
+          transfer_checksum_algorithm: crc32c_checksum_algorithm,
+          transfer_checksum_value: String,
+          storage_provider: aws_storage_provider,
+          source_object: source_object
+        )
+        prepare_transfer_job.perform(source_object.id, enqueue_successor: false)
+      end
+
+      it 'does not create any PendingTransfers if corresponding AWS and GCP PendingTransfers already exist' do
+        FactoryBot.create(
+          :pending_transfer, storage_provider: FactoryBot.create(:storage_provider, :aws), source_object: source_object
+        )
+        FactoryBot.create(
+          :pending_transfer, storage_provider: FactoryBot.create(:storage_provider, :gcp), source_object: source_object
+        )
+        expect(PendingTransfer).not_to receive(:create!)
+        prepare_transfer_job.perform(source_object.id, enqueue_successor: false)
+      end
+    end
+
+    context 'corresponding StoredObjects already exist' do
+      it 'skips creation of an AWS-bound PendingTransfer if a corresponding StoredObject already exists, '\
+         'and only creates a GCP-bound PendingTransfer' do
+        FactoryBot.create(
+          :stored_object, storage_provider: FactoryBot.create(:storage_provider, :aws), source_object: source_object
+        )
+        expect(PendingTransfer).to receive(:create!).once.with(
+          transfer_checksum_algorithm: crc32c_checksum_algorithm,
+          transfer_checksum_value: String,
+          storage_provider: gcp_storage_provider,
+          source_object: source_object
+        )
+        prepare_transfer_job.perform(source_object.id, enqueue_successor: false)
+      end
+
+      it 'skips creation of a GCP-bound PendingTransfer if a corresponding StoredObject already exists, '\
+         'and only creates an AWS-bound PendingTransfer' do
+        FactoryBot.create(
+          :stored_object,
+          storage_provider: FactoryBot.create(:storage_provider, :gcp), source_object: source_object
+        )
+        expect(PendingTransfer).to receive(:create!).once.with(
+          transfer_checksum_algorithm: crc32c_checksum_algorithm,
+          transfer_checksum_value: String,
+          storage_provider: aws_storage_provider,
+          source_object: source_object
+        )
+        prepare_transfer_job.perform(source_object.id, enqueue_successor: false)
+      end
+
+      it 'does not create any PendingTransfers if corresponding AWS and GCP StoredObjects already exist' do
+        FactoryBot.create(
+          :stored_object, storage_provider: FactoryBot.create(:storage_provider, :aws), source_object: source_object
+        )
+        FactoryBot.create(
+          :stored_object, storage_provider: FactoryBot.create(:storage_provider, :gcp), source_object: source_object
+        )
+        expect(PendingTransfer).not_to receive(:create!)
+        prepare_transfer_job.perform(source_object.id, enqueue_successor: false)
+      end
+    end
+  end
 end
