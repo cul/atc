@@ -106,7 +106,7 @@ namespace :atc do
       source_object_path = ENV['source_object_path']
       sha256_checksum_hexdigest = ENV['sha256_checksum_hexdigest']
 
-      source_object = SourceObject.find_by(path_hash: Digest::SHA256.digest(source_object_path))
+      source_object = SourceObject.for_path(source_object_path)
       if source_object.nil?
         puts Rainbow("Could not find SourceObject record with path: #{source_object_path}").red
         next
