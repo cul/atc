@@ -14,14 +14,31 @@ class PerformTransferJob < ApplicationJob
 
     # TODO: Add support for gcp!
     unless storage_provider.storage_type == 'aws'
-      raise NotImplementedError,
-            "Transfers for StorageProvider storage_type #{storage_provider.storage_type} "\
-            'are not yet implemented.'
+      Rails.logger.info "Skipping PendingTransfer #{pending_transfer.id} because its "\
+                        "storage_provider.storage_type value (#{storage_provider.storage_type}) "\
+                        'is not yet implemented.'
+      return
     end
 
     # We'll keep track of our attempts to store this object with the storage provider.
     # Our first attempt may not work if the storage provider
     previously_attempted_stored_paths = []
+
+    # This is the stored key we would ideally like to use,
+    # if no modifications are necessary for storage provider compatibility.
+    first_attempted_stored_key = storage_provider.local_path_to_stored_path(pending_transfer.source_object.path)
+
+    # TODO: Delete the line below after the upcoming Atc::Utils::ObjectKeyNameUtils.remediate_key_name
+    # method updates.  For now, we're skipping the processing of any PendingTransfer that has a
+    # first_attempted_stored_key that would need to be modified for compatiblity with our
+    # storage providers.
+    unless Atc::Utils::ObjectKeyNameUtils.valid_key_name?(first_attempted_stored_key)
+      Rails.logger.info "Skipping PendingTransfer #{pending_transfer.id} because its source_object.path value "\
+            "(#{first_attempted_stored_key}) needs to be remediated and we are not currently transferring "\
+            'files that require remediation.  Would have remediated to: '\
+            "#{Atc::Utils::ObjectKeyNameUtils.remediate_key_name(first_attempted_stored_key, [])}"
+      return
+    end
 
     # Indicate that this transfer is in progress
     pending_transfer.update!(status: :in_progress)
@@ -31,12 +48,8 @@ class PerformTransferJob < ApplicationJob
       tries: 1 + NUM_STORED_PATH_COLLISION_RETRIES,
       base_interval: 0, multiplier: 1, rand_factor: 0
     ) do
-      # TODO: Replace line below with this (after merging in path remediation branch):
-      # previously_attempted_stored_paths << Atc::Utils::ObjectKeyNameUtils.remediate_key_name(
-      #  original_path, previously_attempted_stored_paths
-      # )
-      previously_attempted_stored_paths << storage_provider.local_path_to_stored_path(
-        pending_transfer.source_object.path
+      previously_attempted_stored_paths << Atc::Utils::ObjectKeyNameUtils.remediate_key_name(
+        first_attempted_stored_key, previously_attempted_stored_paths
       )
 
       # Immediately assign this path to the pending transfer because there's a unique index on path.
