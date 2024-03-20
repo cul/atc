@@ -47,6 +47,7 @@ namespace :atc do
         source_object_id_file = ENV['source_object_id_file']
         unless File.exist?(source_object_id_file)
           puts "Error: File not found at #{source_object_id_file}"
+          return false
         end
         # First, validate all of the ids (to make sure they're all numeric ids)
         puts 'Validating source_object_id_file...'
