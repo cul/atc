@@ -17,6 +17,12 @@ describe SourceObject do
     end
   end
 
+  describe '.for_path' do
+    let(:source_object) { FactoryBot.create(:source_object) }
+
+    it { expect(described_class.for_path(source_object.path)).to eql(source_object) }
+  end
+
   context 'with a no-content checksum' do
     let(:source_object_with_zero_byte_size_and_empty_binary_value_checksum) do
       FactoryBot.build(

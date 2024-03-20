@@ -7,8 +7,7 @@ module Atc::Loaders::ChecksumLoader
       log_io.print("skip,#{checksum_algorithm&.name || 'MISSING'},#{checksum_value},#{source_object_path}\n")
       return
     end
-    path_hash = Digest::SHA256.digest(source_object_path)
-    source_object = SourceObject.find_by(path_hash: path_hash)
+    source_object = SourceObject.for_path(source_object_path)
     unless source_object
       log_io.print("xsrc,#{checksum_algorithm.name},#{checksum_value},#{source_object_path}\n")
       return

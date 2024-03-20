@@ -18,4 +18,9 @@ class SourceObject < ApplicationRecord
   validates_with PathValidator, on: :update
   validates_with PathHashValidator
   validates_with FixityChecksumValidator
+
+  def self.for_path(local_file_path)
+    path_hash = Digest::SHA256.digest(local_file_path)
+    self.find_by(path_hash: path_hash)
+  end
 end
