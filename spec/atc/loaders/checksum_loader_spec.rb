@@ -7,6 +7,7 @@ describe Atc::Loaders::ChecksumLoader do
   let(:checksum_alg) { FactoryBot.create(:checksum_algorithm, :sha256) }
   let(:sha256_hex) { '41cd378725458b47f8a45113a81cd30031533cc3f17fba7ce36f8d4d2123e056' }
   let(:checksum_value) { Atc::Utils::HexUtils.hex_to_bin(sha256_hex) }
+  let(:enqueue_successor) { false }
 
   describe '.load' do
     let(:log_io) { instance_double(IO, print: nil) }
@@ -15,12 +16,19 @@ describe Atc::Loaders::ChecksumLoader do
       let(:dry_run) { false }
 
       before do
+        if enqueue_successor
+          expect(PrepareTransferJob).to receive(:perform_later)
+        else
+          expect(PrepareTransferJob).not_to receive(:perform_later)
+        end
+
         described_class.load(
           checksum_algorithm: checksum_alg,
           source_object_path: source_object.path,
           checksum_value: checksum_value,
           dry_run: dry_run,
-          log_io: log_io
+          log_io: log_io,
+          enqueue_successor: enqueue_successor
         )
         source_object.reload
       end
@@ -36,6 +44,15 @@ describe Atc::Loaders::ChecksumLoader do
         it 'does not update the object' do
           expect(source_object.fixity_checksum_value).to be_nil
           expect(source_object.fixity_checksum_algorithm).to be_nil
+        end
+      end
+
+      context 'enqueue_successor is true' do
+        let(:enqueue_successor) { true }
+
+        it 'assigns the checksums' do
+          expect(source_object.fixity_checksum_value).to eql(checksum_value)
+          expect(source_object.fixity_checksum_algorithm).to eql(checksum_alg)
         end
       end
     end

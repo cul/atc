@@ -3,14 +3,30 @@ require 'csv'
 
 namespace :atc do
   namespace :checksums do
+    def parse_boolean_argument(arg, default = false)
+      ENV.fetch(arg, default.to_s) == 'true'
+    end
+
+    def parse_enqueue_successor_argument
+      parse_boolean_argument('enqueue_successor')
+    end
+
+    def parse_dry_run_argument
+      parse_boolean_argument('dry_run')
+    end
+
     desc 'load checksums from a CSV'
     task csv: :environment do
-      dry_run = ENV['dry_run'] == 'true'
       csv_path = ENV['path']
+      dry_run = parse_dry_run_argument()
+      enqueue_successor = parse_enqueue_successor_argument()
+
+      # seed checksum cache with most likely
       sha256_checksum_algorithm = ChecksumAlgorithm.find_by!(name: 'SHA256')
       checksum_algorithms = {
         sha256_checksum_algorithm.name => sha256_checksum_algorithm
       }
+
       start = Time.now
       open("log/checksum-csv-#{start.to_i}#{'-dry_run' if dry_run}.log", "w") do |log|
         CSV.foreach(csv_path, headers: true).each do |row|
@@ -25,8 +41,8 @@ namespace :atc do
             source_object_path: source_object_path,
             checksum_value: checksum_value,
             dry_run: dry_run,
-            start_time: start,
-            log_io: log
+            log_io: log,
+            enqueue_successor: enqueue_successor
           )
         end
       end
@@ -34,7 +50,7 @@ namespace :atc do
 
     desc 'Pull SHA256 checksums from an Archivematica AIP'
     task aip: :environment do
-      dry_run = ENV['dry_run'] == 'true'
+      dry_run = parse_dry_run_argument()
       aip_path = ENV['path']
       unless ENV["debug"] || aip_path.start_with?("/digital/preservation")
         puts Rainbow("Cautiously declining: #{aip_path}").red
