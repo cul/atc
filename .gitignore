@@ -34,6 +34,13 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
+# Editor files
+*~
+\#*\#
+
+# macOS files
+.DS_Store
+
 # Config file ignores
 /config/atc.yml
 /config/aws.yml
