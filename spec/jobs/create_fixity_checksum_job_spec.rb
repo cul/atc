@@ -45,7 +45,7 @@ describe CreateFixityChecksumJob do
 
     context 'when enqueuing successor' do
       it 'calls PrepareTransferJob.perform_later' do
-        expect(PrepareTransferJob).to receive(:perform_later).with(source_object.id)
+        expect(PrepareTransferJob).to receive(:perform_later).with(source_object.id, enqueue_successor: true)
         create_fixity_checksum_job.perform(source_object.id, enqueue_successor: true)
         source_object.reload
         expect(source_object.fixity_checksum_value).to eql(expected_checksum)

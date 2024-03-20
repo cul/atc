@@ -10,7 +10,7 @@ class CreateFixityChecksumJob < ApplicationJob
   def perform(source_object_id, override: false, enqueue_successor: true)
     source_object = SourceObject.find(source_object_id)
     if source_object.fixity_checksum_value && !override
-      enqueue_successor_jobs(source_object_id) if enqueue_successor
+      enqueue_successor_jobs(source_object_id, enqueue_successor: enqueue_successor) if enqueue_successor
       return
     end
 
@@ -22,7 +22,7 @@ class CreateFixityChecksumJob < ApplicationJob
     source_object.update!(
       fixity_checksum_algorithm: fixity_checksum_algorithm, fixity_checksum_value: fixity_checksum_value
     )
-    enqueue_successor_jobs(source_object_id) if enqueue_successor
+    enqueue_successor_jobs(source_object_id, enqueue_successor: enqueue_successor) if enqueue_successor
   end
 
   def calculate_fixity_checksum(source_object, checksum_algorithm)
@@ -34,7 +34,7 @@ class CreateFixityChecksumJob < ApplicationJob
     nil
   end
 
-  def enqueue_successor_jobs(source_object_id)
-    PrepareTransferJob.perform_later(source_object_id)
+  def enqueue_successor_jobs(source_object_id, enqueue_successor: true)
+    PrepareTransferJob.perform_later(source_object_id, enqueue_successor: enqueue_successor)
   end
 end
