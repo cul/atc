@@ -15,6 +15,7 @@ describe Atc::Utils::ObjectKeyNameUtils do
         '../file',
         '/top_dir/sub_dir/file',
         '.top_dir/sub_dir/file',
+        'top_dir/sub_dir/(file)',
         'top_dir/sub_dir/file ',
         'top_dir/sub_dir/ file',
         'top_dîr/sub_dir/file',
