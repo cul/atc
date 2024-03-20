@@ -53,7 +53,8 @@ namespace :atc do
         puts 'Validating source_object_id_file...'
         File.foreach(source_object_id_file) do |line|
           # Using String#strip because each line has a new line character at the end
-          unless line.strip =~ /^\d+$/
+          line_content = line.strip
+          unless line_content.empty? || line.strip =~ /^\d+$/
             puts "Error: Encountered invalid id: #{line}"
             return false
           end
@@ -63,6 +64,8 @@ namespace :atc do
         # Then actually yield each id
         File.foreach(source_object_id_file) do |line|
           # Using String#strip because each line has a new line character at the end
+          line_content = line.strip
+          next if line_content.empty?
           yield line.strip.to_i
         end
       else
