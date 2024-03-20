@@ -12,6 +12,18 @@ class PerformTransferJob < ApplicationJob
     pending_transfer = PendingTransfer.find(pending_transfer_id)
     storage_provider = pending_transfer.storage_provider
 
+    # Make sure that an existing StoredObject does not already exist for this
+    # storage_provider + source_object pair.
+    if StoredObject.exists?(storage_provider: storage_provider, source_object: pending_transfer.source_object)
+      pending_transfer.update(
+        status: :failure,
+        error_message: 'This PendingTransfer was skipped because there is already a StoredObject '\
+                       'with the same storage_provider and source_object. Maybe this '\
+                       'PendingTransfer was an accidental duplicate?'
+      )
+      return
+    end
+
     # TODO: Add support for gcp!
     unless storage_provider.storage_type == 'aws'
       Rails.logger.warn "Skipping PendingTransfer #{pending_transfer.id} because its "\
