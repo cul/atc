@@ -59,7 +59,7 @@ describe Atc::Loaders::ChecksumLoader do
       context 'enqueue_successor is true' do
         let(:enqueue_successor) { true }
 
-        it 'assigns the checksums' do
+        it 'successfully assigns checksums and additionally calls PrepareTransferJob#perform_later' do
           expect(source_object.fixity_checksum_value).to eql(checksum_value)
           expect(source_object.fixity_checksum_algorithm).to eql(checksum_alg)
         end
