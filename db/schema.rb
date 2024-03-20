@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_18_035844) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_20_020209) do
   create_table "checksum_algorithms", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -96,6 +96,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_18_035844) do
     t.integer "transfer_checksum_part_count"
     t.index ["source_object_id"], name: "index_stored_objects_on_source_object_id"
     t.index ["storage_provider_id", "path_hash"], name: "index_stored_objects_on_storage_provider_id_and_path_hash", unique: true
+    t.index ["storage_provider_id", "source_object_id"], name: "idx_on_storage_provider_id_source_object_id_25088e9be4", unique: true
     t.index ["storage_provider_id"], name: "index_stored_objects_on_storage_provider_id"
     t.index ["transfer_checksum_algorithm_id"], name: "index_stored_objects_on_transfer_checksum_algorithm_id"
     t.index ["transfer_checksum_part_count"], name: "index_stored_objects_on_transfer_checksum_part_count"
