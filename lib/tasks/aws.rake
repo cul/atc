@@ -30,6 +30,7 @@ namespace :atc do
       s3_uploader.upload_file(
         local_file_path,
         target_object_key,
+        :multipart,
         overwrite: overwrite,
         verbose: true,
         tags: {
