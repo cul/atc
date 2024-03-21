@@ -37,6 +37,7 @@ describe Atc::Utils::ObjectKeyNameUtils do
     end
     let(:sample_valid_path_key_names) do
       [
+        'file.txt',
         'top_dir/sub_dir/file',
         'top-dir/sub-dir/a-file.txt',
         'top_dir/sub_dir/.hidden_file',
@@ -59,6 +60,32 @@ describe Atc::Utils::ObjectKeyNameUtils do
   end
 
   describe '.remediate_key_name' do
+    let(:sample_remediated_path_key_names) do
+      [
+        ['.top_dir/sub_dir/file', '_top_dir/sub_dir/file'],
+        ['top_dir/sub_dir/file ', 'top_dir/sub_dir/file_'],
+        ['top_dir/sub_dir/ file', 'top_dir/sub_dir/_file'],
+        ['top_dîr/sub_dir/file', 'top_dir/sub_dir/file'],
+        ['top_dir/sub_dîr/file', 'top_dir/sub_dir/file'],
+        ['top_dir/sub_dir/fîle', 'top_dir/sub_dir/file'],
+        ['top dir/sub_dir/file', 'top_dir/sub_dir/file'],
+        ['top_dir/sub_dir/fîle.txt', 'top_dir/sub_dir/file.txt'],
+        ['top_dir/sub_dir/file.îxt', 'top_dir/sub_dir/file.ixt'],
+        ['top.dir/sub.dir/file.txt', 'top_dir/sub_dir/file.txt'],
+        ['top_dir/sub_dir/file.txt.txt', 'top_dir/sub_dir/file_txt.txt'],
+        ['top_dir/sub_dir/.ext.txt.txt', 'top_dir/sub_dir/.ext_txt.txt']
+      ]
+    end
+
+    it 'remediates path key names as expected' do
+      sample_remediated_path_key_names.each do |path|
+        remediated_key = described_class.remediate_key_name(path[0])
+        expect(described_class.remediate_key_name(remediated_key)).to (eql path[1]), lambda {
+          "original '#{path[0]}', expected '#{path[1]}', actual '#{remediated_key}'"
+        }
+      end
+    end
+
     it "remediates '/top_dîr/ça_sub dir/file .txt.txt' to '/top_dir/ca_sub_dir/file__txt.txt'" do
       expect(described_class.remediate_key_name(
                '/top_dîr/ça_sub dir/file .txt.txt'
@@ -100,16 +127,16 @@ describe Atc::Utils::ObjectKeyNameUtils do
       expect(described_class.remediate_key_name('/top_dir/sub_dir/.file.txt')).to eql '/top_dir/sub_dir/.file.txt'
     end
 
-    it "returns original valid key name with suffix '_1': '/top_dir/sub_dir/file.txt_1'" do
+    it "returns original valid key name with suffix '_1' before extension: '/top_dir/sub_dir/file_1.txt'" do
       expect(described_class.remediate_key_name(
                '/top_dir/sub_dir/file.txt', ['/top_dir/sub_dir/file.txt']
-             )).to eql '/top_dir/sub_dir/file.txt_1'
+             )).to eql '/top_dir/sub_dir/file_1.txt'
     end
 
-    it "returns original valid key name with suffix '_2': '/top_dir/sub_dir/file.txt_2'" do
+    it "returns original valid key name with suffix '_2': '/top_dir/sub_dir/file_2.txt'" do
       expect(described_class.remediate_key_name(
-               '/top_dir/sub_dir/file.txt', ['/top_dir/sub_dir/file.txt', '/top_dir/sub_dir/file.txt_1']
-             )).to eql '/top_dir/sub_dir/file.txt_2'
+               '/top_dir/sub_dir/file.txt', ['/top_dir/sub_dir/file.txt', '/top_dir/sub_dir/file_1.txt']
+             )).to eql '/top_dir/sub_dir/file_2.txt'
     end
   end
 end

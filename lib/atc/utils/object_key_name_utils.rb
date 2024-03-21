@@ -11,6 +11,8 @@ module Atc::Utils::ObjectKeyNameUtils
   # conventions. However, it's just a name and fcd1 is cool if module is renamed
 
   def self.valid_key_name?(path_filename)
+    return false if ['', '.'].include? path_filename
+
     pathname = Pathname.new(path_filename)
 
     # a relative path is invalid
@@ -18,6 +20,19 @@ module Atc::Utils::ObjectKeyNameUtils
 
     path_to_file, filename = pathname.split
 
+    # validate filename
+    return false unless self.valid_filename? filename
+    # if the valid filename is at the top level, return true
+    return true if pathname == pathname.basename
+
+    # check each component in the path to the file
+    path_to_file.each_filename do |path_segment|
+      return false if /[^-a-zA-Z0-9_]/.match? path_segment
+    end
+    true
+  end
+
+  def self.valid_filename?(filename)
     # for filename, get extension (if there is one) and base filename
     filename_extension = filename.extname
     base_filename = filename.to_s.delete_suffix(filename_extension)
@@ -31,10 +46,6 @@ module Atc::Utils::ObjectKeyNameUtils
     base_filename = base_filename.delete_prefix('.')
     return false if /[^-a-zA-Z0-9_]/.match? base_filename
 
-    # check each component in the path to the file
-    path_to_file.each_filename do |path_segment|
-      return false if /[^-a-zA-Z0-9_]/.match? path_segment
-    end
     true
   end
 
@@ -85,11 +96,13 @@ module Atc::Utils::ObjectKeyNameUtils
   end
 
   def self.handle_collision(remediated_key_name, unavailable_key_names)
-    new_remediated_key_name = "#{remediated_key_name}_1"
+    pathname = Pathname.new(remediated_key_name)
+    base = pathname.to_s.delete_suffix(pathname.extname)
+    new_remediated_key_name = "#{base}_1#{pathname.extname}"
     suffix_num = 1
     while unavailable_key_names.include? new_remediated_key_name
       suffix_num += 1
-      new_remediated_key_name = remediated_key_name + "_#{suffix_num}"
+      new_remediated_key_name = "#{base}_#{suffix_num}#{pathname.extname}"
     end
     new_remediated_key_name
   end
