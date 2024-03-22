@@ -44,6 +44,19 @@ class PerformTransferJob < ApplicationJob
       pending_transfer.source_object.path
     )
 
+    # TODO: Delete the block below after we've decided how we want to store original paths
+    # for objects that require path remediation due to AWS/GCP bucket key character limitations.
+    # For now, we're skipping the processing of any PendingTransfer that has an
+    # unremediated_first_attempt_stored_path that would need to be modified for compatiblity with
+    # our storage providers.
+    unless Atc::Utils::ObjectKeyNameUtils.valid_key_name?(unremediated_first_attempt_stored_path)
+      Rails.logger.warn "Skipping PendingTransfer #{pending_transfer.id} because its source_object.path value "\
+            "(#{unremediated_first_attempt_stored_path}) needs to be remediated and we are not currently transferring "\
+            'files that require remediation.  Would have remediated to: '\
+            "#{Atc::Utils::ObjectKeyNameUtils.remediate_key_name(unremediated_first_attempt_stored_path, [])}"
+      return
+    end
+
     # Indicate that this transfer is in progress
     pending_transfer.update!(status: :in_progress)
 
@@ -65,9 +78,14 @@ class PerformTransferJob < ApplicationJob
           Atc::Utils::HexUtils.bin_to_hex(pending_transfer.source_object.fixity_checksum_value)
       }
 
-      if previously_attempted_stored_paths.last != unremediated_first_attempt_stored_path
-        tags['original-path'] = unremediated_first_attempt_stored_path
-      end
+      # NOTE: Commenting out the lines below because some of our desired 'original-path' values
+      # contain characters that AWS does not allow in tags.  Also, some of our 'original-path'
+      # values would be too long to store in an S3 object tag, due to maximum tag length
+      # restrictions. So for now, we'll just keep information about StoredObject.path and
+      # SourceObject.path in our database.
+      ## if previously_attempted_stored_paths.last != unremediated_first_attempt_stored_path
+      ##   tags['original-path'] = unremediated_first_attempt_stored_path
+      ## end
 
       storage_provider.perform_transfer(pending_transfer, previously_attempted_stored_paths.last, tags)
     end
