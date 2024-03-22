@@ -11,6 +11,8 @@ module Atc::Utils::ObjectKeyNameUtils
   # conventions. However, it's just a name and fcd1 is cool if module is renamed
 
   def self.valid_key_name?(path_filename)
+    return false if ['', '.', '..', '/'].include? path_filename
+
     pathname = Pathname.new(path_filename)
 
     # a relative path is invalid
@@ -18,41 +20,30 @@ module Atc::Utils::ObjectKeyNameUtils
 
     path_to_file, filename = pathname.split
 
-    # for filename, get extension (if there is one) and base filename
-    filename_extension = filename.extname
-    base_filename = filename.to_s.delete_suffix(filename_extension)
-
-    # check filename extension
-    return false if filename_extension.present? && (/[^-a-zA-Z0-9_]/ =~ filename_extension.delete_prefix('.'))
-
-    # check base filename
-    # NOTE: "hidden files", in other words files that start with a '.' such as '.config', are considered
-    # valid. This is also true if the file has an extension, such as '.config.txt'
-    base_filename = base_filename.delete_prefix('.')
-    return false if /[^-a-zA-Z0-9_]/.match? base_filename
+    # validate filename
+    return false if filename.to_s.end_with?('.') || /[^-a-zA-Z0-9_.]/.match?(filename.to_s)
+    # if the valid filename is at the top level, return true
+    return true if pathname == pathname.basename
 
     # check each component in the path to the file
     path_to_file.each_filename do |path_segment|
-      return false if /[^-a-zA-Z0-9_]/.match? path_segment
+      return false if /[^-a-zA-Z0-9_.]/.match? path_segment
     end
     true
   end
 
   def self.remediate_key_name(filepath_key_name, unavailable_key_names = [])
+    self.argument_check(filepath_key_name)
+
     pathname = Pathname.new(filepath_key_name)
-    remediated_pathname = Pathname.new(pathname.absolute? ? '/' : '')
+
+    remediated_pathname = Pathname.new('')
     path_to_file, filename = pathname.split
 
-    # remediate each component in the path to the file
-    path_to_file.each_filename do |path_segment|
-      remediated_path_segment = Stringex::Unidecoder.decode(path_segment).gsub(/[^-a-zA-Z0-9_]/, '_')
-      remediated_pathname += remediated_path_segment
-    end
+    filename_valid_ascii =
+      Stringex::Unidecoder.decode(filename.to_s).gsub(/[^-a-zA-Z0-9_.]/, '_').gsub(/\.$/, '_')
 
-    # remediate filename
-    filename_valid_ascii = self.remediate_filename(filename)
-
-    remediated_key_name = remediated_pathname.join(filename_valid_ascii).to_s
+    remediated_key_name = self.remediate_path(path_to_file, remediated_pathname).join(filename_valid_ascii).to_s
 
     # no collisions
     return remediated_key_name unless unavailable_key_names.include? remediated_key_name
@@ -61,35 +52,28 @@ module Atc::Utils::ObjectKeyNameUtils
     self.handle_collision(remediated_key_name, unavailable_key_names)
   end
 
-  def self.remediate_filename(filename)
-    # Handle base filename and extension separately
-    extension = filename.extname
-    base = filename.to_s.delete_suffix(extension)
+  def self.argument_check(filepath_key_name)
+    raise ArgumentError, "Bad argument: '#{filepath_key_name}'" if ['', '.', '..', '/'].include? filepath_key_name
+    raise ArgumentError, 'Bad argument: absolute path' if filepath_key_name.start_with?('/')
+  end
 
-    # remediate base filename. Do not replace starting '.' for hidden files
-    base_ascii = Stringex::Unidecoder.decode(base)
-    base_valid_ascii = if base_ascii.starts_with?('.')
-                         ".#{base_ascii.delete_prefix('.').gsub(/[^-a-zA-Z0-9_]/, '_')}"
-                       else
-                         base_ascii.gsub(/[^-a-zA-Z0-9_]/, '_')
-                       end
-
-    # remediate extension if present
-    if extension.present?
-      filename_valid_ascii =
-        "#{base_valid_ascii}.#{Stringex::Unidecoder.decode(extension.delete_prefix('.')).gsub(/[^-a-zA-Z0-9_]/, '_')}"
-    else
-      filename_valid_ascii = base_valid_ascii
+  def self.remediate_path(path_to_file, remediated_pathname)
+    # remediate each component in the path to the file
+    path_to_file.each_filename do |path_segment|
+      remediated_path_segment = Stringex::Unidecoder.decode(path_segment).gsub(/[^-a-zA-Z0-9_.]/, '_')
+      remediated_pathname += remediated_path_segment
     end
-    filename_valid_ascii
+    remediated_pathname
   end
 
   def self.handle_collision(remediated_key_name, unavailable_key_names)
-    new_remediated_key_name = "#{remediated_key_name}_1"
+    pathname = Pathname.new(remediated_key_name)
+    base = pathname.to_s.delete_suffix(pathname.extname)
+    new_remediated_key_name = "#{base}_1#{pathname.extname}"
     suffix_num = 1
     while unavailable_key_names.include? new_remediated_key_name
       suffix_num += 1
-      new_remediated_key_name = remediated_key_name + "_#{suffix_num}"
+      new_remediated_key_name = "#{base}_#{suffix_num}#{pathname.extname}"
     end
     new_remediated_key_name
   end
