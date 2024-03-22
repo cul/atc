@@ -54,6 +54,19 @@ describe Atc::Utils::AwsChecksumUtils do
         f.write('A' * 15.megabytes)
         expect(described_class.multipart_checksum_for_file(f.path)).to eq({
           binary_checksum_of_checksums: Base64.strict_decode64('EUOQdQ=='),
+          binary_checksum_of_object: nil,
+          num_parts: 3,
+          part_size: 5_242_880
+        })
+      end
+    end
+
+    it 'returns the expected hashes when calculating both sums' do
+      Tempfile.create('example-file-to-checksum') do |f|
+        f.write('A' * 15.megabytes)
+        expect(described_class.multipart_checksum_for_file(f.path, calculate_whole_object: true)).to eq({
+          binary_checksum_of_checksums: Base64.strict_decode64('EUOQdQ=='),
+          binary_checksum_of_object: Base64.strict_decode64('Nk5OvQ=='),
           num_parts: 3,
           part_size: 5_242_880
         })

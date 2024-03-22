@@ -14,18 +14,21 @@ class PrepareTransferJob < ApplicationJob
 
     pending_transfers = []
 
+    queue_for_gcp = queue_for_gcp?(source_object)
     if queue_for_aws?(source_object)
       # AWS uses whole file checksum for smaller files, and multipart checksum for larger files
       if File.size(source_object.path) < Atc::Constants::DEFAULT_MULTIPART_THRESHOLD
-        whole_file_crc32c_checksum ||= Digest::CRC32c.file(source_object.path).digest
+        whole_file_crc32c_checksum = Digest::CRC32c.file(source_object.path).digest
         pending_transfers << PendingTransfer.create!(
-          transfer_checksum_algorithm: crc32c_checksum_algorithm,
+          transfer_checksum_algorithm: crc32c_checksum_algorithm(),
           transfer_checksum_value: whole_file_crc32c_checksum,
           storage_provider: aws_storage_provider(),
           source_object: source_object
         )
       else
-        checksum_data = Atc::Utils::AwsChecksumUtils.multipart_checksum_for_file(source_object.path)
+        checksum_data = Atc::Utils::AwsChecksumUtils.multipart_checksum_for_file(source_object.path,
+                                                                                 calculate_whole_object: queue_for_gcp)
+        whole_file_crc32c_checksum = checksum_data[:binary_checksum_of_object]
         pending_transfers << PendingTransfer.create!(
           transfer_checksum_algorithm: crc32c_checksum_algorithm(),
           transfer_checksum_value: checksum_data[:binary_checksum_of_checksums],
@@ -37,7 +40,7 @@ class PrepareTransferJob < ApplicationJob
       end
     end
 
-    if queue_for_gcp?(source_object)
+    if queue_for_gcp
       # GCP always uses whole file checksum
       whole_file_crc32c_checksum ||= Digest::CRC32c.file(source_object.path).digest
       pending_transfers << PendingTransfer.create!(
