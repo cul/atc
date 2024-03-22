@@ -31,13 +31,15 @@ module Atc::Utils::AwsChecksumUtils
   #   num_parts: 4
   # }
   # @return checksum_info [Hash] An info object
-  def self.multipart_checksum_for_file(file_path)
+  def self.multipart_checksum_for_file(file_path, calculate_whole_object: false)
     part_size = self.compute_default_part_size(File.size(file_path))
 
     c2c32c_bin_checksums_for_parts = []
+    whole_object_digester = Digest::CRC32c.new if calculate_whole_object
     File.open(file_path, 'rb') do |file|
       while (buffer = file.read(part_size))
         c2c32c_bin_checksums_for_parts << Digest::CRC32c.digest(buffer)
+        whole_object_digester&.update(buffer)
       end
     end
     checksum_of_checksums = Digest::CRC32c.new
@@ -46,6 +48,7 @@ module Atc::Utils::AwsChecksumUtils
     # "#{base64_checksum}-#{num_parts}"
     {
       binary_checksum_of_checksums: checksum_of_checksums.digest,
+      binary_checksum_of_whole_file: whole_object_digester&.digest,
       part_size: part_size,
       num_parts: c2c32c_bin_checksums_for_parts.length
     }
