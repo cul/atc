@@ -3,7 +3,9 @@
 # rubocop:disable Metrics/MethodLength
 # rubocop:disable Metrics/AbcSize
 
-NUM_STORED_PATH_COLLISION_RETRIES = 0 # TODO: Actually retry later (2 times), once we have remediated path logic
+# We don't expect too many collisions, so we'll only retry a limited number of times.
+# This number can be increased later if needed.
+NUM_STORED_PATH_COLLISION_RETRIES = 2
 
 class PerformTransferJob < ApplicationJob
   queue_as Atc::Queues::PERFORM_TRANSFER
@@ -39,18 +41,6 @@ class PerformTransferJob < ApplicationJob
     # This is the stored key we would ideally like to use,
     # if no modifications are necessary for storage provider compatibility.
     first_attempted_stored_key = storage_provider.local_path_to_stored_path(pending_transfer.source_object.path)
-
-    # TODO: Delete the line below after the upcoming Atc::Utils::ObjectKeyNameUtils.remediate_key_name
-    # method updates.  For now, we're skipping the processing of any PendingTransfer that has a
-    # first_attempted_stored_key that would need to be modified for compatiblity with our
-    # storage providers.
-    unless Atc::Utils::ObjectKeyNameUtils.valid_key_name?(first_attempted_stored_key)
-      Rails.logger.warn "Skipping PendingTransfer #{pending_transfer.id} because its source_object.path value "\
-            "(#{first_attempted_stored_key}) needs to be remediated and we are not currently transferring "\
-            'files that require remediation.  Would have remediated to: '\
-            "#{Atc::Utils::ObjectKeyNameUtils.remediate_key_name(first_attempted_stored_key, [])}"
-      return
-    end
 
     # Indicate that this transfer is in progress
     pending_transfer.update!(status: :in_progress)
