@@ -38,9 +38,11 @@ class PerformTransferJob < ApplicationJob
     # Our first attempt may not work if the storage provider
     previously_attempted_stored_paths = []
 
-    # This is the stored key we would ideally like to use,
+    # This is the stored path we would ideally like to use,
     # if no modifications are necessary for storage provider compatibility.
-    first_attempted_stored_key = storage_provider.local_path_to_stored_path(pending_transfer.source_object.path)
+    unremediated_first_attempt_stored_path = storage_provider.local_path_to_stored_path(
+      pending_transfer.source_object.path
+    )
 
     # Indicate that this transfer is in progress
     pending_transfer.update!(status: :in_progress)
@@ -51,7 +53,7 @@ class PerformTransferJob < ApplicationJob
       base_interval: 0, multiplier: 1, rand_factor: 0
     ) do
       previously_attempted_stored_paths << Atc::Utils::ObjectKeyNameUtils.remediate_key_name(
-        first_attempted_stored_key, previously_attempted_stored_paths
+        unremediated_first_attempt_stored_path, previously_attempted_stored_paths
       )
 
       # Immediately assign this path to the pending transfer because there's a unique index on path.
@@ -63,7 +65,9 @@ class PerformTransferJob < ApplicationJob
           Atc::Utils::HexUtils.bin_to_hex(pending_transfer.source_object.fixity_checksum_value)
       }
 
-      tags['original-path'] = previously_attempted_stored_paths.first if previously_attempted_stored_paths.length > 1
+      if previously_attempted_stored_paths.last != unremediated_first_attempt_stored_path
+        tags['original-path'] = unremediated_first_attempt_stored_path
+      end
 
       storage_provider.perform_transfer(pending_transfer, previously_attempted_stored_paths.last, tags)
     end

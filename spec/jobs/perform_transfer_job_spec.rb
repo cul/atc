@@ -66,7 +66,7 @@ describe PerformTransferJob do
 
     it 'is remediated automatically and the job completes without error' do
       expect(aws_storage_provider).to receive(:perform_transfer).with(
-        pending_transfer, expected_remediated_key, expected_tags
+        pending_transfer, expected_remediated_key, expected_tags.merge({ 'original-path' => object_key })
       )
       perform_transfer_job.perform(pending_transfer.id)
       expect(StoredObject.first.path).to eq(expected_remediated_key)
