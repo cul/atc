@@ -9,12 +9,10 @@ describe Atc::Utils::ObjectKeyNameUtils do
         '',
         '/',
         '.',
+        '..',
         './',
-        './file',
         '../',
-        '../file',
         '/top_dir/sub_dir/file',
-        '.top_dir/sub_dir/file',
         'top_dir/sub_dir/(file)',
         'top_dir/sub_dir/file ',
         'top_dir/sub_dir/ file',
@@ -24,15 +22,10 @@ describe Atc::Utils::ObjectKeyNameUtils do
         'top dir/sub_dir/file',
         'top_dir/sub_dir/fîle.txt',
         'top_dir/sub_dir/file.îxt',
-        'top_dir/sub.dir/file.txt',
-        'top_dir/sub_dir/file.txt.txt',
-        'top_dir/sub_dir/.ext.txt.txt',
-        'top_dir/./file',
-        'top_dir/../file',
-        'top_dir/.../file',
         'top_dir/sub_dir/..',
         'top_dir/sub_dir/...',
-        'top_dir/我能/我能.我能.我能'
+        'top_dir/我能/我能.我能.我能',
+        '.a.b.c./.a.b.c.'
       ]
     end
     let(:sample_valid_path_key_names) do
@@ -42,7 +35,15 @@ describe Atc::Utils::ObjectKeyNameUtils do
         'top-dir/sub-dir/a-file.txt',
         'top_dir/sub_dir/.hidden_file',
         'top_dir/sub_dir/.hidden_file.txt',
-        'top_dir/sub_dir/file.txt'
+        'top_dir/sub_dir/file.txt',
+        'top_dir/sub.dir/file.txt',
+        '.top_dir/sub_dir/file',
+        'top_dir/./file',
+        'top_dir/../file',
+        'top_dir/.../file',
+        'top_dir/sub_dir/file.txt.txt',
+        'top_dir/sub_dir/.ext.txt.txt',
+        '.a.b.c./.a.b.c'
       ]
     end
 
@@ -75,6 +76,22 @@ describe Atc::Utils::ObjectKeyNameUtils do
         ['top_dir/sub_dir/file.txt.txt', 'top_dir/sub_dir/file_txt.txt'],
         ['top_dir/sub_dir/.ext.txt.txt', 'top_dir/sub_dir/.ext_txt.txt']
       ]
+    end
+
+    it "raise an exception for '/'" do
+      expect { described_class.remediate_key_name('/') }.to raise_error(ArgumentError)
+    end
+
+    it "raise an exception for ''" do
+      expect { described_class.remediate_key_name('') }.to raise_error(ArgumentError)
+    end
+
+    it "raise an exception for '.'" do
+      expect { described_class.remediate_key_name('.') }.to raise_error(ArgumentError)
+    end
+
+    it "raise an exception for '..'" do
+      expect { described_class.remediate_key_name('..') }.to raise_error(ArgumentError)
     end
 
     it 'remediates path key names as expected' do

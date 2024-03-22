@@ -11,7 +11,7 @@ module Atc::Utils::ObjectKeyNameUtils
   # conventions. However, it's just a name and fcd1 is cool if module is renamed
 
   def self.valid_key_name?(path_filename)
-    return false if ['', '.'].include? path_filename
+    return false if ['', '.', '..', '/'].include? path_filename
 
     pathname = Pathname.new(path_filename)
 
@@ -21,35 +21,20 @@ module Atc::Utils::ObjectKeyNameUtils
     path_to_file, filename = pathname.split
 
     # validate filename
-    return false unless self.valid_filename? filename
+    return false if filename.to_s.end_with?('.') || /[^-a-zA-Z0-9_.]/.match?(filename.to_s)
     # if the valid filename is at the top level, return true
     return true if pathname == pathname.basename
 
     # check each component in the path to the file
     path_to_file.each_filename do |path_segment|
-      return false if /[^-a-zA-Z0-9_]/.match? path_segment
+      return false if /[^-a-zA-Z0-9_.]/.match? path_segment
     end
     true
   end
 
-  def self.valid_filename?(filename)
-    # for filename, get extension (if there is one) and base filename
-    filename_extension = filename.extname
-    base_filename = filename.to_s.delete_suffix(filename_extension)
-
-    # check filename extension
-    return false if filename_extension.present? && (/[^-a-zA-Z0-9_]/ =~ filename_extension.delete_prefix('.'))
-
-    # check base filename
-    # NOTE: "hidden files", in other words files that start with a '.' such as '.config', are considered
-    # valid. This is also true if the file has an extension, such as '.config.txt'
-    base_filename = base_filename.delete_prefix('.')
-    return false if /[^-a-zA-Z0-9_]/.match? base_filename
-
-    true
-  end
-
   def self.remediate_key_name(filepath_key_name, unavailable_key_names = [])
+    raise ArgumentError, "Bad argument: '#{filepath_key_name}'" if ['', '.', '..', '/'].include? filepath_key_name
+
     pathname = Pathname.new(filepath_key_name)
     remediated_pathname = Pathname.new(pathname.absolute? ? '/' : '')
     path_to_file, filename = pathname.split
