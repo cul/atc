@@ -48,7 +48,7 @@ module Atc::Utils::AwsChecksumUtils
     # "#{base64_checksum}-#{num_parts}"
     {
       binary_checksum_of_checksums: checksum_of_checksums.digest,
-      binary_checksum_of_object: whole_object_digester&.digest,
+      binary_checksum_of_whole_file: whole_object_digester&.digest,
       part_size: part_size,
       num_parts: c2c32c_bin_checksums_for_parts.length
     }

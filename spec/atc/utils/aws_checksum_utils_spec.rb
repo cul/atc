@@ -54,22 +54,24 @@ describe Atc::Utils::AwsChecksumUtils do
         f.write('A' * 15.megabytes)
         expect(described_class.multipart_checksum_for_file(f.path)).to eq({
           binary_checksum_of_checksums: Base64.strict_decode64('EUOQdQ=='),
-          binary_checksum_of_object: nil,
+          binary_checksum_of_whole_file: nil,
           num_parts: 3,
           part_size: 5_242_880
         })
       end
     end
 
-    it 'returns the expected hashes when calculating both sums' do
+    it 'returns the expected hashes when calculating both multipart and whole object checksums' do
       Tempfile.create('example-file-to-checksum') do |f|
         f.write('A' * 15.megabytes)
+        expected_whole_file_checksum = 'Nk5OvQ=='
         expect(described_class.multipart_checksum_for_file(f.path, calculate_whole_object: true)).to eq({
           binary_checksum_of_checksums: Base64.strict_decode64('EUOQdQ=='),
-          binary_checksum_of_object: Base64.strict_decode64('Nk5OvQ=='),
-          num_parts: 3,
-          part_size: 5_242_880
+          binary_checksum_of_whole_file: Base64.strict_decode64(expected_whole_file_checksum),
+          num_parts: 3, part_size: 5_242_880
         })
+        # And make sure that our whole-file checksum matches the Digest::CRC32c whole file checksum
+        expect(Digest::CRC32c.file(f.path).base64digest).to eq(expected_whole_file_checksum)
       end
     end
   end

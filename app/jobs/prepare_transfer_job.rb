@@ -28,7 +28,7 @@ class PrepareTransferJob < ApplicationJob
       else
         checksum_data = Atc::Utils::AwsChecksumUtils.multipart_checksum_for_file(source_object.path,
                                                                                  calculate_whole_object: queue_for_gcp)
-        whole_file_crc32c_checksum = checksum_data[:binary_checksum_of_object]
+        whole_file_crc32c_checksum = checksum_data[:binary_checksum_of_whole_file]
         pending_transfers << PendingTransfer.create!(
           transfer_checksum_algorithm: crc32c_checksum_algorithm(),
           transfer_checksum_value: checksum_data[:binary_checksum_of_checksums],
