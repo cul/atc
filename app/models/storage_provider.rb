@@ -11,6 +11,15 @@ class StorageProvider < ApplicationRecord
           'is not implemented yet.'
   end
 
+  def storage_implemented?
+    case self.storage_type
+    when 'aws'
+      true
+    else
+      false
+    end
+  end
+
   def perform_transfer(pending_transfer, stored_object_key, tags)
     if self.storage_type == 'aws'
       s3_uploader = Atc::Aws::S3Uploader.new(S3_CLIENT, self.container_name)

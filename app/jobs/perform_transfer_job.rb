@@ -27,7 +27,7 @@ class PerformTransferJob < ApplicationJob
     end
 
     # TODO: Add support for gcp!
-    unless storage_provider.storage_type == 'aws'
+    unless storage_provider.storage_implemented?
       Rails.logger.warn "Skipping PendingTransfer #{pending_transfer.id} because its "\
                         "storage_provider.storage_type value (#{storage_provider.storage_type}) "\
                         'is not yet implemented.'
