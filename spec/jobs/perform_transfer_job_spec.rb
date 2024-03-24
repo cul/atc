@@ -39,6 +39,14 @@ describe PerformTransferJob do
     expect(StoredObject.count).to eq(1) # only one StoredObject should exist, not two
   end
 
+  describe '#original_path_metadata' do
+    subject(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key, [object_key]) }
+
+    it 'returns a value that can be converted to the original proposed key' do
+      expect(actual_metadata).to be_empty
+    end
+  end
+
   context 'when an Atc::Exceptions::ObjectExists error is encountered' do
     before do
       # The first time that perform_transfer is called, we'll have it raise an exception
@@ -78,6 +86,17 @@ describe PerformTransferJob do
       )
       perform_transfer_job.perform(pending_transfer.id)
       expect(StoredObject.first.path).to eq(expected_remediated_key)
+    end
+
+    describe '#original_path_metadata' do
+      subject(:actual_metadata_value) { actual_metadata[PerformTransferJob::ORIGINAL_PATH_METADATA_KEY] }
+
+      let(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key, [expected_remediated_key]) }
+      let(:b64_encoded_without_zlib) { Base64.strict_encode64(object_key.b) }
+
+      it 'returns a value that can be converted to the original proposed key' do
+        expect(Base64.strict_decode64(actual_metadata_value).force_encoding(Encoding::UTF_8)).to eql(object_key)
+      end
     end
   end
 
