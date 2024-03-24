@@ -20,19 +20,32 @@ class StorageProvider < ApplicationRecord
     end
   end
 
-  def perform_transfer(pending_transfer, stored_object_key, tags)
-    if self.storage_type == 'aws'
-      s3_uploader = Atc::Aws::S3Uploader.new(S3_CLIENT, self.container_name)
-      s3_uploader.upload_file(
-        pending_transfer.source_object.path,
-        stored_object_key,
-        pending_transfer.transfer_checksum_part_size.nil? ? :whole_file : :multipart,
-        **upload_file_opts(pending_transfer, tags)
-      )
-      return true
-    end
+  def store_aws(pending_transfer, stored_object_key, metadata:, tags: {})
+    s3_uploader = Atc::Aws::S3Uploader.new(S3_CLIENT, self.container_name)
+    s3_uploader.upload_file(
+      pending_transfer.source_object.path,
+      stored_object_key,
+      pending_transfer.transfer_checksum_part_size.nil? ? :whole_file : :multipart,
+      **aws_upload_file_opts(pending_transfer, metadata: metadata, tags: tags)
+    )
+    true
+  end
 
+  # rubocop:disable Lint/UnusedMethodArgument
+  def store_gcp(pending_transfer, _stored_object_key, metadata:, **args)
     raise_unimplemented_storage_type_error!
+  end
+  # rubocop:enable Lint/UnusedMethodArgument
+
+  def perform_transfer(pending_transfer, stored_object_key, metadata:, tags: {})
+    case self.storage_type
+    when 'aws'
+      store_aws(pending_transfer, stored_object_key, metadata: metadata, tags: tags)
+    when 'gcp'
+      store_gcp(pending_transfer, stored_object_key, metadata: metadata, tags: tags)
+    else
+      raise_unimplemented_storage_type_error!
+    end
   end
 
   def local_path_to_stored_path(local_path)
@@ -55,9 +68,10 @@ class StorageProvider < ApplicationRecord
 
   private
 
-  def upload_file_opts(pending_transfer, tags)
+  def upload_file_opts(pending_transfer, metadata:, tags:)
     {
       overwrite: false, # This will raise an Atc::Exceptions::ObjectExists error if the object exists
+      metadata: metadata,
       tags: tags,
       precalculated_aws_crc32c: [
         Base64.strict_encode64(pending_transfer.transfer_checksum_value),
