@@ -50,13 +50,15 @@ module Atc::Utils::AwsChecksumUtils
     }
   end
 
+  # rubocop:disable Performance/UnfreezeString
   def self.digest_file(file_path, part_size, crc32c_accumulator, whole_object_digester)
     File.open(file_path, 'rb') do |file|
-      buffer = +''
+      buffer = String.new
       while file.read(part_size, buffer).present?
         crc32c_accumulator << Digest::CRC32c.digest(buffer)
         whole_object_digester&.update(buffer)
       end
     end
   end
+  # rubocop:enable Performance/UnfreezeString
 end
