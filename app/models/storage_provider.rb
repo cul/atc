@@ -11,14 +11,14 @@ class StorageProvider < ApplicationRecord
           'is not implemented yet.'
   end
 
-  def perform_transfer(pending_transfer, stored_object_key, tags)
+  def perform_transfer(pending_transfer, stored_object_key, metadata)
     if self.storage_type == 'aws'
       s3_uploader = Atc::Aws::S3Uploader.new(S3_CLIENT, self.container_name)
       s3_uploader.upload_file(
         pending_transfer.source_object.path,
         stored_object_key,
         pending_transfer.transfer_checksum_part_size.nil? ? :whole_file : :multipart,
-        **upload_file_opts(pending_transfer, tags)
+        **upload_file_opts(pending_transfer, metadata)
       )
       return true
     end
@@ -46,10 +46,10 @@ class StorageProvider < ApplicationRecord
 
   private
 
-  def upload_file_opts(pending_transfer, tags)
+  def upload_file_opts(pending_transfer, metadata)
     {
       overwrite: false, # This will raise an Atc::Exceptions::ObjectExists error if the object exists
-      tags: tags,
+      metadata: metadata,
       precalculated_aws_crc32c: [
         Base64.strict_encode64(pending_transfer.transfer_checksum_value),
         pending_transfer.transfer_checksum_part_count

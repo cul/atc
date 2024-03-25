@@ -39,7 +39,15 @@ class Atc::Aws::S3Uploader
   #   If provided, this will print progress messages to stdout (via puts).
   #   Default value: false
   # @option options [Hash] :tags
-  #   A Hash of key-value tag pairs
+  #   A Hash of key-value tag pairs (ASCII-only values, max length of 256)
+  # @option options [Hash] :metadata
+  #   A Hash of key-value metadata pairs (and combined length of all keys and values cannot be
+  #   greater than 2048 bytes).  Note that if you put any UTF-8 characters in these values
+  #   that AWS will automatically convert the entire value to a base64-encoded string with some
+  #   extra characters inserted throughout the string.  This value will not be human-readable
+  #   in the AWS console.  If you plan to use UTF-8 characters in a value, it's better to base64
+  #   encode the entire value BEFORE sending it to AWS because it will be easier to decode later
+  #   because it won't have extra AWS-inserted characters.
   # @return True if the upload succeeded, or throws Atc::Exceptions::TransferError if the transfer failed.
   def upload_file(local_file_path, object_key, upload_type, **options)
     s3_object = generate_s3_object(object_key)
@@ -54,7 +62,8 @@ class Atc::Aws::S3Uploader
 
     puts 'Performing upload...' if verbose
     s3_object.upload_file(
-      local_file_path, s3_object_upload_opts(multipart_threshold, tags: options[:tags], verbose: verbose)
+      local_file_path,
+      s3_object_upload_opts(multipart_threshold, tags: options[:tags], metadata: options[:metadata], verbose: verbose)
     ) do |resp|
       verify_aws_response_checksum!(resp.checksum_crc32c, precalculated_aws_crc32c)
     end
@@ -122,7 +131,7 @@ class Atc::Aws::S3Uploader
     end
   end
 
-  def s3_object_upload_opts(multipart_threshold, tags: nil, verbose: false)
+  def s3_object_upload_opts(multipart_threshold, tags: nil, metadata: nil, verbose: false)
     opts = {
       # NOTE: Supplying a checksum_algorithm option with value 'CRC32C' will make the AWS SDK
       # automatically calculate a local CRC32C checksums before sending the file to S3 (for both
@@ -135,6 +144,7 @@ class Atc::Aws::S3Uploader
 
     opts[:progress_callback] = PROGRESS_DISPLAY_PROC if verbose
     opts[:tagging] = self.class.tags_to_query_string(tags) if tags.present?
+    opts[:metadata] = metadata
     opts
   end
 end

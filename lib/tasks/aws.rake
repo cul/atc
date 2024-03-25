@@ -2,8 +2,13 @@
 
 namespace :atc do
   namespace :aws do
-    desc 'Upload a file to Amazon S3'
+    desc 'Upload a file to Amazon S3.  This task only exists for transfer testing purposes.'
     task upload_file: :environment do
+      if Rails.env != 'development'
+        puts 'This task is just for transfer testing and should only be run in a development environment.'
+        next
+      end
+
       local_file_path = ENV['local_file_path']
       overwrite = ENV['overwrite'] == 'true'
 
@@ -30,12 +35,12 @@ namespace :atc do
       s3_uploader.upload_file(
         local_file_path,
         target_object_key,
-        :multipart,
+        :auto,
         overwrite: overwrite,
         verbose: true,
-        tags: {
-          'checksum-sha256': sha256_hexdigest
-          # 'original-path': 'add this if applicable for the rake task context'
+        metadata: {
+          'checksum-sha256': sha256_hexdigest,
+          'original-path-b64' => Base64.strict_encode64('example/value')
         }
       )
     end

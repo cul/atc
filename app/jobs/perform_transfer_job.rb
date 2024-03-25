@@ -44,19 +44,6 @@ class PerformTransferJob < ApplicationJob
       pending_transfer.source_object.path
     )
 
-    # TODO: Delete the block below after we've decided how we want to store original paths
-    # for objects that require path remediation due to AWS/GCP bucket key character limitations.
-    # For now, we're skipping the processing of any PendingTransfer that has an
-    # unremediated_first_attempt_stored_path that would need to be modified for compatiblity with
-    # our storage providers.
-    unless Atc::Utils::ObjectKeyNameUtils.valid_key_name?(unremediated_first_attempt_stored_path)
-      Rails.logger.warn "Skipping PendingTransfer #{pending_transfer.id} because its source_object.path value "\
-            "(#{unremediated_first_attempt_stored_path}) needs to be remediated and we are not currently transferring "\
-            'files that require remediation.  Would have remediated to: '\
-            "#{Atc::Utils::ObjectKeyNameUtils.remediate_key_name(unremediated_first_attempt_stored_path, [])}"
-      return
-    end
-
     # Indicate that this transfer is in progress
     pending_transfer.update!(status: :in_progress)
 
@@ -73,21 +60,16 @@ class PerformTransferJob < ApplicationJob
       # This will prevent any concurrent transfer process from attempting to claim the same path.
       pending_transfer.update!(stored_object_path: previously_attempted_stored_paths.last)
 
-      tags = {
+      metadata = {
         "checksum-#{pending_transfer.source_object.fixity_checksum_algorithm.name.downcase}" =>
           Atc::Utils::HexUtils.bin_to_hex(pending_transfer.source_object.fixity_checksum_value)
       }
 
-      # NOTE: Commenting out the lines below because some of our desired 'original-path' values
-      # contain characters that AWS does not allow in tags.  Also, some of our 'original-path'
-      # values would be too long to store in an S3 object tag, due to maximum tag length
-      # restrictions. So for now, we'll just keep information about StoredObject.path and
-      # SourceObject.path in our database.
-      ## if previously_attempted_stored_paths.last != unremediated_first_attempt_stored_path
-      ##   tags['original-path'] = unremediated_first_attempt_stored_path
-      ## end
+      if previously_attempted_stored_paths.last != unremediated_first_attempt_stored_path
+        add_original_path_metadata!(metadata, unremediated_first_attempt_stored_path)
+      end
 
-      storage_provider.perform_transfer(pending_transfer, previously_attempted_stored_paths.last, tags)
+      storage_provider.perform_transfer(pending_transfer, previously_attempted_stored_paths.last, metadata)
     end
 
     # If we got here, that means that the upload was successful.  We can convert this
@@ -115,5 +97,30 @@ class PerformTransferJob < ApplicationJob
 
     # And re-raise so that normal job error handling can continue
     raise e
+  end
+
+  private
+
+  # Modifies the given metadata Hash, adding either a 'original-path-b64' or 'original-path-b64-gz' value
+  # based on the number of bytes in the given unremediated_first_attempt_stored_path String.  An 'original-path-b64'
+  # key will indicate a base64-encoded version of a smaller-value unremediated_first_attempt_stored_path, and an
+  # 'original-path-b64-gz' key will indicate a gzipped THEN base64-encoded version of a larger-value
+  # unremediated_first_attempt_stored_path.
+  # @param metadata [Hash]
+  # @param unremediated_first_attempt_stored_path [String]
+  def add_original_path_metadata!(metadata, unremediated_first_attempt_stored_path)
+    # NOTE: We're checking the unremediated_first_attempt_stored_path.bytes.length instead of
+    # unremediated_first_attempt_stored_path.length because multibyte characters in the path string can make a 1024
+    # character path take up more than 1024 bytes.  This is important because our cloud storage providers generally
+    # limit metadata by string BYTES rather than string LENGTH.
+    if unremediated_first_attempt_stored_path.bytes.length < 1024
+      metadata['original-path-b64'] = Base64.strict_encode64(unremediated_first_attempt_stored_path)
+      return
+    end
+
+    # For higher-byte-length strings, we'll gzip the value before base64 encoding it AND store it with a different key
+    metadata['original-path-b64-gz'] = Base64.strict_encode64(
+      Zlib::Deflate.deflate(unremediated_first_attempt_stored_path)
+    )
   end
 end
