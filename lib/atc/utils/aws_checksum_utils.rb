@@ -36,12 +36,8 @@ module Atc::Utils::AwsChecksumUtils
 
     c2c32c_bin_checksums_for_parts = []
     whole_object_digester = Digest::CRC32c.new if calculate_whole_object
-    File.open(file_path, 'rb') do |file|
-      while (buffer = file.read(part_size))
-        c2c32c_bin_checksums_for_parts << Digest::CRC32c.digest(buffer)
-        whole_object_digester&.update(buffer)
-      end
-    end
+    digest_file(file_path, part_size, c2c32c_bin_checksums_for_parts, whole_object_digester)
+
     checksum_of_checksums = Digest::CRC32c.new
     c2c32c_bin_checksums_for_parts.each { |checksum| checksum_of_checksums.update(checksum) }
     # NOTE: The values below can be used to create an Amazon-formatted multi-part upload checksum:
@@ -53,4 +49,16 @@ module Atc::Utils::AwsChecksumUtils
       num_parts: c2c32c_bin_checksums_for_parts.length
     }
   end
+
+  # rubocop:disable Performance/UnfreezeString
+  def self.digest_file(file_path, part_size, crc32c_accumulator, whole_object_digester)
+    File.open(file_path, 'rb') do |file|
+      buffer = String.new
+      while file.read(part_size, buffer).present?
+        crc32c_accumulator << Digest::CRC32c.digest(buffer)
+        whole_object_digester&.update(buffer)
+      end
+    end
+  end
+  # rubocop:enable Performance/UnfreezeString
 end
