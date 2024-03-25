@@ -107,11 +107,13 @@ class PerformTransferJob < ApplicationJob
   def original_path_metadata(first_proposed_path, attempted_stored_paths)
     return {} unless attempted_stored_paths.length > 1 || first_proposed_path != attempted_stored_paths.first
 
-    if first_proposed_path.bytesize < LONG_ORIGINAL_PATH_THRESHOLD
-      return { ORIGINAL_PATH_METADATA_KEY => Base64.strict_encode64(first_proposed_path) }
+    first_proposed_path_as_utf8 = first_proposed_path.encode(Encoding::UTF_8)
+
+    if first_proposed_path_as_utf8.bytesize < LONG_ORIGINAL_PATH_THRESHOLD
+      return { ORIGINAL_PATH_METADATA_KEY => Base64.strict_encode64(first_proposed_path_as_utf8) }
     end
 
-    gz = Zlib::Deflate.deflate(first_proposed_path)
+    gz = Zlib::Deflate.deflate(first_proposed_path_as_utf8)
     {
       ORIGINAL_PATH_COMPRESSED_METADATA_KEY => Base64.strict_encode64(gz)
     }
