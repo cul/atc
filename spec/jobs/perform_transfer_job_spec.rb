@@ -60,8 +60,10 @@ describe PerformTransferJob do
       end
 
       context 'when the original path was given in an unexpected encoding' do
-        let(:utf16_object_key) { '🎃a/🍕b/c  🎉.jpg'.encode(Encoding::UTF_16) }
-        let(:actual_metadata) { perform_transfer_job.original_path_metadata(utf16_object_key, [expected_remediated_key]) }
+        let(:utf16_object_key) { object_key.encode(Encoding::UTF_16) }
+        let(:actual_metadata) do
+          perform_transfer_job.original_path_metadata(utf16_object_key, [expected_remediated_key])
+        end
 
         it 'returns a value that can be converted to the original proposed key in UTF8' do
           expect(Base64.strict_decode64(actual_metadata_value).force_encoding(Encoding::UTF_8)).to eql(object_key)
