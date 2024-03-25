@@ -43,8 +43,39 @@ describe PerformTransferJob do
   describe '#original_path_metadata' do
     subject(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key, [object_key]) }
 
-    it 'returns a value that can be converted to the original proposed key' do
+    it 'returns an empty hash when no path change is indicated' do
       expect(actual_metadata).to be_empty
+    end
+
+    context 'when a key is encountered that needs remediation' do
+      subject(:actual_metadata_value) { actual_metadata[PerformTransferJob::ORIGINAL_PATH_METADATA_KEY] }
+
+      let(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key, [expected_remediated_key]) }
+      let(:b64_encoded_without_zlib) { object_key_as_base64 }
+      let(:expected_remediated_key) { '_a/_b/c___.jpg' }
+      let(:object_key) { '🎃a/🍕b/c  🎉.jpg' }
+
+      it 'returns a value that can be converted to the original proposed key' do
+        expect(Base64.strict_decode64(actual_metadata_value).force_encoding(Encoding::UTF_8)).to eql(object_key)
+      end
+    end
+
+    context 'when a key is very long' do
+      subject(:actual_metadata_value) { actual_metadata[PerformTransferJob::ORIGINAL_PATH_COMPRESSED_METADATA_KEY] }
+
+      let(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key, [expected_remediated_key]) }
+      let(:expected_original_path_metadata) do
+        Base64.strict_encode64(Zlib::Deflate.deflate(object_key.encode(Encoding::UTF_8)))
+      end
+      let(:expected_remediated_key) { "#{'_a/_b/' * path_multiples}c___.jpg" }
+      let(:object_key) { "#{'🎃a/🍕b/' * path_multiples}c  🎉.jpg" }
+      let(:path_multiples) { ((PerformTransferJob::LONG_ORIGINAL_PATH_THRESHOLD - 10) / 10).ceil }
+
+      it 'returns a value that can be converted to the original proposed key' do
+        gz = Base64.strict_decode64(actual_metadata_value)
+        inflated = Zlib::Inflate.inflate(gz)
+        expect(inflated.force_encoding(Encoding::UTF_8)).to eql(object_key)
+      end
     end
   end
 
@@ -89,17 +120,6 @@ describe PerformTransferJob do
       perform_transfer_job.perform(pending_transfer.id)
       expect(StoredObject.first.path).to eq(expected_remediated_key)
     end
-
-    describe '#original_path_metadata' do
-      subject(:actual_metadata_value) { actual_metadata[PerformTransferJob::ORIGINAL_PATH_METADATA_KEY] }
-
-      let(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key, [expected_remediated_key]) }
-      let(:b64_encoded_without_zlib) { object_key_as_base64 }
-
-      it 'returns a value that can be converted to the original proposed key' do
-        expect(Base64.strict_decode64(actual_metadata_value).force_encoding(Encoding::UTF_8)).to eql(object_key)
-      end
-    end
   end
 
   context 'when a key is very long' do
@@ -118,19 +138,6 @@ describe PerformTransferJob do
       )
       perform_transfer_job.perform(pending_transfer.id)
       expect(StoredObject.first.path).to eq(expected_remediated_key)
-    end
-
-    describe '#original_path_metadata' do
-      subject(:actual_metadata_value) { actual_metadata[PerformTransferJob::ORIGINAL_PATH_COMPRESSED_METADATA_KEY] }
-
-      let(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key, [expected_remediated_key]) }
-      let(:b64_encoded_without_zlib) { object_key_as_base64 }
-
-      it 'returns a value that can be converted to the original proposed key' do
-        gz = Base64.strict_decode64(actual_metadata_value)
-        inflated = Zlib::Inflate.inflate(gz)
-        expect(inflated.force_encoding(Encoding::UTF_8)).to eql(object_key)
-      end
     end
   end
 end
