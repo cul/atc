@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable RSpec/StubbedMock
+
 require 'rails_helper'
 
 describe Atc::Aws::S3Uploader do
@@ -146,6 +148,38 @@ describe Atc::Aws::S3Uploader do
         end
       end
     end
+
+    context 'tags and metadata' do
+      before do
+        allow(s3_object_file_upload_response).to receive(:checksum_crc32c).and_return('BSABmg==')
+      end
+
+      it 'supports the addition of tags' do
+        Tempfile.create('example-file-to-checksum') do |f|
+          f.write('A' * 10.megabytes)
+          f.flush
+          expect(s3_object).to receive(:upload_file).with(
+            String, hash_including(tagging: 'tag-key=tag-value')
+          ).and_yield(s3_object_file_upload_response)
+          expect(
+            s3_uploader.upload_file(f.path, bucket_name, :whole_file, tags: { 'tag-key' => 'tag-value' })
+          ).to eq(true)
+        end
+      end
+
+      it 'supports the addition of metadata' do
+        Tempfile.create('example-file-to-checksum') do |f|
+          f.write('A' * 10.megabytes)
+          f.flush
+          expect(s3_object).to receive(:upload_file).with(
+            String, hash_including(metadata: { 'metadata-key' => 'metadata-value' })
+          ).and_yield(s3_object_file_upload_response)
+          expect(
+            s3_uploader.upload_file(f.path, bucket_name, :whole_file, metadata: { 'metadata-key' => 'metadata-value' })
+          ).to eq(true)
+        end
+      end
+    end
   end
 
   describe '.tags_to_query_string' do
@@ -174,3 +208,5 @@ describe Atc::Aws::S3Uploader do
     end
   end
 end
+
+# rubocop:enable RSpec/StubbedMock

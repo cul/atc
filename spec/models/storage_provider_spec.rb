@@ -13,6 +13,26 @@ describe StorageProvider do
     end
   end
 
+  context 'AWS provider type' do
+    subject(:storage_provider) { FactoryBot.build(:storage_provider, :aws) }
+
+    describe '#storage_implemented?' do
+      it 'returns true' do
+        expect(storage_provider.storage_implemented?).to be true
+      end
+    end
+  end
+
+  context 'GCP provider type' do
+    subject(:storage_provider) { FactoryBot.build(:storage_provider, :gcp) }
+
+    describe '#storage_implemented?' do
+      it 'returns false' do
+        expect(storage_provider.storage_implemented?).to be false
+      end
+    end
+  end
+
   describe 'validations' do
     let(:new_storage_provider) { described_class.new }
 

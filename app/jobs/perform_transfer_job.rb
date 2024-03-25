@@ -3,11 +3,17 @@
 # rubocop:disable Metrics/MethodLength
 # rubocop:disable Metrics/AbcSize
 
-# We don't expect too many collisions, so we'll only retry a limited number of times.
-# This number can be increased later if needed.
-NUM_STORED_PATH_COLLISION_RETRIES = 2
-
 class PerformTransferJob < ApplicationJob
+  # We don't expect too many collisions, so we'll only retry a limited number of times.
+  # This number can be increased later if needed.
+  NUM_STORED_PATH_COLLISION_RETRIES = 2
+
+  # The length at which we will Zlib::Deflate the original path before encoding
+  LONG_ORIGINAL_PATH_THRESHOLD = 768
+
+  ORIGINAL_PATH_METADATA_KEY = 'original-path-b64'
+  ORIGINAL_PATH_COMPRESSED_METADATA_KEY = 'original-path-gz-b64'
+
   queue_as Atc::Queues::PERFORM_TRANSFER
 
   def perform(pending_transfer_id)
@@ -27,7 +33,7 @@ class PerformTransferJob < ApplicationJob
     end
 
     # TODO: Add support for gcp!
-    unless storage_provider.storage_type == 'aws'
+    unless storage_provider.storage_implemented?
       Rails.logger.warn "Skipping PendingTransfer #{pending_transfer.id} because its "\
                         "storage_provider.storage_type value (#{storage_provider.storage_type}) "\
                         'is not yet implemented.'
@@ -38,9 +44,11 @@ class PerformTransferJob < ApplicationJob
     # Our first attempt may not work if the storage provider
     previously_attempted_stored_paths = []
 
-    # This is the stored key we would ideally like to use,
+    # This is the stored path we would ideally like to use,
     # if no modifications are necessary for storage provider compatibility.
-    first_attempted_stored_key = storage_provider.local_path_to_stored_path(pending_transfer.source_object.path)
+    unremediated_first_attempt_stored_path = storage_provider.local_path_to_stored_path(
+      pending_transfer.source_object.path
+    )
 
     # Indicate that this transfer is in progress
     pending_transfer.update!(status: :in_progress)
@@ -51,21 +59,22 @@ class PerformTransferJob < ApplicationJob
       base_interval: 0, multiplier: 1, rand_factor: 0
     ) do
       previously_attempted_stored_paths << Atc::Utils::ObjectKeyNameUtils.remediate_key_name(
-        first_attempted_stored_key, previously_attempted_stored_paths
+        unremediated_first_attempt_stored_path, previously_attempted_stored_paths
       )
 
       # Immediately assign this path to the pending transfer because there's a unique index on path.
       # This will prevent any concurrent transfer process from attempting to claim the same path.
       pending_transfer.update!(stored_object_path: previously_attempted_stored_paths.last)
 
-      tags = {
-        "checksum-#{pending_transfer.source_object.fixity_checksum_algorithm.name.downcase}" =>
+      metadata = {
+        "checksum-#{pending_transfer.source_object.fixity_checksum_algorithm.name.downcase}-hex" =>
           Atc::Utils::HexUtils.bin_to_hex(pending_transfer.source_object.fixity_checksum_value)
       }
 
-      tags['original-path'] = previously_attempted_stored_paths.first if previously_attempted_stored_paths.length > 1
+      # Will as appropriate merge either original-path-b64 or original-path-gz-b64
+      metadata.merge!(original_path_metadata(unremediated_first_attempt_stored_path, previously_attempted_stored_paths))
 
-      storage_provider.perform_transfer(pending_transfer, previously_attempted_stored_paths.last, tags)
+      storage_provider.perform_transfer(pending_transfer, previously_attempted_stored_paths.last, metadata: metadata)
     end
 
     # If we got here, that means that the upload was successful.  We can convert this
@@ -93,5 +102,20 @@ class PerformTransferJob < ApplicationJob
 
     # And re-raise so that normal job error handling can continue
     raise e
+  end
+
+  def original_path_metadata(first_proposed_path, attempted_stored_paths)
+    return {} unless attempted_stored_paths.length > 1 || first_proposed_path != attempted_stored_paths.first
+
+    first_proposed_path_as_utf8 = first_proposed_path.encode(Encoding::UTF_8)
+
+    if first_proposed_path_as_utf8.bytesize < LONG_ORIGINAL_PATH_THRESHOLD
+      return { ORIGINAL_PATH_METADATA_KEY => Base64.strict_encode64(first_proposed_path_as_utf8) }
+    end
+
+    gz = Zlib::Deflate.deflate(first_proposed_path_as_utf8)
+    {
+      ORIGINAL_PATH_COMPRESSED_METADATA_KEY => Base64.strict_encode64(gz)
+    }
   end
 end
