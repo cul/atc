@@ -7,6 +7,7 @@ describe PerformTransferJob do
   let(:aws_storage_provider) { FactoryBot.create(:storage_provider, :aws) }
   let(:pending_transfer) { FactoryBot.create(:pending_transfer, storage_provider: aws_storage_provider) }
   let(:object_key) { 'safe/object/key.jpg' }
+  let(:object_key_as_base64) { Base64.strict_encode64(object_key) }
   let(:expected_metadata) do
     { 'checksum-sha256' => '31a961575a28515eb6645610a736b0465ef24f9105892e18808294afe70c00f6' }
   end
@@ -56,19 +57,20 @@ describe PerformTransferJob do
         metadata: expected_metadata
       ).and_raise(Atc::Exceptions::ObjectExists)
       # The second time that perform_transfer is called, we expect it to receive a renamed variation
-      # and an 'original-path' tag, and we'll raise an exception again to pretend there's another collision.
+      # and original-path-* metadata, and we'll raise an exception again to pretend there's
+      # another collision.
       allow(aws_storage_provider).to receive(:perform_transfer).with(
         pending_transfer, object_key.sub('.jpg', '_1.jpg'),
-        metadata: expected_metadata.merge({ 'original-path-b64' => Base64.strict_encode64(object_key.b) })
+        metadata: expected_metadata.merge({ 'original-path-b64' => object_key_as_base64 })
       ).and_raise(Atc::Exceptions::ObjectExists)
     end
 
-    it 'appends a numbered variation to the key, and adds an original-path tag' do
+    it 'appends a numbered variation to the key, and adds original-path-* metadata' do
       # The third time that perform_transfer is called, we expect it to receive a different
       # renamed variation and an 'original-path' tag, and we won't raise an exception.
       expect(aws_storage_provider).to receive(:perform_transfer).with(
         pending_transfer, object_key.sub('.jpg', '_2.jpg'),
-        metadata: expected_metadata.merge({ 'original-path-b64' => Base64.strict_encode64(object_key.b) })
+        metadata: expected_metadata.merge({ 'original-path-b64' => object_key_as_base64 })
       )
       perform_transfer_job.perform(pending_transfer.id)
       expect(StoredObject.first.path).to eq(object_key.sub('.jpg', '_2.jpg'))
@@ -82,7 +84,7 @@ describe PerformTransferJob do
     it 'is remediated automatically and the job completes without error' do
       expect(aws_storage_provider).to receive(:perform_transfer).with(
         pending_transfer, expected_remediated_key,
-        metadata: expected_metadata.merge({ 'original-path-b64' => Base64.strict_encode64(object_key.b) })
+        metadata: expected_metadata.merge({ 'original-path-b64' => object_key_as_base64 })
       )
       perform_transfer_job.perform(pending_transfer.id)
       expect(StoredObject.first.path).to eq(expected_remediated_key)
@@ -92,7 +94,7 @@ describe PerformTransferJob do
       subject(:actual_metadata_value) { actual_metadata[PerformTransferJob::ORIGINAL_PATH_METADATA_KEY] }
 
       let(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key, [expected_remediated_key]) }
-      let(:b64_encoded_without_zlib) { Base64.strict_encode64(object_key.b) }
+      let(:b64_encoded_without_zlib) { object_key_as_base64 }
 
       it 'returns a value that can be converted to the original proposed key' do
         expect(Base64.strict_decode64(actual_metadata_value).force_encoding(Encoding::UTF_8)).to eql(object_key)
@@ -122,13 +124,9 @@ describe PerformTransferJob do
       subject(:actual_metadata_value) { actual_metadata[PerformTransferJob::ORIGINAL_PATH_COMPRESSED_METADATA_KEY] }
 
       let(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key, [expected_remediated_key]) }
-      let(:b64_encoded_without_zlib) { Base64.strict_encode64(object_key.b) }
+      let(:b64_encoded_without_zlib) { object_key_as_base64 }
 
       it 'returns a value that can be converted to the original proposed key' do
-        if actual_metadata_value.length > b64_encoded_without_zlib.length
-          puts 'while this value is safe, the metadata value is larger than the b64-encoded original'
-          puts "#{actual_metadata_value.length} vs #{b64_encoded_without_zlib.length}"
-        end
         gz = Base64.strict_decode64(actual_metadata_value)
         inflated = Zlib::Inflate.inflate(gz)
         expect(inflated.force_encoding(Encoding::UTF_8)).to eql(object_key)
