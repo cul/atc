@@ -44,9 +44,11 @@ class PerformTransferJob < ApplicationJob
     # Our first attempt may not work if the storage provider
     previously_attempted_stored_paths = []
 
-    # This is the stored key we would ideally like to use,
+    # This is the stored path we would ideally like to use,
     # if no modifications are necessary for storage provider compatibility.
-    first_attempted_stored_key = storage_provider.local_path_to_stored_path(pending_transfer.source_object.path)
+    unremediated_first_attempt_stored_path = storage_provider.local_path_to_stored_path(
+      pending_transfer.source_object.path
+    )
 
     # Indicate that this transfer is in progress
     pending_transfer.update!(status: :in_progress)
@@ -57,7 +59,7 @@ class PerformTransferJob < ApplicationJob
       base_interval: 0, multiplier: 1, rand_factor: 0
     ) do
       previously_attempted_stored_paths << Atc::Utils::ObjectKeyNameUtils.remediate_key_name(
-        first_attempted_stored_key, previously_attempted_stored_paths
+        unremediated_first_attempt_stored_path, previously_attempted_stored_paths
       )
 
       # Immediately assign this path to the pending transfer because there's a unique index on path.
@@ -70,7 +72,7 @@ class PerformTransferJob < ApplicationJob
       }
 
       # Will as appropriate merge either original-path-b64 or original-path-gz-b64
-      metadata.merge!(original_path_metadata(first_attempted_stored_key, previously_attempted_stored_paths))
+      metadata.merge!(original_path_metadata(unremediated_first_attempt_stored_path, previously_attempted_stored_paths))
 
       storage_provider.perform_transfer(pending_transfer, previously_attempted_stored_paths.last, metadata: metadata)
     end
@@ -102,15 +104,16 @@ class PerformTransferJob < ApplicationJob
     raise e
   end
 
-  def original_path_metadata(first_proposed_key, attempted_stored_keys)
-    return {} unless attempted_stored_keys.length > 1 || first_proposed_key != attempted_stored_keys.first
+  def original_path_metadata(first_proposed_path, attempted_stored_paths)
+    return {} unless attempted_stored_paths.length > 1 || first_proposed_path != attempted_stored_paths.first
 
-    utf8_original_path_bytes = first_proposed_key.encode(Encoding::UTF_8).b
-    if utf8_original_path_bytes.length < LONG_ORIGINAL_PATH_THRESHOLD
-      return { ORIGINAL_PATH_METADATA_KEY => Base64.strict_encode64(utf8_original_path_bytes) }
+    first_proposed_path_as_utf8 = first_proposed_path.encode(Encoding::UTF_8)
+
+    if first_proposed_path_as_utf8.bytesize < LONG_ORIGINAL_PATH_THRESHOLD
+      return { ORIGINAL_PATH_METADATA_KEY => Base64.strict_encode64(first_proposed_path_as_utf8) }
     end
 
-    gz = Zlib::Deflate.deflate(utf8_original_path_bytes)
+    gz = Zlib::Deflate.deflate(first_proposed_path_as_utf8)
     {
       ORIGINAL_PATH_COMPRESSED_METADATA_KEY => Base64.strict_encode64(gz)
     }
