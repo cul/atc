@@ -39,7 +39,7 @@ namespace :atc do
         overwrite: overwrite,
         verbose: true,
         metadata: {
-          'checksum-sha256': sha256_hexdigest,
+          'checksum-sha256-hex': sha256_hexdigest,
           'original-path-b64' => Base64.strict_encode64(target_object_key)
         }
       )

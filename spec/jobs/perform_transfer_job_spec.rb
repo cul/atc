@@ -9,7 +9,7 @@ describe PerformTransferJob do
   let(:object_key) { 'safe/object/key.jpg' }
   let(:object_key_as_base64) { Base64.strict_encode64(object_key) }
   let(:expected_metadata) do
-    { 'checksum-sha256' => '31a961575a28515eb6645610a736b0465ef24f9105892e18808294afe70c00f6' }
+    { 'checksum-sha256-hex' => '31a961575a28515eb6645610a736b0465ef24f9105892e18808294afe70c00f6' }
   end
 
   before do

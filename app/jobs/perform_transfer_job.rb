@@ -67,7 +67,7 @@ class PerformTransferJob < ApplicationJob
       pending_transfer.update!(stored_object_path: previously_attempted_stored_paths.last)
 
       metadata = {
-        "checksum-#{pending_transfer.source_object.fixity_checksum_algorithm.name.downcase}" =>
+        "checksum-#{pending_transfer.source_object.fixity_checksum_algorithm.name.downcase}-hex" =>
           Atc::Utils::HexUtils.bin_to_hex(pending_transfer.source_object.fixity_checksum_value)
       }
 
