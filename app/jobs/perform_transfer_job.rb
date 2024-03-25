@@ -72,7 +72,7 @@ class PerformTransferJob < ApplicationJob
       }
 
       # Will as appropriate merge either original-path-b64 or original-path-gz-b64
-      metadata.merge!(original_path_metadata(unremediated_first_attempt_stored_path, previously_attempted_stored_paths))
+      metadata.merge!(original_path_metadata(unremediated_first_attempt_stored_path))
 
       storage_provider.perform_transfer(pending_transfer, previously_attempted_stored_paths.last, metadata: metadata)
     end
@@ -104,9 +104,7 @@ class PerformTransferJob < ApplicationJob
     raise e
   end
 
-  def original_path_metadata(first_proposed_path, attempted_stored_paths)
-    return {} unless attempted_stored_paths.length > 1 || first_proposed_path != attempted_stored_paths.first
-
+  def original_path_metadata(first_proposed_path)
     first_proposed_path_as_utf8 = first_proposed_path.encode(Encoding::UTF_8)
 
     if first_proposed_path_as_utf8.bytesize < LONG_ORIGINAL_PATH_THRESHOLD

@@ -6,10 +6,16 @@ describe PerformTransferJob do
   let(:perform_transfer_job) { described_class.new }
   let(:aws_storage_provider) { FactoryBot.create(:storage_provider, :aws) }
   let(:pending_transfer) { FactoryBot.create(:pending_transfer, storage_provider: aws_storage_provider) }
+  # this is the hexed checksum of the pending transfer fixture
+  let(:well_known_checksum) { '31a961575a28515eb6645610a736b0465ef24f9105892e18808294afe70c00f6' }
   let(:object_key) { 'safe/object/key.jpg' }
   let(:object_key_as_base64) { Base64.strict_encode64(object_key) }
+  let(:metadata_key) { PerformTransferJob::ORIGINAL_PATH_METADATA_KEY }
   let(:expected_metadata) do
-    { 'checksum-sha256-hex' => '31a961575a28515eb6645610a736b0465ef24f9105892e18808294afe70c00f6' }
+    {
+      'checksum-sha256-hex' => well_known_checksum,
+      metadata_key => object_key_as_base64
+    }
   end
 
   before do
@@ -41,18 +47,17 @@ describe PerformTransferJob do
   end
 
   describe '#original_path_metadata' do
-    subject(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key, [object_key]) }
+    subject(:actual_metadata_value) { actual_metadata[metadata_key] }
 
-    it 'returns an empty hash when no path change is indicated' do
-      expect(actual_metadata).to be_empty
+    let(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key) }
+
+    it 'returns a value that can be converted to the original proposed key' do
+      expect(Base64.strict_decode64(actual_metadata_value).force_encoding(Encoding::UTF_8)).to eql(object_key)
     end
 
     context 'when a key is encountered that needs remediation' do
-      subject(:actual_metadata_value) { actual_metadata[PerformTransferJob::ORIGINAL_PATH_METADATA_KEY] }
-
-      let(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key, [expected_remediated_key]) }
+      let(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key) }
       let(:b64_encoded_without_zlib) { object_key_as_base64 }
-      let(:expected_remediated_key) { '_a/_b/c___.jpg' }
       let(:object_key) { '🎃a/🍕b/c  🎉.jpg' }
 
       it 'returns a value that can be converted to the original proposed key' do
@@ -60,10 +65,10 @@ describe PerformTransferJob do
       end
 
       context 'when the original path was given in an unexpected encoding' do
-        let(:utf16_object_key) { object_key.encode(Encoding::UTF_16) }
         let(:actual_metadata) do
-          perform_transfer_job.original_path_metadata(utf16_object_key, [expected_remediated_key])
+          perform_transfer_job.original_path_metadata(utf16_object_key)
         end
+        let(:utf16_object_key) { object_key.encode(Encoding::UTF_16) }
 
         it 'returns a value that can be converted to the original proposed key in UTF8' do
           expect(Base64.strict_decode64(actual_metadata_value).force_encoding(Encoding::UTF_8)).to eql(object_key)
@@ -72,13 +77,11 @@ describe PerformTransferJob do
     end
 
     context 'when a key is very long' do
-      subject(:actual_metadata_value) { actual_metadata[PerformTransferJob::ORIGINAL_PATH_COMPRESSED_METADATA_KEY] }
-
-      let(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key, [expected_remediated_key]) }
+      let(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key) }
       let(:expected_original_path_metadata) do
         Base64.strict_encode64(Zlib::Deflate.deflate(object_key.encode(Encoding::UTF_8)))
       end
-      let(:expected_remediated_key) { "#{'_a/_b/' * path_multiples}c___.jpg" }
+      let(:metadata_key) { PerformTransferJob::ORIGINAL_PATH_COMPRESSED_METADATA_KEY }
       let(:object_key) { "#{'🎃a/🍕b/' * path_multiples}c  🎉.jpg" }
       let(:path_multiples) { ((PerformTransferJob::LONG_ORIGINAL_PATH_THRESHOLD - 10) / 10).ceil }
 
@@ -103,7 +106,7 @@ describe PerformTransferJob do
       # another collision.
       allow(aws_storage_provider).to receive(:perform_transfer).with(
         pending_transfer, object_key.sub('.jpg', '_1.jpg'),
-        metadata: expected_metadata.merge({ 'original-path-b64' => object_key_as_base64 })
+        metadata: expected_metadata
       ).and_raise(Atc::Exceptions::ObjectExists)
     end
 
@@ -112,7 +115,7 @@ describe PerformTransferJob do
       # renamed variation and an 'original-path' tag, and we won't raise an exception.
       expect(aws_storage_provider).to receive(:perform_transfer).with(
         pending_transfer, object_key.sub('.jpg', '_2.jpg'),
-        metadata: expected_metadata.merge({ 'original-path-b64' => object_key_as_base64 })
+        metadata: expected_metadata
       )
       perform_transfer_job.perform(pending_transfer.id)
       expect(StoredObject.first.path).to eq(object_key.sub('.jpg', '_2.jpg'))
@@ -126,7 +129,7 @@ describe PerformTransferJob do
     it 'is remediated automatically and the job completes without error' do
       expect(aws_storage_provider).to receive(:perform_transfer).with(
         pending_transfer, expected_remediated_key,
-        metadata: expected_metadata.merge({ 'original-path-b64' => object_key_as_base64 })
+        metadata: expected_metadata
       )
       perform_transfer_job.perform(pending_transfer.id)
       expect(StoredObject.first.path).to eq(expected_remediated_key)
@@ -138,14 +141,17 @@ describe PerformTransferJob do
     let(:object_key) { "#{'🎃a/🍕b/' * path_multiples}c  🎉.jpg" }
     let(:expected_remediated_key) { "#{'_a/_b/' * path_multiples}c___.jpg" }
     let(:expected_original_path_metadata) do
-      utf8_bytes = object_key.encode(Encoding::UTF_8).b
-      Base64.strict_encode64(Zlib::Deflate.deflate(utf8_bytes))
+      {
+        'checksum-sha256-hex' => well_known_checksum,
+        metadata_key => Base64.strict_encode64(Zlib::Deflate.deflate(object_key))
+      }
     end
+    let(:metadata_key) { PerformTransferJob::ORIGINAL_PATH_COMPRESSED_METADATA_KEY }
 
     it 'is remediated automatically and the job completes without error' do
       expect(aws_storage_provider).to receive(:perform_transfer).with(
         pending_transfer, expected_remediated_key,
-        metadata: expected_metadata.merge({ 'original-path-gz-b64' => expected_original_path_metadata })
+        metadata: expected_original_path_metadata
       )
       perform_transfer_job.perform(pending_transfer.id)
       expect(StoredObject.first.path).to eq(expected_remediated_key)
