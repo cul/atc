@@ -10,11 +10,11 @@ describe PerformTransferJob do
   let(:well_known_checksum) { '31a961575a28515eb6645610a736b0465ef24f9105892e18808294afe70c00f6' }
   let(:object_key) { 'safe/object/key.jpg' }
   let(:object_key_as_base64) { Base64.strict_encode64(object_key) }
-  let(:metadata_key) { PerformTransferJob::ORIGINAL_PATH_METADATA_KEY }
+  let(:original_path_metadata_key) { PerformTransferJob::ORIGINAL_PATH_METADATA_KEY }
   let(:expected_metadata) do
     {
       'checksum-sha256-hex' => well_known_checksum,
-      metadata_key => object_key_as_base64
+      original_path_metadata_key => object_key_as_base64
     }
   end
 
@@ -47,7 +47,7 @@ describe PerformTransferJob do
   end
 
   describe '#original_path_metadata' do
-    subject(:actual_metadata_value) { actual_metadata[metadata_key] }
+    subject(:actual_metadata_value) { actual_metadata[original_path_metadata_key] }
 
     let(:actual_metadata) { perform_transfer_job.original_path_metadata(object_key) }
 
@@ -81,7 +81,7 @@ describe PerformTransferJob do
       let(:expected_original_path_metadata) do
         Base64.strict_encode64(Zlib::Deflate.deflate(object_key.encode(Encoding::UTF_8)))
       end
-      let(:metadata_key) { PerformTransferJob::ORIGINAL_PATH_COMPRESSED_METADATA_KEY }
+      let(:original_path_metadata_key) { PerformTransferJob::ORIGINAL_PATH_COMPRESSED_METADATA_KEY }
       let(:object_key) { "#{'🎃a/🍕b/' * path_multiples}c  🎉.jpg" }
       let(:path_multiples) { ((PerformTransferJob::LONG_ORIGINAL_PATH_THRESHOLD - 10) / 10).ceil }
 
@@ -143,10 +143,10 @@ describe PerformTransferJob do
     let(:expected_original_path_metadata) do
       {
         'checksum-sha256-hex' => well_known_checksum,
-        metadata_key => Base64.strict_encode64(Zlib::Deflate.deflate(object_key))
+        original_path_metadata_key => Base64.strict_encode64(Zlib::Deflate.deflate(object_key))
       }
     end
-    let(:metadata_key) { PerformTransferJob::ORIGINAL_PATH_COMPRESSED_METADATA_KEY }
+    let(:original_path_metadata_key) { PerformTransferJob::ORIGINAL_PATH_COMPRESSED_METADATA_KEY }
 
     it 'is remediated automatically and the job completes without error' do
       expect(aws_storage_provider).to receive(:perform_transfer).with(
