@@ -149,7 +149,7 @@ describe Atc::Aws::S3Uploader do
       end
     end
 
-    context 'tags and metadata' do
+    context 'tags, metadata, and content type' do
       before do
         allow(s3_object_file_upload_response).to receive(:checksum_crc32c).and_return('BSABmg==')
       end
@@ -176,6 +176,19 @@ describe Atc::Aws::S3Uploader do
           ).and_yield(s3_object_file_upload_response)
           expect(
             s3_uploader.upload_file(f.path, bucket_name, :whole_file, metadata: { 'metadata-key' => 'metadata-value' })
+          ).to eq(true)
+        end
+      end
+
+      it 'sets the content type of the file, based on its extension' do
+        Tempfile.create(['example-file-to-checksum', '.tiff']) do |f|
+          f.write('A' * 10.megabytes)
+          f.flush
+          expect(s3_object).to receive(:upload_file).with(
+            String, hash_including(content_type: 'image/tiff')
+          ).and_yield(s3_object_file_upload_response)
+          expect(
+            s3_uploader.upload_file(f.path, bucket_name, :whole_file)
           ).to eq(true)
         end
       end

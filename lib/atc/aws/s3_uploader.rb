@@ -63,7 +63,9 @@ class Atc::Aws::S3Uploader
     puts 'Performing upload...' if verbose
     s3_object.upload_file(
       local_file_path,
-      s3_object_upload_opts(multipart_threshold, tags: options[:tags], metadata: options[:metadata], verbose: verbose)
+      s3_object_upload_opts(
+        local_file_path, multipart_threshold, tags: options[:tags], metadata: options[:metadata], verbose: verbose
+      )
     ) do |resp|
       verify_aws_response_checksum!(resp.checksum_crc32c, precalculated_aws_crc32c)
     end
@@ -131,7 +133,7 @@ class Atc::Aws::S3Uploader
     end
   end
 
-  def s3_object_upload_opts(multipart_threshold, tags: nil, metadata: nil, verbose: false)
+  def s3_object_upload_opts(local_file_path, multipart_threshold, tags: nil, metadata: nil, verbose: false)
     opts = {
       # NOTE: Supplying a checksum_algorithm option with value 'CRC32C' will make the AWS SDK
       # automatically calculate a local CRC32C checksums before sending the file to S3 (for both
@@ -139,7 +141,8 @@ class Atc::Aws::S3Uploader
       # calculated by S3 does not match.
       checksum_algorithm: 'CRC32C',
       multipart_threshold: multipart_threshold,
-      thread_count: 10 # The number of parallel multipart uploads
+      thread_count: 10, # The number of parallel multipart uploads
+      content_type: BestType.mime_type.for_file_name(local_file_path)
     }
 
     opts[:progress_callback] = PROGRESS_DISPLAY_PROC if verbose
