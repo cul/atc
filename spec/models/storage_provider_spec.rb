@@ -16,9 +16,39 @@ describe StorageProvider do
   context 'AWS provider type' do
     subject(:storage_provider) { FactoryBot.build(:storage_provider, :aws) }
 
+    let(:pending_transfer) { FactoryBot.build(:pending_transfer, :aws) }
+    let(:s3_client) { Aws::S3::Client.new(stub_responses: true) }
+    let(:bucket_name) { 'example_bucket' }
+    let(:s3_uploader) do
+      Atc::Aws::S3Uploader.new(s3_client, bucket_name)
+    end
+    let(:s3_object_key) { 'some/key.txt' }
+
     describe '#storage_implemented?' do
       it 'returns true' do
         expect(storage_provider.storage_implemented?).to be true
+      end
+    end
+
+    describe '#store_aws' do
+      before do
+        allow(storage_provider).to receive(:s3_uploader).and_return(s3_uploader)
+      end
+
+      let(:expected_metadata) { { 'a' => 'b' } }
+      let(:expected_tags) { { 'c' => 'd' } }
+
+      it 'performs as expected' do
+        expect(s3_uploader).to receive(:upload_file).with(
+          pending_transfer.source_object.path,
+          s3_object_key,
+          :whole_file,
+          overwrite: false,
+          metadata: expected_metadata,
+          tags: expected_tags,
+          precalculated_aws_crc32c: 'm6nHZg=='
+        )
+        storage_provider.store_aws(pending_transfer, s3_object_key, metadata: expected_metadata, tags: expected_tags)
       end
     end
   end

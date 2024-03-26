@@ -21,14 +21,17 @@ class StorageProvider < ApplicationRecord
   end
 
   def store_aws(pending_transfer, stored_object_key, metadata:, tags: {})
-    s3_uploader = Atc::Aws::S3Uploader.new(S3_CLIENT, self.container_name)
     s3_uploader.upload_file(
       pending_transfer.source_object.path,
       stored_object_key,
       pending_transfer.transfer_checksum_part_size.nil? ? :whole_file : :multipart,
-      **aws_upload_file_opts(pending_transfer, metadata: metadata, tags: tags)
+      **upload_file_opts(pending_transfer, metadata: metadata, tags: tags)
     )
     true
+  end
+
+  def s3_uploader
+    @s3_uploader ||= Atc::Aws::S3Uploader.new(S3_CLIENT, self.container_name)
   end
 
   # rubocop:disable Lint/UnusedMethodArgument

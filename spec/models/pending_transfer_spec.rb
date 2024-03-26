@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 describe PendingTransfer do
-  subject(:pending_transfer) { FactoryBot.build(:pending_transfer) }
+  subject(:pending_transfer) { FactoryBot.build(:pending_transfer, :aws) }
 
   describe 'with valid fields' do
     it 'saves without error' do
@@ -37,13 +37,14 @@ describe PendingTransfer do
     let(:pending_transfer_with_zero_byte_size_and_empty_binary_value_checksum) do
       obj = FactoryBot.build(
         :pending_transfer,
+        :aws,
         source_object: FactoryBot.create(:source_object, :with_zero_byte_object_size, :with_checksum)
       )
       obj.transfer_checksum_value = obj.transfer_checksum_algorithm.empty_binary_value
       obj
     end
     let(:pending_transfer_with_positive_byte_size_and_empty_binary_value_checksum) do
-      obj = FactoryBot.build(:pending_transfer)
+      obj = FactoryBot.build(:pending_transfer, :aws)
       obj.transfer_checksum_value = obj.transfer_checksum_algorithm.empty_binary_value
       obj
     end
@@ -70,6 +71,7 @@ describe PendingTransfer do
     it 'can store a crc32c checksum value in transfer_checksum_value' do
       pending_transfer = FactoryBot.build(
         :pending_transfer,
+        :aws,
         transfer_checksum_algorithm: crc32c_checksum_algorithm,
         transfer_checksum_value: crc32c_content_checksum
       )
