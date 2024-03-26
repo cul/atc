@@ -50,8 +50,9 @@ class PerformTransferJob < ApplicationJob
       pending_transfer.source_object.path
     )
 
-    # Indicate that this transfer is in progress
-    pending_transfer.update!(status: :in_progress)
+    # Indicate that this transfer is in progress, and clear any previously set
+    # error_message (in case this job is being re-processed).
+    pending_transfer.update!(status: :in_progress, error_message: nil)
 
     Retriable.retriable(
       on: [ActiveRecord::RecordNotUnique, Atc::Exceptions::ObjectExists],
