@@ -4,7 +4,23 @@ default: &default
 development:
   <<: *default
   preservation_bucket_name: 'example-dev-bucket'
+  local_path_key_map:
+    '/digital/preservation/': ''
 
 test:
   <<: *default
   preservation_bucket_name: 'example-test-bucket'
+  local_path_key_map:
+    '/digital/preservation/': ''
+  mock_credentials: true
+  credentials:
+    type: "service_account",
+    project_id: "cul-atc-test",
+    private_key_id: "cul-atc-test-key-id",
+    private_key: "fill-me-in",
+    client_email: "atc@service-accounts.org",
+    client_id: "cul-atc-test-client-id",
+    auth_uri: "https://accounts.google.com/o/oauth2/auth",
+    token_uri: "https://accounts.google.com/o/oauth2/token",
+    auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+    client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/atc@service-accounts.org"
