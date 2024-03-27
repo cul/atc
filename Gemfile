@@ -10,10 +10,14 @@ gem 'aws-sdk-s3', '~> 1'
 #  branch: 's3_allow_custom_multipart_part_size_during_object_upload', glob: 'gems/aws-sdk-s3/*.gemspec'
 # Additional gem enabling the AWS SDK to calculate CRC32C checksums
 gem 'aws-crt', '~> 0.2.0'
+# For file type determination
+gem 'best_type', '~> 1.0'
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', require: false
 # Add CRC32C support to the Ruby Digest module
 gem 'digest-crc', '~> 0.6.5'
+# Google Cloud Storage SDK
+gem 'google-cloud-storage', '~> 1.49'
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
 gem 'importmap-rails'
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
