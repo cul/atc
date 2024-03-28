@@ -16,6 +16,8 @@ gem 'best_type', '~> 1.0'
 gem 'bootsnap', require: false
 # Add CRC32C support to the Ruby Digest module
 gem 'digest-crc', '~> 0.6.5'
+# Google Cloud Storage SDK
+gem 'google-cloud-storage', '~> 1.49'
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
 gem 'importmap-rails'
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]

@@ -109,7 +109,7 @@ class Atc::Aws::S3Uploader
   end
 
   def calculate_aws_crc32c(local_file_path, multipart_threshold, verbose)
-    puts 'Calculating precalculated_aws_crc32c because one was not provided...' if verbose
+    puts 'Calculating crc32c because one was not provided...' if verbose
     checksum = Atc::Utils::AwsChecksumUtils.checksum_string_for_file(local_file_path, multipart_threshold)
     puts "Done calculating local crc32c checksum (#{checksum})." if verbose
     checksum

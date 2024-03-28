@@ -42,7 +42,7 @@ describe Atc::Aws::S3Uploader do
         Tempfile.create('example-file-to-checksum') do |f|
           f.write('A' * 10.megabytes)
           f.flush
-          expect(s3_uploader.upload_file(f.path, bucket_name, :whole_file)).to eq(true)
+          expect(s3_uploader.upload_file(f.path, object_key, :whole_file)).to eq(true)
         end
       end
     end
@@ -56,7 +56,7 @@ describe Atc::Aws::S3Uploader do
         Tempfile.create('example-file-to-checksum') do |f|
           f.write('A' * 10.megabytes)
           f.flush
-          expect(s3_uploader.upload_file(f.path, bucket_name, :multipart)).to eq(true)
+          expect(s3_uploader.upload_file(f.path, object_key, :multipart)).to eq(true)
         end
       end
     end
@@ -68,7 +68,7 @@ describe Atc::Aws::S3Uploader do
         Tempfile.create('example-file-to-checksum') do |f|
           f.write('A' * Atc::Constants::DEFAULT_MULTIPART_THRESHOLD)
           f.flush
-          expect(s3_uploader.upload_file(f.path, bucket_name, :auto)).to eq(true)
+          expect(s3_uploader.upload_file(f.path, object_key, :auto)).to eq(true)
         end
       end
 
@@ -78,7 +78,7 @@ describe Atc::Aws::S3Uploader do
         Tempfile.create('example-file-to-checksum') do |f|
           f.write('A' * (Atc::Constants::DEFAULT_MULTIPART_THRESHOLD - 1))
           f.flush
-          expect(s3_uploader.upload_file(f.path, bucket_name, :auto)).to eq(true)
+          expect(s3_uploader.upload_file(f.path, object_key, :auto)).to eq(true)
         end
       end
     end
@@ -93,7 +93,7 @@ describe Atc::Aws::S3Uploader do
           f.write('A')
           f.flush
           expect(s3_uploader).not_to receive(:calculate_aws_crc32c)
-          s3_uploader.upload_file(f.path, bucket_name, :whole_file, precalculated_aws_crc32c: '4W3N7g==')
+          s3_uploader.upload_file(f.path, object_key, :whole_file, precalculated_aws_crc32c: '4W3N7g==')
         end
       end
 
@@ -102,7 +102,7 @@ describe Atc::Aws::S3Uploader do
           f.write('A')
           f.flush
           expect {
-            s3_uploader.upload_file(f.path, bucket_name, :whole_file, precalculated_aws_crc32c: 'bad+checksum')
+            s3_uploader.upload_file(f.path, object_key, :whole_file, precalculated_aws_crc32c: 'bad+checksum')
           }.to raise_error(Atc::Exceptions::TransferError)
         end
       end
@@ -114,7 +114,7 @@ describe Atc::Aws::S3Uploader do
           expect(
             Atc::Utils::AwsChecksumUtils
           ).to receive(:checksum_string_for_file).with(f.path, Integer).and_call_original
-          s3_uploader.upload_file(f.path, bucket_name, :whole_file)
+          s3_uploader.upload_file(f.path, object_key, :whole_file)
         end
       end
     end
@@ -126,13 +126,13 @@ describe Atc::Aws::S3Uploader do
 
       let(:s3_object_exists) { true }
 
-      it 'raises an exception if the `overwrite: true` option was not provided ' do
+      it 'raises an exception if the `overwrite: true` option was not provided' do
         Tempfile.create('example-file-to-checksum') do |f|
           f.write('A')
           f.flush
           expect(s3_object).not_to receive(:upload_file)
           expect {
-            s3_uploader.upload_file(f.path, bucket_name, :whole_file)
+            s3_uploader.upload_file(f.path, object_key, :whole_file)
           }.to raise_error(Atc::Exceptions::ObjectExists)
         end
       end
@@ -143,7 +143,7 @@ describe Atc::Aws::S3Uploader do
           f.flush
           expect(s3_object).to receive(:upload_file)
           expect {
-            s3_uploader.upload_file(f.path, bucket_name, :whole_file, overwrite: true)
+            s3_uploader.upload_file(f.path, object_key, :whole_file, overwrite: true)
           }.not_to raise_error
         end
       end
@@ -162,7 +162,7 @@ describe Atc::Aws::S3Uploader do
             String, hash_including(tagging: 'tag-key=tag-value')
           ).and_yield(s3_object_file_upload_response)
           expect(
-            s3_uploader.upload_file(f.path, bucket_name, :whole_file, tags: { 'tag-key' => 'tag-value' })
+            s3_uploader.upload_file(f.path, object_key, :whole_file, tags: { 'tag-key' => 'tag-value' })
           ).to eq(true)
         end
       end
@@ -175,7 +175,7 @@ describe Atc::Aws::S3Uploader do
             String, hash_including(metadata: { 'metadata-key' => 'metadata-value' })
           ).and_yield(s3_object_file_upload_response)
           expect(
-            s3_uploader.upload_file(f.path, bucket_name, :whole_file, metadata: { 'metadata-key' => 'metadata-value' })
+            s3_uploader.upload_file(f.path, object_key, :whole_file, metadata: { 'metadata-key' => 'metadata-value' })
           ).to eq(true)
         end
       end
