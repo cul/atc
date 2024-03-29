@@ -11,7 +11,7 @@ FactoryBot.define do
     end
 
     trait :gcp do
-      storage_provider { association :storage_provider, :aws }
+      storage_provider { association :storage_provider, :gcp }
     end
 
     trait :with_part_size do

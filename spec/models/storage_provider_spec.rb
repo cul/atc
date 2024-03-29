@@ -31,7 +31,7 @@ describe StorageProvider do
       end
     end
 
-    describe '#store_aws' do
+    describe '#perform_transfer' do
       before do
         allow(storage_provider).to receive(:aws_s3_uploader).and_return(aws_s3_uploader)
       end
@@ -44,12 +44,13 @@ describe StorageProvider do
           pending_transfer.source_object.path,
           object_key,
           :whole_file,
-          overwrite: false,
-          metadata: expected_metadata,
-          tags: expected_tags,
-          precalculated_aws_crc32c: 'm6nHZg=='
+          overwrite: false, metadata: expected_metadata,
+          tags: expected_tags, precalculated_aws_crc32c: 'm6nHZg=='
         )
-        storage_provider.store_aws(pending_transfer, object_key, metadata: expected_metadata, tags: expected_tags)
+        storage_provider.perform_transfer(
+          pending_transfer, object_key,
+          metadata: expected_metadata, tags: expected_tags
+        )
       end
     end
   end
@@ -72,12 +73,13 @@ describe StorageProvider do
       end
     end
 
-    describe '#store_gcp' do
+    describe '#perform_transfer' do
       before do
         allow(storage_provider).to receive(:gcp_storage_uploader).and_return(gcp_storage_uploader)
       end
 
       let(:expected_metadata) { { 'a' => 'b' } }
+      let(:expected_tags) { { 'c' => 'd' } }
 
       it 'performs as expected' do
         expect(gcp_storage_uploader).to receive(:upload_file).with(
@@ -87,7 +89,10 @@ describe StorageProvider do
           metadata: expected_metadata,
           precalculated_whole_file_crc32c: 'm6nHZg=='
         )
-        storage_provider.store_gcp(pending_transfer, object_key, metadata: expected_metadata)
+        storage_provider.perform_transfer(
+          pending_transfer, object_key,
+          metadata: expected_metadata, tags: expected_tags
+        )
       end
     end
   end
