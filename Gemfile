@@ -35,6 +35,11 @@ gem 'turbo-rails'
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: %i[windows jruby]
 
+# Use devise and omniauth for authentication
+gem 'devise'
+gem 'omniauth'
+gem 'omniauth-cul', '~> 0.2.0'
+
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
 
