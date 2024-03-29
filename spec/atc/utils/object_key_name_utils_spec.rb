@@ -3,6 +3,30 @@
 require 'rails_helper'
 
 describe Atc::Utils::ObjectKeyNameUtils do
+  let(:sample_valid_path_key_names) do
+    [
+      'file.txt',
+      'top_dir/sub_dir/file',
+      'top-dir/sub-dir/a-file.txt',
+      'top_dir/sub_dir/.hidden_file',
+      'top_dir/sub_dir/.hidden_file.txt',
+      'top_dir/sub_dir/file.txt',
+      'top_dir/sub.dir/file.txt',
+      '.top_dir/sub_dir/file',
+      'top_dir/./file',
+      'top_dir/../file',
+      'top_dir/.../file',
+      'top_dir/sub_dir/file.txt.txt',
+      'top_dir/sub_dir/.ext.txt.txt',
+      '.a.b.c./.a.b.c',
+      'top_dir/sub_dir/(file)',
+      '())(top_dir())(/()sub_dir)(/())(file())(',
+      '.a.b.c./.a.b.c./.a.b.c',
+      '(a)bc/a(b)c/ab(c)',
+      '_a_b_c_/_a_b_c_/_a_b_c_'
+    ]
+  end
+
   describe '.valid_key_name?' do
     let(:sample_invalid_path_key_names) do
       [
@@ -13,7 +37,6 @@ describe Atc::Utils::ObjectKeyNameUtils do
         './',
         '../',
         '/top_dir/sub_dir/file',
-        'top_dir/sub_dir/(file)',
         'top_dir/sub_dir/file ',
         'top_dir/sub_dir/ file',
         'top_dîr/sub_dir/file',
@@ -26,24 +49,6 @@ describe Atc::Utils::ObjectKeyNameUtils do
         'top_dir/sub_dir/...',
         'top_dir/我能/我能.我能.我能',
         '.a.b.c./.a.b.c.'
-      ]
-    end
-    let(:sample_valid_path_key_names) do
-      [
-        'file.txt',
-        'top_dir/sub_dir/file',
-        'top-dir/sub-dir/a-file.txt',
-        'top_dir/sub_dir/.hidden_file',
-        'top_dir/sub_dir/.hidden_file.txt',
-        'top_dir/sub_dir/file.txt',
-        'top_dir/sub.dir/file.txt',
-        '.top_dir/sub_dir/file',
-        'top_dir/./file',
-        'top_dir/../file',
-        'top_dir/.../file',
-        'top_dir/sub_dir/file.txt.txt',
-        'top_dir/sub_dir/.ext.txt.txt',
-        '.a.b.c./.a.b.c'
       ]
     end
 
@@ -63,10 +68,7 @@ describe Atc::Utils::ObjectKeyNameUtils do
   describe '.remediate_key_name' do
     let(:sample_remediated_path_key_names) do
       [
-        ['.a.b.c./.a.b.c./.a.b.c', '.a.b.c./.a.b.c./.a.b.c'],
         ['.a.b.c./.a.b.c./.a.b.c.', '.a.b.c./.a.b.c./.a.b.c_'],
-        ['(a)bc/a(b)c/ab(c)', '_a_bc/a_b_c/ab_c_'],
-        ['_a_b_c_/_a_b_c_/_a_b_c_', '_a_b_c_/_a_b_c_/_a_b_c_'],
         [' a b c / a b c / a b c ', '_a_b_c_/_a_b_c_/_a_b_c_'],
         [' a b c/ a b c/ a b c', '_a_b_c/_a_b_c/_a_b_c'],
         ['aîc/aîc/aîc.îii', 'aic/aic/aic.iii'],
@@ -99,9 +101,15 @@ describe Atc::Utils::ObjectKeyNameUtils do
     it 'remediates path key names as expected' do
       sample_remediated_path_key_names.each do |path|
         remediated_key = described_class.remediate_key_name(path[0])
-        expect(described_class.remediate_key_name(remediated_key)).to (eql path[1]), lambda {
+        expect(remediated_key).to (eql path[1]), lambda {
           "original '#{path[0]}', expected '#{path[1]}', actual '#{remediated_key}'"
         }
+      end
+    end
+
+    it 'returns original path key name path if no remediation needed' do
+      sample_valid_path_key_names.each do |path|
+        expect(described_class.remediate_key_name(path)).to eql path
       end
     end
 

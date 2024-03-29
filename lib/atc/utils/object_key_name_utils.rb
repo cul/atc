@@ -10,6 +10,8 @@ module Atc::Utils::ObjectKeyNameUtils
   # So fcd1 decided to call this module ObjectKeyNameUtils to try and cover both naming
   # conventions. However, it's just a name and fcd1 is cool if module is renamed
 
+  DISALLOWED_ASCII_REGEX = '[^-a-zA-Z0-9_.()]'
+
   def self.valid_key_name?(path_filename)
     return false if ['', '.', '..', '/'].include? path_filename
 
@@ -21,18 +23,22 @@ module Atc::Utils::ObjectKeyNameUtils
     path_to_file, filename = pathname.split
 
     # validate filename
-    return false if filename.to_s.end_with?('.') || /[^-a-zA-Z0-9_.]/.match?(filename.to_s)
+    return false if filename.to_s.end_with?('.') || /#{DISALLOWED_ASCII_REGEX}/.match?(filename.to_s)
     # if the valid filename is at the top level, return true
     return true if pathname == pathname.basename
 
     # check each component in the path to the file
     path_to_file.each_filename do |path_segment|
-      return false if /[^-a-zA-Z0-9_.]/.match? path_segment
+      return false if /#{DISALLOWED_ASCII_REGEX}/.match? path_segment
     end
     true
   end
 
   def self.remediate_key_name(filepath_key_name, unavailable_key_names = [])
+    if unavailable_key_names.exclude?(filepath_key_name) && self.valid_key_name?(filepath_key_name)
+      return filepath_key_name
+    end
+
     self.argument_check(filepath_key_name)
 
     pathname = Pathname.new(filepath_key_name)
@@ -41,7 +47,7 @@ module Atc::Utils::ObjectKeyNameUtils
     path_to_file, filename = pathname.split
 
     filename_valid_ascii =
-      Stringex::Unidecoder.decode(filename.to_s).gsub(/[^-a-zA-Z0-9_.]/, '_').gsub(/\.$/, '_')
+      Stringex::Unidecoder.decode(filename.to_s).gsub(/#{DISALLOWED_ASCII_REGEX}/, '_').gsub(/\.$/, '_')
 
     remediated_key_name = self.remediate_path(path_to_file, remediated_pathname).join(filename_valid_ascii).to_s
 
@@ -60,7 +66,7 @@ module Atc::Utils::ObjectKeyNameUtils
   def self.remediate_path(path_to_file, remediated_pathname)
     # remediate each component in the path to the file
     path_to_file.each_filename do |path_segment|
-      remediated_path_segment = Stringex::Unidecoder.decode(path_segment).gsub(/[^-a-zA-Z0-9_.]/, '_')
+      remediated_path_segment = Stringex::Unidecoder.decode(path_segment).gsub(/#{DISALLOWED_ASCII_REGEX}/, '_')
       remediated_pathname += remediated_path_segment
     end
     remediated_pathname
