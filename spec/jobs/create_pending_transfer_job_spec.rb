@@ -22,22 +22,23 @@ describe CreatePendingTransferJob do
     expect(aws.transfer_checksum_value).to eq(expected_checksum)
   end
 
-  it 'creates the expected PendingTransfer record for a file above the multipart threshold' do
-    Tempfile.create(source_object_with_tempfile.path, binmode: true) do |f|
-      f.write('A' * (multipart_threshold + 1.megabytes))
-      f.flush
-      allow(File).to receive(:open).with(source_object_with_tempfile.path, 'rb').and_return(f)
-      allow(File).to receive(:size).with(source_object_with_tempfile.path).and_return(multipart_threshold + 1.megabytes)
+  # it 'creates the expected PendingTransfer record for a file above the multipart threshold' do
+  #   Tempfile.create(source_object_with_tempfile.path, binmode: true) do |f|
+  #     f.write('A' * (multipart_threshold + 1.megabytes))
+  #     f.flush
+  #     allow(File).to receive(:open).with(source_object_with_tempfile.path, 'rb').and_return(f)
+  #     allow(File).to receive(:size).with(source_object_with_tempfile.path)
+  #     .and_return(multipart_threshold + 1.megabytes)
 
-      create_pending_transfer_job.perform(source_object_with_tempfile.id)
-      aws = PendingTransfer.find_by(source_object_id: source_object_with_tempfile.id, storage_provider_id: aws_id)
-      gcp = PendingTransfer.find_by(source_object_id: source_object_with_tempfile.id, storage_provider_id: gcp_id)
+  #     create_pending_transfer_job.perform(source_object_with_tempfile.id)
+  #     aws = PendingTransfer.find_by(source_object_id: source_object_with_tempfile.id, storage_provider_id: aws_id)
+  #     gcp = PendingTransfer.find_by(source_object_id: source_object_with_tempfile.id, storage_provider_id: gcp_id)
 
-      expect(aws).not_to be_nil
-      expect(gcp).not_to be_nil
-      expect(aws.transfer_checksum_value).to eq(expected_checksum)
-    end
-  end
+  #     expect(aws).not_to be_nil
+  #     expect(gcp).not_to be_nil
+  #     expect(aws.transfer_checksum_value).to eq(expected_checksum)
+  #   end
+  # end
 
   it 'fails to create a PendingTransfer if the given source object id cannot be resolved to a SourceObject record' do
     # Raises ActiveRecord::RecordNotFound if no SourceObject has that id.

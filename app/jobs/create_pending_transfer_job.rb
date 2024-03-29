@@ -8,7 +8,7 @@ class CreatePendingTransferJob < ApplicationJob
   def perform(source_object_id)
     source_object, file_size, whole_file_checksum = calculate_whole_file_checksum source_object_id
 
-    puts file_size
+    # puts file_size
 
     if file_size.to_i > MULTIPART_THRESHOLD
       ENV['AWS_REGION'] = AWS_CONFIG['aws_region']
