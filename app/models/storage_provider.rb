@@ -33,7 +33,7 @@ class StorageProvider < ApplicationRecord
     @gcp_storage_uploader ||= Atc::Gcp::StorageUploader.new(GCP_STORAGE_CLIENT, self.container_name)
   end
 
-  def store_gcp(pending_transfer, stored_object_key, metadata:)
+  def store_gcp(pending_transfer, stored_object_key, metadata:, **_args)
     gcp_storage_uploader.upload_file(
       pending_transfer.source_object.path,
       stored_object_key,
