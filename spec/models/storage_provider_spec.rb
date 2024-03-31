@@ -79,7 +79,6 @@ describe StorageProvider do
       end
 
       let(:expected_metadata) { { 'a' => 'b' } }
-      let(:expected_tags) { { 'c' => 'd' } }
 
       it 'performs as expected' do
         expect(gcp_storage_uploader).to receive(:upload_file).with(
@@ -91,7 +90,20 @@ describe StorageProvider do
         )
         storage_provider.perform_transfer(
           pending_transfer, object_key,
-          metadata: expected_metadata, tags: expected_tags
+          metadata: expected_metadata
+        )
+      end
+
+      it 'raises an ArgumentError when tags are provided (because GCP does not support tags)' do
+        expect {
+          storage_provider.perform_transfer(
+            pending_transfer, object_key,
+            metadata: expected_metadata,
+            tags: { 'some-tag-key' => 'some-tag-value' }
+          )
+        }.to raise_error(
+          ArgumentError,
+          "#{storage_provider.storage_type} storage provider does not support tags. Use metadata instead."
         )
       end
     end

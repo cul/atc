@@ -33,7 +33,12 @@ class StorageProvider < ApplicationRecord
     @gcp_storage_uploader ||= Atc::Gcp::StorageUploader.new(GCP_STORAGE_CLIENT, self.container_name)
   end
 
-  def store_gcp(pending_transfer, stored_object_key, metadata:, **_args)
+  def store_gcp(pending_transfer, stored_object_key, metadata:, tags: nil)
+    if tags.present?
+      raise ArgumentError,
+            "#{self.storage_type} storage provider does not support tags. "\
+            'Use metadata instead.'
+    end
     gcp_storage_uploader.upload_file(
       pending_transfer.source_object.path,
       stored_object_key,
