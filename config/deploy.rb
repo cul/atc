@@ -25,6 +25,7 @@ append  :linked_files,
         'config/aws.yml',
         'config/database.yml',
         'config/master.key',
+        'config/permissions.yml',
         'config/redis.yml',
         'config/resque.yml'
 

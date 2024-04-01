@@ -38,6 +38,7 @@
 /config/atc.yml
 /config/aws.yml
 /config/database.yml
+/config/permissions.yml
 /config/redis.yml
 /config/resque.yml
 
