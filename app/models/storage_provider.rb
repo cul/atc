@@ -12,33 +12,40 @@ class StorageProvider < ApplicationRecord
   end
 
   def storage_implemented?
-    case self.storage_type
-    when 'aws'
-      true
-    else
-      false
-    end
+    ['aws', 'gcp'].include?(self.storage_type)
   end
 
   def store_aws(pending_transfer, stored_object_key, metadata:, tags: {})
-    s3_uploader.upload_file(
+    aws_s3_uploader.upload_file(
       pending_transfer.source_object.path,
       stored_object_key,
       pending_transfer.transfer_checksum_part_size.nil? ? :whole_file : :multipart,
-      **upload_file_opts(pending_transfer, metadata: metadata, tags: tags)
+      **aws_upload_file_opts(pending_transfer, metadata: metadata, tags: tags)
     )
     true
   end
 
-  def s3_uploader
-    @s3_uploader ||= Atc::Aws::S3Uploader.new(S3_CLIENT, self.container_name)
+  def aws_s3_uploader
+    @aws_s3_uploader ||= Atc::Aws::S3Uploader.new(S3_CLIENT, self.container_name)
   end
 
-  # rubocop:disable Lint/UnusedMethodArgument
-  def store_gcp(pending_transfer, _stored_object_key, metadata:, **args)
-    raise_unimplemented_storage_type_error!
+  def gcp_storage_uploader
+    @gcp_storage_uploader ||= Atc::Gcp::StorageUploader.new(GCP_STORAGE_CLIENT, self.container_name)
   end
-  # rubocop:enable Lint/UnusedMethodArgument
+
+  def store_gcp(pending_transfer, stored_object_key, metadata:, tags: nil)
+    if tags.present?
+      raise ArgumentError,
+            "#{self.storage_type} storage provider does not support tags. "\
+            'Use metadata instead.'
+    end
+    gcp_storage_uploader.upload_file(
+      pending_transfer.source_object.path,
+      stored_object_key,
+      **gcp_upload_file_opts(pending_transfer, metadata: metadata)
+    )
+    true
+  end
 
   def perform_transfer(pending_transfer, stored_object_key, metadata:, tags: {})
     case self.storage_type
@@ -71,7 +78,7 @@ class StorageProvider < ApplicationRecord
 
   private
 
-  def upload_file_opts(pending_transfer, metadata:, tags:)
+  def aws_upload_file_opts(pending_transfer, metadata:, tags:)
     {
       overwrite: false, # This will raise an Atc::Exceptions::ObjectExists error if the object exists
       metadata: metadata,
@@ -80,6 +87,14 @@ class StorageProvider < ApplicationRecord
         Base64.strict_encode64(pending_transfer.transfer_checksum_value),
         pending_transfer.transfer_checksum_part_count
       ].compact.join('-')
+    }
+  end
+
+  def gcp_upload_file_opts(pending_transfer, metadata:)
+    {
+      overwrite: false, # This will raise an Atc::Exceptions::ObjectExists error if the object exists
+      metadata: metadata,
+      precalculated_whole_file_crc32c: Base64.strict_encode64(pending_transfer.transfer_checksum_value)
     }
   end
 end

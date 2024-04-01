@@ -10,6 +10,10 @@ FactoryBot.define do
       storage_provider { association :storage_provider, :aws }
     end
 
+    trait :gcp do
+      storage_provider { association :storage_provider, :gcp }
+    end
+
     trait :with_part_size do
       transfer_checksum_value { Digest::CRC32c.digest('A' * 6.megabytes) }
       part_size { 1.megabyte }

@@ -3,6 +3,8 @@
 require 'rails_helper'
 
 describe StorageProvider do
+  let(:object_key) { 'some/key.txt' }
+
   describe 'with valid fields' do
     subject(:storage_provider) { FactoryBot.build(:storage_provider, :aws) }
 
@@ -19,10 +21,9 @@ describe StorageProvider do
     let(:pending_transfer) { FactoryBot.build(:pending_transfer, :aws) }
     let(:s3_client) { Aws::S3::Client.new(stub_responses: true) }
     let(:bucket_name) { 'example_bucket' }
-    let(:s3_uploader) do
+    let(:aws_s3_uploader) do
       Atc::Aws::S3Uploader.new(s3_client, bucket_name)
     end
-    let(:s3_object_key) { 'some/key.txt' }
 
     describe '#storage_implemented?' do
       it 'returns true' do
@@ -30,25 +31,26 @@ describe StorageProvider do
       end
     end
 
-    describe '#store_aws' do
+    describe '#perform_transfer' do
       before do
-        allow(storage_provider).to receive(:s3_uploader).and_return(s3_uploader)
+        allow(storage_provider).to receive(:aws_s3_uploader).and_return(aws_s3_uploader)
       end
 
       let(:expected_metadata) { { 'a' => 'b' } }
       let(:expected_tags) { { 'c' => 'd' } }
 
       it 'performs as expected' do
-        expect(s3_uploader).to receive(:upload_file).with(
+        expect(aws_s3_uploader).to receive(:upload_file).with(
           pending_transfer.source_object.path,
-          s3_object_key,
+          object_key,
           :whole_file,
-          overwrite: false,
-          metadata: expected_metadata,
-          tags: expected_tags,
-          precalculated_aws_crc32c: 'm6nHZg=='
+          overwrite: false, metadata: expected_metadata,
+          tags: expected_tags, precalculated_aws_crc32c: 'm6nHZg=='
         )
-        storage_provider.store_aws(pending_transfer, s3_object_key, metadata: expected_metadata, tags: expected_tags)
+        storage_provider.perform_transfer(
+          pending_transfer, object_key,
+          metadata: expected_metadata, tags: expected_tags
+        )
       end
     end
   end
@@ -56,9 +58,53 @@ describe StorageProvider do
   context 'GCP provider type' do
     subject(:storage_provider) { FactoryBot.build(:storage_provider, :gcp) }
 
+    let(:pending_transfer) { FactoryBot.build(:pending_transfer, :gcp) }
+    let(:bucket_name) { 'example_bucket' }
+    let(:gcp_storage_client) do
+      Google::Cloud::Storage.new(credentials: GcpMockCredentials.new(GCP_CONFIG[:credentials]))
+    end
+    let(:gcp_storage_uploader) do
+      Atc::Gcp::StorageUploader.new(gcp_storage_client, bucket_name)
+    end
+
     describe '#storage_implemented?' do
-      it 'returns false' do
-        expect(storage_provider.storage_implemented?).to be false
+      it 'returns true' do
+        expect(storage_provider.storage_implemented?).to be true
+      end
+    end
+
+    describe '#perform_transfer' do
+      before do
+        allow(storage_provider).to receive(:gcp_storage_uploader).and_return(gcp_storage_uploader)
+      end
+
+      let(:expected_metadata) { { 'a' => 'b' } }
+
+      it 'performs as expected' do
+        expect(gcp_storage_uploader).to receive(:upload_file).with(
+          pending_transfer.source_object.path,
+          object_key,
+          overwrite: false,
+          metadata: expected_metadata,
+          precalculated_whole_file_crc32c: 'm6nHZg=='
+        )
+        storage_provider.perform_transfer(
+          pending_transfer, object_key,
+          metadata: expected_metadata
+        )
+      end
+
+      it 'raises an ArgumentError when tags are provided (because GCP does not support tags)' do
+        expect {
+          storage_provider.perform_transfer(
+            pending_transfer, object_key,
+            metadata: expected_metadata,
+            tags: { 'some-tag-key' => 'some-tag-value' }
+          )
+        }.to raise_error(
+          ArgumentError,
+          "#{storage_provider.storage_type} storage provider does not support tags. Use metadata instead."
+        )
       end
     end
   end
