@@ -4,4 +4,5 @@ module Atc::Exceptions
   class AtcError < StandardError; end
   class TransferError < AtcError; end
   class ObjectExists < AtcError; end
+  class StorageProviderMappingNotFound < AtcError; end
 end
