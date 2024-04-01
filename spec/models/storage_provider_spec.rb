@@ -15,6 +15,45 @@ describe StorageProvider do
     end
   end
 
+  describe '#local_path_key_map_for_storage_type' do
+    let(:local_path_key_map) do
+      { '/some/path' => '' }
+    end
+
+    it 'works for an aws provider' do
+      stub_const('AWS_CONFIG', AWS_CONFIG.merge({ local_path_key_map: local_path_key_map }))
+      storage_provider = FactoryBot.build(:storage_provider, :aws)
+      expect(storage_provider.local_path_key_map_for_storage_type).to eq(local_path_key_map)
+    end
+
+    it 'works for a gcp provider' do
+      stub_const('GCP_CONFIG', GCP_CONFIG.merge({ local_path_key_map: local_path_key_map }))
+      storage_provider = FactoryBot.build(:storage_provider, :gcp)
+      expect(storage_provider.local_path_key_map_for_storage_type).to eq(local_path_key_map)
+    end
+
+    it 'raises an exception for an unsupported provider' do
+      storage_provider = FactoryBot.build(:storage_provider, :cul)
+      expect { storage_provider.local_path_key_map_for_storage_type }.to raise_error(NotImplementedError)
+    end
+  end
+
+  describe '#local_path_to_stored_path' do
+    subject(:storage_provider) { FactoryBot.build(:storage_provider, :aws) }
+
+    let(:local_path) { '/digital/preservation/path/to/file.txt' }
+
+    it 'converts the given path when it starts with a value in the local_path_key_map' do
+      expect(storage_provider.local_path_to_stored_path(local_path)).to eq('path/to/file.txt')
+    end
+
+    it 'raises an error when the given path does not start with a value in the local_path_key_map' do
+      expect {
+        storage_provider.local_path_to_stored_path('/unexpected/path/to/file.txt')
+      }.to raise_error(Atc::Exceptions::StorageProviderMappingNotFound)
+    end
+  end
+
   context 'AWS provider type' do
     subject(:storage_provider) { FactoryBot.build(:storage_provider, :aws) }
 
@@ -114,7 +153,7 @@ describe StorageProvider do
       let(:storage_provider) { FactoryBot.build(:storage_provider, :cul) }
       let(:pending_transfer) { FactoryBot.build(:pending_transfer, storage_provider: storage_provider) }
 
-      it 'raises an exception because the method has not been fully implemented for the CUL storage provider' do
+      it 'raises an exception because the method has not been fully implemented a the cul storage provider' do
         expect {
           storage_provider.perform_transfer(pending_transfer, 'some-key', metadata: nil)
         }.to raise_error(NotImplementedError)
