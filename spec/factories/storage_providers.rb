@@ -23,5 +23,16 @@ FactoryBot.define do
         )
       end
     end
+
+    trait :cul do
+      initialize_with do
+        storage_type = StorageProvider.storage_types[:cul]
+        container_name = 'cul5'
+        StorageProvider.find_by(storage_type: storage_type, container_name: container_name) || StorageProvider.create(
+          storage_type: storage_type,
+          container_name: container_name
+        )
+      end
+    end
   end
 end

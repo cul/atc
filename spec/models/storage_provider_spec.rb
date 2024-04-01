@@ -109,6 +109,19 @@ describe StorageProvider do
     end
   end
 
+  context 'CUL provider type' do
+    describe '#perform_transfer' do
+      let(:storage_provider) { FactoryBot.build(:storage_provider, :cul) }
+      let(:pending_transfer) { FactoryBot.build(:pending_transfer, storage_provider: storage_provider) }
+
+      it 'raises an exception because the method has not been fully implemented for the CUL storage provider' do
+        expect {
+          storage_provider.perform_transfer(pending_transfer, 'some-key', metadata: nil)
+        }.to raise_error(NotImplementedError)
+      end
+    end
+  end
+
   describe 'validations' do
     let(:new_storage_provider) { described_class.new }
 

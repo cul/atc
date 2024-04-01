@@ -7,7 +7,7 @@ class StorageProvider < ApplicationRecord
 
   def raise_unimplemented_storage_type_error!
     raise NotImplementedError,
-          "StorageProvider storage_type #{storage_provider.storage_type} "\
+          "StorageProvider storage_type #{self.storage_type} "\
           'is not implemented yet.'
   end
 
