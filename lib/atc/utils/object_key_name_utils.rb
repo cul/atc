@@ -35,9 +35,7 @@ module Atc::Utils::ObjectKeyNameUtils
   end
 
   def self.remediate_key_name(filepath_key_name, unavailable_key_names = [])
-    if unavailable_key_names.exclude?(filepath_key_name) && self.valid_key_name?(filepath_key_name)
-      return filepath_key_name
-    end
+    return filepath_key_name if unavailable_key_names.exclude?(filepath_key_name) && self.valid_key_name?(filepath_key_name)
 
     self.argument_check(filepath_key_name)
 

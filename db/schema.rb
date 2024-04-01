@@ -10,8 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_20_020209) do
-  create_table "checksum_algorithms", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+ActiveRecord::Schema[7.1].define(version: 2024_03_29_162321) do
+  create_table "checksum_algorithms", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -19,9 +19,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_20_020209) do
     t.index ["name"], name: "index_checksum_algorithms_on_name", unique: true
   end
 
-  create_table "fixity_verifications", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
-    t.bigint "source_object_id", null: false
-    t.bigint "stored_object_id", null: false
+  create_table "fixity_verifications", force: :cascade do |t|
+    t.integer "source_object_id", null: false
+    t.integer "stored_object_id", null: false
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -30,13 +30,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_20_020209) do
     t.index ["stored_object_id"], name: "index_fixity_verifications_on_stored_object_id"
   end
 
-  create_table "pending_transfers", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
-    t.bigint "transfer_checksum_algorithm_id", null: false
+  create_table "pending_transfers", force: :cascade do |t|
+    t.integer "transfer_checksum_algorithm_id", null: false
     t.binary "transfer_checksum_value", limit: 4, null: false
     t.integer "transfer_checksum_part_size"
     t.integer "transfer_checksum_part_count"
-    t.bigint "storage_provider_id", null: false
-    t.bigint "source_object_id", null: false
+    t.integer "storage_provider_id", null: false
+    t.integer "source_object_id", null: false
     t.integer "status", default: 0, null: false
     t.text "error_message"
     t.datetime "created_at", null: false
@@ -51,21 +51,21 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_20_020209) do
     t.index ["transfer_checksum_part_size"], name: "index_pending_transfers_on_transfer_checksum_part_size"
   end
 
-  create_table "repositories", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+  create_table "repositories", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "source_objects", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+  create_table "source_objects", force: :cascade do |t|
     t.string "path", limit: 4096, null: false
     t.binary "path_hash", limit: 32, null: false
     t.bigint "object_size", null: false
     t.datetime "on_prem_deleted_at"
-    t.bigint "repository_id"
+    t.integer "repository_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "fixity_checksum_algorithm_id"
+    t.integer "fixity_checksum_algorithm_id"
     t.binary "fixity_checksum_value", limit: 64
     t.index ["fixity_checksum_algorithm_id"], name: "index_source_objects_on_fixity_checksum_algorithm_id"
     t.index ["fixity_checksum_value"], name: "index_source_objects_on_fixity_checksum_value"
@@ -73,7 +73,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_20_020209) do
     t.index ["repository_id"], name: "index_source_objects_on_repository_id"
   end
 
-  create_table "storage_providers", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+  create_table "storage_providers", force: :cascade do |t|
     t.integer "storage_type", null: false
     t.string "container_name", null: false
     t.datetime "created_at", null: false
@@ -83,14 +83,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_20_020209) do
     t.index ["storage_type"], name: "index_storage_providers_on_storage_type"
   end
 
-  create_table "stored_objects", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+  create_table "stored_objects", force: :cascade do |t|
     t.string "path", limit: 1024, null: false
     t.binary "path_hash", limit: 32, null: false
-    t.bigint "source_object_id", null: false
-    t.bigint "storage_provider_id", null: false
+    t.integer "source_object_id", null: false
+    t.integer "storage_provider_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "transfer_checksum_algorithm_id"
+    t.integer "transfer_checksum_algorithm_id"
     t.binary "transfer_checksum_value", limit: 4
     t.integer "transfer_checksum_part_size"
     t.integer "transfer_checksum_part_count"
