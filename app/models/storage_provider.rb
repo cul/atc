@@ -7,7 +7,7 @@ class StorageProvider < ApplicationRecord
 
   def raise_unimplemented_storage_type_error!
     raise NotImplementedError,
-          "StorageProvider storage_type #{storage_provider.storage_type} "\
+          "StorageProvider storage_type #{self.storage_type} "\
           'is not implemented yet.'
   end
 
@@ -59,24 +59,31 @@ class StorageProvider < ApplicationRecord
   end
 
   def local_path_to_stored_path(local_path)
-    if self.storage_type == 'aws'
-      local_path_key_map = AWS_CONFIG[:local_path_key_map]
-      matching_local_path_prefix = local_path_key_map.keys.find do |local_file_prefix|
-        local_path.start_with?(local_file_prefix.to_s)
-      end
-
-      if matching_local_path_prefix.nil?
-        raise "Could not find #{self.storage_type} storage provider "\
-              "mapping for #{local_path}"
-      end
-
-      return local_path.sub(matching_local_path_prefix.to_s, local_path_key_map[matching_local_path_prefix])
+    matching_local_path_prefix = local_path_key_map.keys.find do |local_file_prefix|
+      local_path.start_with?(local_file_prefix.to_s)
     end
 
-    raise_unimplemented_storage_type_error!
+    if matching_local_path_prefix.nil?
+      raise "Could not find #{self.storage_type} storage provider "\
+            "mapping for #{local_path}"
+    end
+
+    local_path.sub(matching_local_path_prefix.to_s, local_path_key_map[matching_local_path_prefix])
   end
 
   private
+
+  def local_path_key_map
+    @local_path_key_map ||=
+      case self.storage_type
+      when 'aws'
+        AWS_CONFIG[:local_path_key_map]
+      when 'gcp'
+        GCP_CONFIG[:local_path_key_map]
+      else
+        raise_unimplemented_storage_type_error!
+      end
+  end
 
   def aws_upload_file_opts(pending_transfer, metadata:, tags:)
     {

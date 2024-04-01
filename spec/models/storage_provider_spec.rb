@@ -53,6 +53,15 @@ describe StorageProvider do
         )
       end
     end
+
+    describe '#local_path_to_stored_path' do
+      let(:local_path) { '/digital/preservation/a/b/c' }
+      let(:stored_path) { 'a/b/c' }
+
+      it 'substitutes as expected' do
+        expect(storage_provider.local_path_to_stored_path(local_path)).to eql(stored_path)
+      end
+    end
   end
 
   context 'GCP provider type' do
@@ -105,6 +114,27 @@ describe StorageProvider do
           ArgumentError,
           "#{storage_provider.storage_type} storage provider does not support tags. Use metadata instead."
         )
+      end
+    end
+
+    describe '#local_path_to_stored_path' do
+      let(:local_path) { '/digital/preservation/a/b/c' }
+      let(:stored_path) { 'a/b/c' }
+
+      it 'substitutes as expected' do
+        expect(storage_provider.local_path_to_stored_path(local_path)).to eql(stored_path)
+      end
+    end
+  end
+
+  context 'CUL provider type' do
+    subject(:storage_provider) { FactoryBot.build(:storage_provider, :cul) }
+
+    describe '#local_path_to_stored_path' do
+      let(:local_path) { '/digital/preservation/a/b/c' }
+
+      it 'substitutes as expected' do
+        expect { storage_provider.local_path_to_stored_path(local_path) }.to raise_error(NotImplementedError)
       end
     end
   end
