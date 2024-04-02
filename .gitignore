@@ -46,6 +46,7 @@
 /config/aws.yml
 /config/gcp.yml
 /config/database.yml
+/config/permissions.yml
 /config/redis.yml
 /config/resque.yml
 
