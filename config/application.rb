@@ -45,10 +45,6 @@ module Atc
     # Don't generate system test files.
     config.generators.system_tests = nil
 
-    config.hosts << 'atc.library.columbia.edu:3000'
-    config.hosts << 'atc-dev.library.columbia.edu:3000'
-    config.hosts << 'atc-test.library.columbia.edu:3000'
-
     config.active_job.queue_adapter = :resque
     config.active_job.queue_name_prefix = "atc.#{Rails.env}"
     config.active_job.queue_name_delimiter = '.'
