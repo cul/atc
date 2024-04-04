@@ -16,6 +16,4 @@ class Users::DevelopmentController < Devise::SessionsController
 
     redirect_to root_path
   end
-
-  def output_current_user; end
 end
