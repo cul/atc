@@ -59,6 +59,5 @@ end
 GCP_STORAGE_CLIENT = Google::Cloud::Storage.new(
   project_id: GCP_CONFIG[:project_id],
   credentials: credentials_from_config(GCP_CONFIG),
-  retries: 3,
-  timeout: 120
+  retries: 3
 )
