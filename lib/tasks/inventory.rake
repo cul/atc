@@ -35,6 +35,8 @@ namespace :atc do
         raise "Could not find readable file at: #{new_path}" unless File.readable?(new_path)
 
         source_object = SourceObject.for_path(old_path)
+        raise "Cannot find SourceObject with old_path: #{old_path}" if source_object.nil?
+
         print "Updating SourceObject #{source_object.id}..."
 
         source_object.path = new_path
@@ -42,7 +44,7 @@ namespace :atc do
         source_object.save(validate: false) # Validations normally prevent reassignment of path
 
         # Verify that object is findable via new_path
-        raise "Cannot find updated SourceObject with new path" unless SourceObject.for_path(new_path)&.id == source_object.id
+        raise "Cannot find updated SourceObject with new_path" unless SourceObject.for_path(new_path)&.id == source_object.id
         puts "done!"
       end
     end
