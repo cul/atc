@@ -7,10 +7,7 @@ Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   devise_scope :user do
-    if Rails.env.development?
-      get '/users/development/sign_in_developer', to: 'users/development#sign_in_developer'
-      get '/users/development/output_current_user', to: 'users/development#output_current_user'
-    end
+    get '/users/development/sign_in_developer', to: 'users/development#sign_in_developer' if Rails.env.development?
   end
 
   resque_web_constraint = lambda do |request|
