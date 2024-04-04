@@ -32,9 +32,10 @@ namespace :atc do
         old_path = row['old_path']
         new_path = row['new_path']
 
+        raise "Could not find readable file at: #{new_path}" unless File.readable?(new_path)
+
         source_object = SourceObject.for_path(old_path)
         print "Updating SourceObject #{source_object.id}..."
-        raise "Could not find readable file at: #{new_path}" unless File.readable?(new_path)
 
         source_object.path = new_path
         source_object.assign_path_hash
