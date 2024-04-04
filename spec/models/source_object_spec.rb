@@ -15,6 +15,15 @@ describe SourceObject do
     it 'does not permit reassignment of path' do
       expect { source_object.update!(path: 'LQSyM') }.to raise_error ActiveRecord::RecordInvalid
     end
+
+    it 'requires a path value when saving a new object (strict validation)' do
+      expect { FactoryBot.create(:source_object, path: nil).save }.to raise_error(ActiveModel::StrictValidationFailed)
+    end
+
+    it 'requires a path value when saving an existing object (strict validation)' do
+      source_object.path = nil
+      expect { source_object.save }.to raise_error(ActiveModel::StrictValidationFailed)
+    end
   end
 
   describe '.for_path' do

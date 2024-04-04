@@ -8,6 +8,6 @@ module PathHashes
   end
 
   def assign_path_hash
-    self.path_hash = Digest::SHA256.digest(self.path) # This is a binary digest
+    self.path_hash = Digest::SHA256.digest(self.path) if self.path.present? # This is a binary digest
   end
 end

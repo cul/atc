@@ -20,6 +20,35 @@ end
 
 namespace :atc do
   namespace :inventory do
+
+    desc 'Updates the path of SourceObjects via old_path and new_path values in the given path_update_csv_file'
+    task update_source_object_path: :environment do
+      unless ENV['path_update_csv_file']
+        puts 'Please supply a path_update_csv_file'
+        next
+      end
+
+      CSV.foreach(ENV['path_update_csv_file'], headers: true).each do |row|
+        old_path = row['old_path']
+        new_path = row['new_path']
+
+        raise "Could not find readable file at: #{new_path}" unless File.readable?(new_path)
+
+        source_object = SourceObject.for_path(old_path)
+        raise "Cannot find SourceObject with old_path: #{old_path}" if source_object.nil?
+
+        print "Updating SourceObject #{source_object.id}..."
+
+        source_object.path = new_path
+        source_object.assign_path_hash
+        source_object.save(validate: false) # Validations normally prevent reassignment of path
+
+        # Verify that object is findable via new_path
+        raise "Cannot find updated SourceObject with new_path" unless SourceObject.for_path(new_path)&.id == source_object.id
+        puts "done!"
+      end
+    end
+
     desc 'Scan a directory and add all of its files to the source_objects table'
     task add_source_objects: :environment do
       path = ENV['path']
