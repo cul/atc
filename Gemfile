@@ -31,7 +31,9 @@ gem 'rails', '~> 7.1.3', '>= 7.1.3.2'
 # Rainbow for text coloring
 gem 'rainbow', '~> 3.0'
 # Use Redis adapter to run Action Cable in production
-gem 'redis', '>= 4.0.1'
+gem 'redis', '~> 4.8' # NOTE: Updating the redis gem to v5 breaks the current redis namespace setup
+# For namespacing the Redis keys used by resque
+gem 'redis-namespace', '~> 1.11'
 # Resque for queued jobs
 gem 'resque', '~> 2.6'
 # Resque for retrying code after errors
