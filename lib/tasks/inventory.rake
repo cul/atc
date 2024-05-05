@@ -6,9 +6,9 @@ def print_readability_check_progress(file_count, unreadable_directory_count, unr
         "Unreadable file count = #{unreadable_file_count}"
 end
 
-def print_inventory_addition_progress(source_object_count, previously_inventoried_file_count)
+def print_inventory_addition_progress(source_object_count, previously_inventoried_file_counter)
   print "\rSourceObject records created: #{source_object_count}, "\
-        "Number of files previously added to the inventory: #{previously_inventoried_file_count}"
+        "Number of files previously added to the inventory: #{previously_inventoried_file_counter}"
 end
 
 def validate_required_keys_and_print_error_messages(*keys)
@@ -111,8 +111,8 @@ namespace :atc do
       puts "\nStep 2: Adding files to the inventory database..."
 
       source_object_counter = 0
-      previously_inventoried_file_count = 0
-      print_inventory_addition_progress(source_object_counter, previously_inventoried_file_count)
+      previously_inventoried_file_counter = 0
+      print_inventory_addition_progress(source_object_counter, previously_inventoried_file_counter)
       Atc::Utils::FileUtils.stream_recursive_directory_read(path, false) do |file_path|
         size = File.size(file_path)
         source_object = SourceObject.create!(
@@ -122,13 +122,16 @@ namespace :atc do
         CreateFixityChecksumJob.perform_later(source_object.id, enqueue_successor: true) if enqueue_checksum_and_upload
         source_object_counter += 1
         if source_object_counter % 1000 == 0
-          print_inventory_addition_progress(source_object_counter, previously_inventoried_file_count)
+          print_inventory_addition_progress(source_object_counter, previously_inventoried_file_counter)
         end
       rescue ActiveRecord::RecordNotUnique => e
         # Skipping file because it was previously added to the inventory
-        previously_inventoried_file_count += 1
+        previously_inventoried_file_counter += 1
+        if previously_inventoried_file_counter % 1000 == 0
+          print_inventory_addition_progress(source_object_counter, previously_inventoried_file_counter)
+        end
       end
-      print_inventory_addition_progress(source_object_counter, previously_inventoried_file_count)
+      print_inventory_addition_progress(source_object_counter, previously_inventoried_file_counter)
       puts "\nStep 2: Done!"
 
       puts "\nProcess complete!"
