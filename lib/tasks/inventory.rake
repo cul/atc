@@ -54,6 +54,7 @@ namespace :atc do
       path = ENV['path']
       dry_run = ENV['dry_run'] == 'true'
       skip_readability_check = ENV['skip_readability_check'] == 'true'
+      enqueue_checksum_and_upload = ENV['enqueue_checksum_and_upload'] == 'true'
 
       if path.present?
         unless File.exist?(path)
@@ -116,6 +117,7 @@ namespace :atc do
           path: file_path,
           object_size: size,
         )
+        CreateFixityChecksumJob.perform_later(source_object.id, enqueue_successor: true) if enqueue_checksum_and_upload
         source_object_counter += 1
         if source_object_counter % 1000 == 0
           print_inventory_addition_progress(source_object_counter)
