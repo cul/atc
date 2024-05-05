@@ -122,6 +122,10 @@ namespace :atc do
         if source_object_counter % 1000 == 0
           print_inventory_addition_progress(source_object_counter)
         end
+      rescue ActiveRecord::RecordNotUnique => e
+        # Re-raise error, but print additional information first about which file_path raised the error
+        puts "Encountered error for file: #{file_path}"
+        raise e
       end
       print_inventory_addition_progress(source_object_counter)
       puts "\nStep 2: Done!"
