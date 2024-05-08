@@ -54,7 +54,7 @@ module Atc::Utils::AwsChecksumUtils
   def self.digest_file(file_path, part_size, crc32c_accumulator, whole_object_digester)
     File.open(file_path, 'rb') do |file|
       buffer = String.new
-      while file.read(part_size, buffer).present?
+      while file.read(part_size, buffer) != nil
         crc32c_accumulator << Digest::CRC32c.digest(buffer)
         whole_object_digester&.update(buffer)
       end
