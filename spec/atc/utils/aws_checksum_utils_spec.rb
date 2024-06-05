@@ -26,6 +26,38 @@ describe Atc::Utils::AwsChecksumUtils do
         expect(described_class.checksum_string_for_file(f.path, multipart_threshold)).to eq('g38HMg==')
       end
     end
+
+    # NOTE: We ran into this issue in the past, so that's why this test exists
+    it 'properly handles parts that are made entirely of whitespace characters (0x0B line tab, 0x0C form feed, etc.)' do
+      Tempfile.create('example-file-to-checksum') do |f|
+        f.write('A' * multipart_threshold)
+        f.write(Atc::Utils::HexUtils.hex_to_bin('0B') * (multipart_threshold - 10))
+        f.write(Atc::Utils::HexUtils.hex_to_bin('0C') * 10)
+        f.write('A' * multipart_threshold)
+        expect(described_class.checksum_string_for_file(f.path, multipart_threshold)).to eq('OdsyWA==-3')
+      end
+    end
+  end
+
+  describe '.digest_file' do
+    let(:crc32c_accumulator) { [] }
+    let(:whole_object_digester) { Digest::CRC32c.new }
+    let(:part_size) { 5.megabytes }
+
+    # NOTE: We ran into this issue in the past, so that's why this test exists
+    it 'properly handles parts that are made entirely of whitespace characters (0x0B line tab, 0x0C form feed, etc.)' do
+      Tempfile.create('example-file-to-checksum') do |f|
+        f.write('A' * part_size)
+        f.write(Atc::Utils::HexUtils.hex_to_bin('0B') * (part_size - 10))
+        f.write(Atc::Utils::HexUtils.hex_to_bin('0C') * 10)
+        f.write('A' * part_size)
+        described_class.digest_file(f.path, part_size, crc32c_accumulator, whole_object_digester)
+      end
+      expect(
+        crc32c_accumulator.map { |checksum_bin_value| Base64.strict_encode64(checksum_bin_value) }
+      ).to eq(['MDaLrw==', 'X/yhqA==', 'MDaLrw=='])
+      expect(whole_object_digester.base64digest).to eq('NIRe3g==')
+    end
   end
 
   describe '.compute_default_part_size' do
