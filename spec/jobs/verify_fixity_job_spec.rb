@@ -29,20 +29,106 @@ describe VerifyFixityJob do
                 "checksum_algorithm_name": "SHA31415"} }'
   end
 
-  describe '#process_aws_fixity_checksum_response' do
-    let(:json_response) do
-      '{"type": "fixity_check_complete",
-        "data": { "checksum_hexdigest": "ABCDEF12345", "object_size": 1234 } }'
+  describe '#perform' do
+    it 'calls #aws_verify_fixity if storage provider is AWS' do
+      expect(verify_fixity_job).to receive(:aws_verify_fixity)
+      verify_fixity_job.perform(aws_stored_object.id)
     end
 
-    it 'returns checksum, object size, and nil for the error message if check complete' do
-      result = verify_fixity_job.process_aws_fixity_checksum_response(JSON.parse(json_response))
-      expect(result).to eq(['ABCDEF12345', 1234, nil])
+    it 'calls #gcp_verify_fixity if storage provider is GCP' do
+      expect(verify_fixity_job).to receive(:gcp_verify_fixity)
+      verify_fixity_job.perform(gcp_stored_object.id)
+    end
+  end
+
+  describe '#create_fixity_verification_record_if_needed' do
+    context 'with existing FixityVerification(s) for the given StoredObject' do
+      let(:aws_fixity_verification_pending) do
+        FactoryBot.create(:fixity_verification,
+                          source_object: source_object,
+                          stored_object: aws_stored_object,
+                          status: 0)
+      end
+
+      it 'calls #process_existing_fixity_verification_record' do
+        aws_fixity_verification_pending
+        expect(verify_fixity_job).to receive(:process_existing_fixity_verification_record)
+        verify_fixity_job.create_fixity_verification_record_if_needed(aws_stored_object)
+      end
     end
 
-    it 'returns error message and nil for the checksum if error occured' do
-      result = verify_fixity_job.process_aws_fixity_checksum_response(JSON.parse(aws_error_json_response))
-      expect(result).to eq([nil, 'Ooops!'])
+    context 'without an existing FixityVerification(s) for the given StoredObject' do
+      it 'calls #create_pending_fixity_verification' do
+        expect(verify_fixity_job).to receive(:create_pending_fixity_verification)
+        verify_fixity_job.create_fixity_verification_record_if_needed(aws_stored_object)
+      end
+    end
+  end
+
+  describe '#process_existing_fixity_verification_record' do
+    context 'with existing FixityVerification.status failure' do
+      let(:aws_fixity_verification_pending) do
+        FactoryBot.create(:fixity_verification,
+                          source_object: source_object,
+                          stored_object: aws_stored_object,
+                          status: 0)
+      end
+
+      it 'returns nil' do
+        result =
+          verify_fixity_job.process_existing_fixity_verification_record(aws_stored_object,
+                                                                        aws_fixity_verification_pending)
+        expect(result).to eq(nil)
+      end
+    end
+
+    context 'with existing FixityVerification.status pending' do
+      let(:aws_fixity_verification_failure) do
+        FactoryBot.create(:fixity_verification,
+                          source_object: source_object,
+                          stored_object: aws_stored_object,
+                          status: 1)
+      end
+
+      it 'calls #create_pending_fixity_verification' do
+        expect(verify_fixity_job).to receive(:create_pending_fixity_verification).with(aws_stored_object)
+        verify_fixity_job.process_existing_fixity_verification_record(aws_stored_object,
+                                                                      aws_fixity_verification_failure)
+      end
+    end
+  end
+
+  describe '#create_pending_fixity_verification' do
+    it 'calls #FixityVerification.create!' do
+      result = verify_fixity_job.create_pending_fixity_verification(aws_stored_object)
+      expect(result).to be_an_instance_of(FixityVerification)
+    end
+  end
+
+  describe '#process_aws_fixity_websocket_channel_stream' do
+    context 'receives a check complete from the aws fixity server' do
+      let(:aws_json_response) do
+        '{"type": "fixity_check_complete",
+          "data": { "checksum_hexdigest": "ABCDEF12345", "object_size": 1234 } }'
+      end
+
+      it 'and returns checksum, object size, and nil for the error message' do
+        allow(verify_fixity_job).to receive(:aws_fixity_websocket_channel_stream) { aws_json_response }
+        result =
+          verify_fixity_job.process_aws_fixity_websocket_channel_stream(aws_stored_object,
+                                                                        1)
+        expect(result).to eq(['ABCDEF12345', 1234, nil])
+      end
+    end
+
+    context 'receives a fixity check error from the aws fixity server' do
+      it 'and returns error message, and nil for the checksum and object size' do
+        allow(verify_fixity_job).to receive(:aws_fixity_websocket_channel_stream) { aws_error_json_response }
+        result =
+          verify_fixity_job.process_aws_fixity_websocket_channel_stream(aws_stored_object,
+                                                                        1)
+        expect(result).to eq([nil, nil, 'Ooops!'])
+      end
     end
   end
 
@@ -50,20 +136,6 @@ describe VerifyFixityJob do
     it 'returns error message to insert into FixityVerification.error_message' do
       result = verify_fixity_job.aws_fixity_verification_record_error_message(JSON.parse(aws_error_json_response))
       expect(result).to eq('Finish implementation')
-    end
-  end
-
-  describe '#perform' do
-    it 'calls #aws_verify_fixity if storage provider is AWS' do
-      # verify_fixity_job.perform(stored_object.id)
-      expect(verify_fixity_job).to receive(:aws_verify_fixity)
-      verify_fixity_job.perform(aws_stored_object.id)
-    end
-
-    it 'calls #gcp_verify_fixity if storage provider is GCP' do
-      # verify_fixity_job.perform(stored_object.id)
-      expect(verify_fixity_job).to receive(:gcp_verify_fixity)
-      verify_fixity_job.perform(gcp_stored_object.id)
     end
   end
 end
