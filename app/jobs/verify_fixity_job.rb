@@ -58,6 +58,7 @@ class VerifyFixityJob < ApplicationJob
     end
   end
 
+  # rubocop:disable Metrics/MethodLength
   def aws_verify_fixity(stored_object, fixity_verification_record)
     # Question: is the AWS S3 object key the same as StoredObject.path?
     # For now, assume yes. Howver, may need to add prefix
@@ -69,9 +70,16 @@ class VerifyFixityJob < ApplicationJob
       fixity_verification_record.error_message = aws_fixity_error
       fixity_verification_record.failure! # saves to the database
     elsif aws_fixity_checksum.present?
-      process_object_checksum_and_size(stored_object, aws_object_checksum, aws_object_size)
+      if object_checksum_and_size_match?(stored_object, aws_object_checksum, aws_object_size)
+        fixity_verification_record.success!
+      else
+        fixity_verification_record.failure!
+        fixity_verification_record.error_message =
+          aws_fixity_verification_record_error_message aws_fixity_checksum_response
+      end
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   def parse_json_response_aws_fixity_websocket_channel_stream(stored_object, fixity_verification_record)
     JSON.parse(aws_fixity_websocket_channel_stream(AWS_CONFIG[:preservation_bucket_name],
@@ -104,18 +112,25 @@ class VerifyFixityJob < ApplicationJob
     end
   end
 
-  def aws_fixity_verification_record_error_message(_parsed_json_aws_response)
-    'Finish implementation'
-  end
-
-  def process_object_checksum_and_size(stored_object, object_checksum, _object_size)
+  def object_checksum_and_size_match?(stored_object, provider_object_checksum, provider_object_size)
     # Needs additional implementation!!!
-    checksum_match?(stored_object, object_checksum)
+    if checksum_match?(stored_object, provider_object_checksum) &&
+       (stored_object.source_object.object_size == provider_object_size)
+      Rails.logger.warn 'Yippee!'
+      true
+    else
+      Rails.logger.warn 'Darn!'
+      false
+    end
   end
 
   def checksums_match?(stored_object, object_fixity_checksum)
     atc_fixity_checksum = Atc::Utils::HexUtils.bin_to_hex(stored_object.source_object.fixity_checksum_value)
     atc_fixity_checksum == object_fixity_checksum
+  end
+
+  def aws_fixity_verification_record_error_message(_parsed_json_aws_response)
+    'Finish implementation'
   end
 
   def gcp_verify_fixity(_stored_object, _fixity_verification_record)
