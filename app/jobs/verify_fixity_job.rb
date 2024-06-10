@@ -7,50 +7,22 @@ class VerifyFixityJob < ApplicationJob
   def perform(stored_object_id)
     stored_object = StoredObject.find(stored_object_id)
 
-    # create_fixity_verification_record checks for an existing FixityRecord for this StoredObject
-    # and return nil if a fixity check request for this StoredObject is not required.
-    return unless (fixity_verification_record = create_fixity_verification_record_if_needed(stored_object))
+    existing_fixity_verification_record = FixityVerification.find_by(stored_object: stored_object)
+    return if existing_fixity_verification_record&.pending?
 
-    verify_fixity(stored_object, fixity_verification_record)
+    if existing_fixity_verification_record
+      process_existing_fixity_verification_record existing_fixity_verification_record
+    end
+    fixity_verification_record = create_pending_fixity_verification stored_object
+    verify_fixity fixity_verification_record
   end
 
-  def verify_fixity(stored_object, fixity_verification_record)
-    if stored_object.storage_provider.aws?
-      aws_verify_fixity(stored_object, fixity_verification_record)
-    elsif stored_object.storage_provider.gcp?
-      gcp_verify_fixity(stored_object, fixity_verification_record)
-    else
-      # throw exception as well?
-      Rails.logger.warn 'Unsupported storage provider'
-    end
-  end
+  def process_existing_fixity_verification_record(existing_fixity_verification_record)
+    return if existing_fixity_verification_record.pending?
 
-  # spec present
-  def create_fixity_verification_record_if_needed(stored_object)
-    if (existing_fixity_verification_record = FixityVerification.find_by(stored_object: stored_object))
-      process_existing_fixity_verification_record(stored_object, existing_fixity_verification_record)
-    else
-      create_pending_fixity_verification stored_object
-    end
-  end
-
-  # spec present
-  def process_existing_fixity_verification_record(stored_object, existing_fixity_verification_record)
-    if existing_fixity_verification_record.pending?
-      # A fixity checksum request for this StoredObject is already in process and pending, so no need
-      # to initiate a new request
-      nil
-    elsif existing_fixity_verification_record.success? || existing_fixity_verification_record.failure?
-      # What should be done here? Assume copy the existing one to the penultimate table, and create a
-      # new one. Other processing needed?
-      # Create VerificationPending in new table, delete this one and create new one
-      Rails.logger.warn 'VerifyFixityJob::perform - FixityVerification exists, moving it'
-      create_pending_fixity_verification stored_object
-    else
-      # Need to add exception
-      Rails.logger.warn 'VerifyFixityJob::perform - FixityVerification exists, unexpected status, no-op'
-      nil
-    end
+    # for now, just delete the existing FixityVerification. In later implementation, copy the info
+    # into an entry in the new table (PastFixityVerifications).
+    existing_fixity_verification_record.destroy
   end
 
   # spec present
@@ -61,27 +33,43 @@ class VerifyFixityJob < ApplicationJob
     fixity_verification_record
   end
 
-  def aws_verify_fixity(stored_object, fixity_verification_record)
-    # Question: is the AWS S3 object key the same as StoredObject.path?
-    # For now, assume yes. Howver, may need to add prefix
-    aws_object_checksum, aws_object_size, aws_fixity_error =
-      process_aws_fixity_websocket_channel_stream_response(stored_object, fixity_verification_record.id)
-    if aws_fixity_error.present?
-      fixity_verification_record.error_message = aws_fixity_error
-      fixity_verification_record.failure! # saves to the database
-      # process_aws_fixity_error(fixity_verification_record)
-    elsif object_checksum_and_size_match?(stored_object, aws_object_checksum, aws_object_size)
-      fixity_verification_record.success!
+  def verify_fixity(fixity_verification_record)
+    if fixity_verification_record.stored_object.storage_provider.aws?
+      aws_verify_fixity(fixity_verification_record)
+    elsif fixity_verification_record.stored_object.storage_provider.gcp?
+      gcp_verify_fixity(fixity_verification_record)
     else
-      fixity_verification_record.error_message =
-        aws_fixity_verification_record_error_message aws_fixity_checksum_response
-      fixity_verification_record.failure!
+      # throw exception as well?
+      Rails.logger.warn 'Unsupported storage provider'
     end
   end
 
-  def process_aws_fixity_websocket_channel_stream(stored_object, stream_id)
+  def aws_verify_fixity(fixity_record)
+    # Question: is the AWS S3 object key the same as StoredObject.path?
+    # For now, assume yes. Howver, may need to add prefix
+    object_checksum, object_size, aws_fixity_error =
+      process_aws_fixity_websocket_channel_stream_response(fixity_record)
+    if aws_fixity_error.present?
+      fixity_record.error_message = aws_fixity_error
+      fixity_record.failure! # saves to the database
+      # process_aws_fixity_error(fixity_verification_record)
+    elsif object_checksum_and_size_match?(fixity_record.stored_object, object_checksum, object_size)
+      fixity_record.success!
+    else
+      # fixity_record.error_message =
+      # aws_fixity_verification_record_error_message aws_fixity_checksum_response
+      fixity_record.failure!
+    end
+  end
+
+  def gcp_verify_fixity(_fixity_verification_record)
+    # throw exception as well?
+    Rails.logger.warn 'GCP fixity checks are not implemented'
+  end
+
+  def process_aws_fixity_websocket_channel_stream_response(fixity_verification_record)
     aws_fixity_check_response =
-      parse_json_response_aws_fixity_websocket_channel_stream(stored_object, stream_id)
+      parse_json_response_aws_fixity_websocket_channel_stream(fixity_verification_record)
     case aws_fixity_check_response['type']
     when 'fixity_check_complete'
       [aws_fixity_check_response['data']['checksum_hexdigest'], aws_fixity_check_response['data']['object_size'], nil]
@@ -90,14 +78,17 @@ class VerifyFixityJob < ApplicationJob
     end
   end
 
-  def parse_json_response_aws_fixity_websocket_channel_stream(stored_object, stream_id)
-    JSON.parse(aws_fixity_websocket_channel_stream(AWS_CONFIG[:preservation_bucket_name],
-                                                   stored_object.path,
-                                                   stored_object.source_object.fixity_checksum_algorithm,
-                                                   stream_id))
+  # method will be adapted/changed once helper class method is available
+  def parse_json_response_aws_fixity_websocket_channel_stream(fixity_record)
+    aws_bucket_name = fixity_record.stored_object.storage_provider.container_name
+    JSON.parse(aws_fixity_websocket_channel_stream(aws_bucket_name,
+                                                   fixity_record.stored_object.path,
+                                                   fixity_record.stored_object.source_object.fixity_checksum_algorithm,
+                                                   fixity_record.id))
   end
 
-  # following is a placeholder. Will be replaced by test websocket client code
+  # following is a placeholder. Will be replaced by call to helper class method
+  # and possibly merged with #process_aws_fixity_websocket_channel_stream
   def aws_fixity_websocket_channel_stream(bucket,
                                           object_key,
                                           fixity_checksum_algorithm,
@@ -110,7 +101,7 @@ class VerifyFixityJob < ApplicationJob
 
   def object_checksum_and_size_match?(stored_object, provider_object_checksum, provider_object_size)
     # Needs additional implementation!!!
-    if checksum_match?(stored_object, provider_object_checksum) &&
+    if checksums_match?(stored_object, provider_object_checksum) &&
        (stored_object.source_object.object_size == provider_object_size)
       Rails.logger.warn 'Yippee!'
       true
@@ -127,10 +118,5 @@ class VerifyFixityJob < ApplicationJob
 
   def aws_fixity_verification_record_error_message(_parsed_json_aws_response)
     'Finish implementation'
-  end
-
-  def gcp_verify_fixity(_stored_object, _fixity_verification_record)
-    # throw exception as well?
-    Rails.logger.warn 'GCP fixity checks are not implemented'
   end
 end
