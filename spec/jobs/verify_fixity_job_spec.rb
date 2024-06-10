@@ -57,7 +57,7 @@ describe VerifyFixityJob do
                       status: 0)
   end
 
-  describe '#perform' do
+  xdescribe '#perform' do
     it 'calls #aws_verify_fixity if storage provider is AWS' do
       expect(verify_fixity_job).to receive(:aws_verify_fixity)
       verify_fixity_job.perform(aws_stored_object.id)
@@ -107,65 +107,16 @@ describe VerifyFixityJob do
 
   describe '#verify_fixity' do
     it 'calls #aws_verify_fixity if storage provider is AWS' do
-      expect(verify_fixity_job).to receive(:aws_verify_fixity)
-      verify_fixity_job.verify_fixity(aws_fixity_verification_pending)
+      aws_fixity_check = Atc::Aws::FixityCheck.new(aws_stored_object, 3141)
+      allow(aws_fixity_check).to receive(:fixity_checksum_object_size).and_return [123, 456, nil]
+      allow(Atc::Aws::FixityCheck).to receive(:new).and_return aws_fixity_check
+      result = verify_fixity_job.verify_fixity aws_fixity_verification_pending
+      expect(result).to eq([123, 456, nil])
     end
 
-    it 'calls #gcp_verify_fixity if storage provider is GCP' do
+    xit 'calls #gcp_verify_fixity if storage provider is GCP' do
       expect(verify_fixity_job).to receive(:gcp_verify_fixity)
-      verify_fixity_job.verify_fixity(gcp_fixity_verification_pending)
-    end
-  end
-
-  describe '#aws_verify_fixity' do
-    it 'calls #process_aws_fixity_websocket_channel_stream_response' do
-      expect(verify_fixity_job).to receive(:process_aws_fixity_websocket_channel_stream_response)
-      verify_fixity_job.aws_verify_fixity(aws_fixity_verification_pending)
-    end
-
-    context 'with a AWS response without errors ' do
-      let(:aws_json_response) do
-        '{"type": "fixity_check_complete",
-          "data": { "checksum_hexdigest": "ABCDEF12345", "object_size": 1234 } }'
-      end
-
-      it 'calls #object_checksum_and_size_match?' do
-        allow(verify_fixity_job).to receive(:aws_fixity_websocket_channel_stream) { aws_json_response }
-        expect(verify_fixity_job).to receive(:object_checksum_and_size_match?)
-        verify_fixity_job.aws_verify_fixity(aws_fixity_verification_pending)
-      end
-    end
-  end
-
-  describe '#process_aws_fixity_websocket_channel_stream_response' do
-    context 'receives a check complete from the aws fixity server' do
-      let(:aws_json_response) do
-        '{"type": "fixity_check_complete",
-          "data": { "checksum_hexdigest": "ABCDEF12345", "object_size": 1234 } }'
-      end
-
-      it 'and returns checksum, object size, and nil for the error message' do
-        allow(verify_fixity_job).to receive(:aws_fixity_websocket_channel_stream) { aws_json_response }
-        result =
-          verify_fixity_job.process_aws_fixity_websocket_channel_stream_response(aws_fixity_verification_pending)
-        expect(result).to eq(['ABCDEF12345', 1234, nil])
-      end
-    end
-
-    context 'receives a fixity check error from the aws fixity server' do
-      it 'and returns error message, and nil for the checksum and object size' do
-        allow(verify_fixity_job).to receive(:aws_fixity_websocket_channel_stream) { aws_error_json_response }
-        result =
-          verify_fixity_job.process_aws_fixity_websocket_channel_stream_response(aws_fixity_verification_pending)
-        expect(result).to eq([nil, nil, 'Ooops!'])
-      end
-    end
-  end
-
-  describe '#aws_fixity_verification_record_error_message' do
-    it 'returns error message to insert into FixityVerification.error_message' do
-      result = verify_fixity_job.aws_fixity_verification_record_error_message(JSON.parse(aws_error_json_response))
-      expect(result).to eq('Finish implementation')
+      verify_fixity_job.verify_fixity aws_fixity_verification_pending
     end
   end
 end

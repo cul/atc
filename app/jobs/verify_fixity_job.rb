@@ -35,68 +35,14 @@ class VerifyFixityJob < ApplicationJob
 
   def verify_fixity(fixity_verification_record)
     if fixity_verification_record.stored_object.storage_provider.aws?
-      aws_verify_fixity(fixity_verification_record)
-    elsif fixity_verification_record.stored_object.storage_provider.gcp?
-      gcp_verify_fixity(fixity_verification_record)
+      @check_fixity = Atc::Aws::FixityCheck.new(fixity_verification_record.stored_object,
+                                                fixity_verification_record.id)
+    # add an 'elsif' clause once GCP is also fixity-checked.
     else
       # throw exception as well?
       Rails.logger.warn 'Unsupported storage provider'
     end
-  end
-
-  def aws_verify_fixity(fixity_record)
-    # Question: is the AWS S3 object key the same as StoredObject.path?
-    # For now, assume yes. Howver, may need to add prefix
-    object_checksum, object_size, aws_fixity_error =
-      process_aws_fixity_websocket_channel_stream_response(fixity_record)
-    if aws_fixity_error.present?
-      fixity_record.error_message = aws_fixity_error
-      fixity_record.failure! # saves to the database
-      # process_aws_fixity_error(fixity_verification_record)
-    elsif object_checksum_and_size_match?(fixity_record.stored_object, object_checksum, object_size)
-      fixity_record.success!
-    else
-      # fixity_record.error_message =
-      # aws_fixity_verification_record_error_message aws_fixity_checksum_response
-      fixity_record.failure!
-    end
-  end
-
-  def gcp_verify_fixity(_fixity_verification_record)
-    # throw exception as well?
-    Rails.logger.warn 'GCP fixity checks are not implemented'
-  end
-
-  def process_aws_fixity_websocket_channel_stream_response(fixity_verification_record)
-    aws_fixity_check_response =
-      parse_json_response_aws_fixity_websocket_channel_stream(fixity_verification_record)
-    case aws_fixity_check_response['type']
-    when 'fixity_check_complete'
-      [aws_fixity_check_response['data']['checksum_hexdigest'], aws_fixity_check_response['data']['object_size'], nil]
-    when 'fixity_check_error'
-      [nil, nil, aws_fixity_check_response['data']['error_message']]
-    end
-  end
-
-  # method will be adapted/changed once helper class method is available
-  def parse_json_response_aws_fixity_websocket_channel_stream(fixity_record)
-    aws_bucket_name = fixity_record.stored_object.storage_provider.container_name
-    JSON.parse(aws_fixity_websocket_channel_stream(aws_bucket_name,
-                                                   fixity_record.stored_object.path,
-                                                   fixity_record.stored_object.source_object.fixity_checksum_algorithm,
-                                                   fixity_record.id))
-  end
-
-  # following is a placeholder. Will be replaced by call to helper class method
-  # and possibly merged with #process_aws_fixity_websocket_channel_stream
-  def aws_fixity_websocket_channel_stream(bucket,
-                                          object_key,
-                                          fixity_checksum_algorithm,
-                                          fixity_verification_record_id)
-    # fixity_verification_record_id used as stream identifier
-    # websocket client code will go here.
-    # Response received (assume JSON) is returned as-is.
-    # No processing of the response in this method.
+    _object_checksum, _object_size, _fixity_check_error = @check_fixity.fixity_checksum_object_size
   end
 
   def object_checksum_and_size_match?(stored_object, provider_object_checksum, provider_object_size)
