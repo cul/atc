@@ -3,7 +3,7 @@
 class VerifyFixityJob < ApplicationJob
   queue_as Atc::Queues::VERIFY_FIXITY
 
-  # spec present
+  # missing spec
   def perform(stored_object_id)
     stored_object = StoredObject.find(stored_object_id)
 
@@ -17,6 +17,7 @@ class VerifyFixityJob < ApplicationJob
     verify_fixity fixity_verification_record
   end
 
+  # spec present
   def process_existing_fixity_verification_record(existing_fixity_verification_record)
     return if existing_fixity_verification_record.pending?
 
@@ -34,21 +35,36 @@ class VerifyFixityJob < ApplicationJob
   end
 
   def verify_fixity(fixity_verification_record)
+    @fixity_check = provider_fixity_check(fixity_verification_record)
+    object_checksum, object_size, fixity_check_error = @fixity_check.fixity_checksum_object_size
+    if fixity_check_error.present?
+      fixity_verification_record.error_message = fixity_check_error
+      fixity_verification_record.failure!
+    elsif object_checksum_and_size_match?(fixity_verification_record, object_checksum, object_size)
+      fixity_verification_record.success!
+    else
+      fixity_verification_record.failure!
+    end
+  end
+
+  def provider_fixity_check(fixity_verification_record)
     if fixity_verification_record.stored_object.storage_provider.aws?
-      @check_fixity = Atc::Aws::FixityCheck.new(fixity_verification_record.stored_object,
-                                                fixity_verification_record.id)
+      Atc::Aws::FixityCheck.new(fixity_verification_record.stored_object,
+                                fixity_verification_record.id)
     # add an 'elsif' clause once GCP is also fixity-checked.
     else
       # throw exception as well?
-      Rails.logger.warn 'Unsupported storage provider'
+      storage_type = fixity_verification_record.stored_object.storage_provider.storage_type
+      msg = "No fixity check functionality for storage type #{storage_type}"
+      Rails.logger.warn msg
+      raise Atc::Exceptions::FixityCheckProviderNotFound, msg
     end
-    _object_checksum, _object_size, _fixity_check_error = @check_fixity.fixity_checksum_object_size
   end
 
-  def object_checksum_and_size_match?(stored_object, provider_object_checksum, provider_object_size)
+  def object_checksum_and_size_match?(fixity_verification_record, provider_object_checksum, provider_object_size)
     # Needs additional implementation!!!
-    if checksums_match?(stored_object, provider_object_checksum) &&
-       (stored_object.source_object.object_size == provider_object_size)
+    if checksums_match?(fixity_verification_record, provider_object_checksum) &&
+       (fixity_verification_record.stored_object.source_object.object_size == provider_object_size)
       Rails.logger.warn 'Yippee!'
       true
     else

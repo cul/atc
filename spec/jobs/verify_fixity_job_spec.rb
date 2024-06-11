@@ -111,12 +111,29 @@ describe VerifyFixityJob do
       allow(aws_fixity_check).to receive(:fixity_checksum_object_size).and_return [123, 456, nil]
       allow(Atc::Aws::FixityCheck).to receive(:new).and_return aws_fixity_check
       result = verify_fixity_job.verify_fixity aws_fixity_verification_pending
-      expect(result).to eq([123, 456, nil])
+      expect(result).to be true
     end
 
     xit 'calls #gcp_verify_fixity if storage provider is GCP' do
       expect(verify_fixity_job).to receive(:gcp_verify_fixity)
       verify_fixity_job.verify_fixity aws_fixity_verification_pending
+    end
+  end
+
+  describe '#provider_fixity_check' do
+    context 'with storage provider AWS' do
+      it 'returns a Atc::Aws::FixityCheck' do
+        result = verify_fixity_job.provider_fixity_check(aws_fixity_verification_pending)
+        expect(result).to be_an_instance_of(Atc::Aws::FixityCheck)
+      end
+    end
+
+    context 'with storage provider GCP' do
+      it 'raise a Atc::Exceptions::FixityCheckProviderNotFound exception' do
+        expect {
+          verify_fixity_job.provider_fixity_check(gcp_fixity_verification_pending)
+        }.to raise_error(Atc::Exceptions::FixityCheckProviderNotFound)
+      end
     end
   end
 end
