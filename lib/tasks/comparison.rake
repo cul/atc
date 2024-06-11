@@ -28,12 +28,12 @@ namespace :atc do
         # For now, based on Fred's old remediation script, also convert all mid-filename periods to underscores (but don't convert the last period)
         expected_remediated_filename = expected_remediated_filename.gsub(/\.(?=.*\..*)/, '_')
         # Also adding the rule below to match Fred's remediation script (but not replacing periods because we already handled those)
-        expected_remediated_filename = expected_remediated_filename.gsub(/[^a-zA-Z0-9\.]+/, '_')
+        expected_remediated_filename = expected_remediated_filename.gsub(/[^a-zA-Z0-9\.-]+/, '_')
 
         remediated_filename = File.basename(new_path)
 
         # Check if the new_filename matches the remediated version of the old filename
-        if remediated_filename != expected_remediated_filename
+        if remediated_filename.strip != expected_remediated_filename.strip
           puts "Possible mismatch for old_path (on CSV row #{i+2}). Expected #{expected_remediated_filename}, but found: #{remediated_filename}"
         end
 
