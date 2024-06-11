@@ -57,15 +57,12 @@ describe VerifyFixityJob do
                       status: 0)
   end
 
-  xdescribe '#perform' do
-    it 'calls #aws_verify_fixity if storage provider is AWS' do
-      expect(verify_fixity_job).to receive(:aws_verify_fixity)
-      verify_fixity_job.perform(aws_stored_object.id)
-    end
-
-    it 'calls #gcp_verify_fixity if storage provider is GCP' do
-      expect(verify_fixity_job).to receive(:gcp_verify_fixity)
-      verify_fixity_job.perform(gcp_stored_object.id)
+  describe '#perform' do
+    context 'with stored object in GCP' do
+      it 'returns immediately so does not call FixityVerification.find_by' do
+        expect(FixityVerification).not_to receive(:find_by)
+        verify_fixity_job.perform(gcp_stored_object.id)
+      end
     end
   end
 
@@ -105,25 +102,10 @@ describe VerifyFixityJob do
     end
   end
 
-  describe '#verify_fixity' do
-    it 'calls #aws_verify_fixity if storage provider is AWS' do
-      aws_fixity_check = Atc::Aws::FixityCheck.new(aws_stored_object, 3141)
-      allow(aws_fixity_check).to receive(:fixity_checksum_object_size).and_return [123, 456, nil]
-      allow(Atc::Aws::FixityCheck).to receive(:new).and_return aws_fixity_check
-      result = verify_fixity_job.verify_fixity aws_fixity_verification_pending
-      expect(result).to be true
-    end
-
-    xit 'calls #gcp_verify_fixity if storage provider is GCP' do
-      expect(verify_fixity_job).to receive(:gcp_verify_fixity)
-      verify_fixity_job.verify_fixity aws_fixity_verification_pending
-    end
-  end
-
-  describe '#provider_fixity_check' do
+  describe '#instatiate_provider_fixity_check' do
     context 'with storage provider AWS' do
       it 'returns a Atc::Aws::FixityCheck' do
-        result = verify_fixity_job.provider_fixity_check(aws_fixity_verification_pending)
+        result = verify_fixity_job.instantiate_provider_fixity_check(aws_fixity_verification_pending)
         expect(result).to be_an_instance_of(Atc::Aws::FixityCheck)
       end
     end
@@ -131,8 +113,56 @@ describe VerifyFixityJob do
     context 'with storage provider GCP' do
       it 'raise a Atc::Exceptions::FixityCheckProviderNotFound exception' do
         expect {
-          verify_fixity_job.provider_fixity_check(gcp_fixity_verification_pending)
-        }.to raise_error(Atc::Exceptions::FixityCheckProviderNotFound)
+          verify_fixity_job.instantiate_provider_fixity_check(gcp_fixity_verification_pending)
+        }.to raise_error(Atc::Exceptions::ProviderFixityCheckNotFound)
+      end
+    end
+  end
+
+  describe '#verify_fixity' do
+    context 'with Atc::Aws::FixityCheck instance as argument' do
+      it 'calls the instance#fixity_checksum_object_size' do
+        aws_fixity_check = Atc::Aws::FixityCheck.new(aws_stored_object, 3141)
+        expect(aws_fixity_check).to receive(:fixity_checksum_object_size)
+        verify_fixity_job.verify_fixity(aws_fixity_verification_pending, aws_fixity_check)
+      end
+    end
+
+    context 'with Atc::Aws::FixityCheck#fixity_checksum_object_size returns error' do
+      it 'calls FixityVerfication#failure!' do
+        aws_fixity_check = Atc::Aws::FixityCheck.new(aws_stored_object, 3141)
+        allow(aws_fixity_check).to receive(:fixity_checksum_object_size).and_return [nil, nil, 'Ooops']
+        expect(aws_fixity_verification_pending).to receive(:failure!)
+        verify_fixity_job.verify_fixity(aws_fixity_verification_pending, aws_fixity_check)
+      end
+    end
+
+    context 'with Atc::Aws::FixityCheck#fixity_checksum_object_size returns checksum and size' do
+      it 'calls #object_checksum_and_size_match?' do
+        aws_fixity_check = Atc::Aws::FixityCheck.new(aws_stored_object, 3141)
+        allow(aws_fixity_check).to receive(:fixity_checksum_object_size).and_return ['12345FF', 1234, nil]
+        expect(verify_fixity_job).to receive(:object_checksum_and_size_match?)
+        verify_fixity_job.verify_fixity(aws_fixity_verification_pending, aws_fixity_check)
+      end
+
+      context 'and #object_checksum_and_size_match? returns false' do
+        it 'calls FixityVerfication#failure!' do
+          aws_fixity_check = Atc::Aws::FixityCheck.new(aws_stored_object, 3141)
+          allow(aws_fixity_check).to receive(:fixity_checksum_object_size).and_return ['12345FF', 1234, nil]
+          allow(verify_fixity_job).to receive(:object_checksum_and_size_match?).and_return false
+          expect(aws_fixity_verification_pending).to receive(:failure!)
+          verify_fixity_job.verify_fixity(aws_fixity_verification_pending, aws_fixity_check)
+        end
+      end
+
+      context 'and #object_checksum_and_size_match? returns true' do
+        it 'calls FixityVerfication#failure!' do
+          aws_fixity_check = Atc::Aws::FixityCheck.new(aws_stored_object, 3141)
+          allow(aws_fixity_check).to receive(:fixity_checksum_object_size).and_return ['12345FF', 1234, nil]
+          allow(verify_fixity_job).to receive(:object_checksum_and_size_match?).and_return true
+          expect(aws_fixity_verification_pending).to receive(:success!)
+          verify_fixity_job.verify_fixity(aws_fixity_verification_pending, aws_fixity_check)
+        end
       end
     end
   end

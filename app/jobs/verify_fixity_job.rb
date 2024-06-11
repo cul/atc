@@ -7,6 +7,9 @@ class VerifyFixityJob < ApplicationJob
   def perform(stored_object_id)
     stored_object = StoredObject.find(stored_object_id)
 
+    # For now, handle only AWS fixity check
+    return unless stored_object.storage_provider.aws?
+
     existing_fixity_verification_record = FixityVerification.find_by(stored_object: stored_object)
     return if existing_fixity_verification_record&.pending?
 
@@ -14,7 +17,8 @@ class VerifyFixityJob < ApplicationJob
       process_existing_fixity_verification_record existing_fixity_verification_record
     end
     fixity_verification_record = create_pending_fixity_verification stored_object
-    verify_fixity fixity_verification_record
+    provider_fixity_check = instantiate_provider_fixity_check fixity_verification_record
+    verify_fixity(fixity_verification_record, provider_fixity_check)
   end
 
   # spec present
@@ -34,9 +38,23 @@ class VerifyFixityJob < ApplicationJob
     fixity_verification_record
   end
 
-  def verify_fixity(fixity_verification_record)
-    @fixity_check = provider_fixity_check(fixity_verification_record)
-    object_checksum, object_size, fixity_check_error = @fixity_check.fixity_checksum_object_size
+  # spec present
+  def instantiate_provider_fixity_check(fixity_verification_record)
+    if fixity_verification_record.stored_object.storage_provider.aws?
+      Atc::Aws::FixityCheck.new(fixity_verification_record.stored_object,
+                                fixity_verification_record.id)
+    # add an 'elsif' clause once GCP is also fixity-checked.
+    else
+      storage_type = fixity_verification_record.stored_object.storage_provider.storage_type
+      msg = "No fixity check functionality for storage type #{storage_type}"
+      Rails.logger.warn msg
+      raise Atc::Exceptions::ProviderFixityCheckNotFound, msg
+    end
+  end
+
+  # spec present
+  def verify_fixity(fixity_verification_record, provider_fixity_check)
+    object_checksum, object_size, fixity_check_error = provider_fixity_check.fixity_checksum_object_size
     if fixity_check_error.present?
       fixity_verification_record.error_message = fixity_check_error
       fixity_verification_record.failure!
@@ -44,20 +62,6 @@ class VerifyFixityJob < ApplicationJob
       fixity_verification_record.success!
     else
       fixity_verification_record.failure!
-    end
-  end
-
-  def provider_fixity_check(fixity_verification_record)
-    if fixity_verification_record.stored_object.storage_provider.aws?
-      Atc::Aws::FixityCheck.new(fixity_verification_record.stored_object,
-                                fixity_verification_record.id)
-    # add an 'elsif' clause once GCP is also fixity-checked.
-    else
-      # throw exception as well?
-      storage_type = fixity_verification_record.stored_object.storage_provider.storage_type
-      msg = "No fixity check functionality for storage type #{storage_type}"
-      Rails.logger.warn msg
-      raise Atc::Exceptions::FixityCheckProviderNotFound, msg
     end
   end
 
