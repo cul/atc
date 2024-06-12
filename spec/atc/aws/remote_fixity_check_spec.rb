@@ -3,8 +3,8 @@
 require 'rails_helper'
 
 describe Atc::Aws::RemoteFixityCheck do
-  let(:mock_websocket) {
-    ws = double(Faye::WebSocket::Client)
+  let(:mock_websocket) do
+    ws = double(Faye::WebSocket::Client) # rubocop:disable RSpec/VerifiedDoubles
     # Intercept bindings to "on"
     allow(ws).to receive(:on) { |a, &block|
       procs_for_on = ws.instance_variable_get(:@procs_for_on) || {}
@@ -19,17 +19,15 @@ describe Atc::Aws::RemoteFixityCheck do
       procs_for_on[a].each { |prc| prc.call(event) }
     }
     # Allow ws.close to trigger any on(:close) procs.
-    allow(ws).to receive(:close) { ws.trigger(:close, ->(){}) }
+    allow(ws).to receive(:close) { ws.trigger(:close, -> {}) }
     ws
-  }
-  let(:remote_fixity_check) {
-    described_class.new('ws://fake-websocket-url', 'fake-auth-token')
-  }
+  end
+  let(:remote_fixity_check) { described_class.new('ws://fake-websocket-url', 'fake-auth-token') }
   let(:job_identifier) { 'job-12345' }
   let(:bucket_name) { 'example-bucket' }
   let(:object_path) { 'path/to/object.tiff' }
   let(:checksum_algorithm_name) { 'sha256' }
-  let(:example_job_response) { {'a' => 'b'}.to_json }
+  let(:example_job_response) { { 'a' => 'b' }.to_json }
 
   let(:fixity_check_complete_message) do
     {
@@ -49,7 +47,7 @@ describe Atc::Aws::RemoteFixityCheck do
 
   describe '#perform' do
     it 'works as expected' do
-      expect(remote_fixity_check).to receive(:create_websocket_connection).and_return(mock_websocket)
+      allow(remote_fixity_check).to receive(:create_websocket_connection).and_return(mock_websocket)
 
       job_response = nil
       t = Thread.new do
@@ -69,7 +67,7 @@ describe Atc::Aws::RemoteFixityCheck do
     end
   end
 
-  describe "#job_unresponsive?" do
+  describe '#job_unresponsive?' do
     it 'returns true when the passed-in time is more than STALLED_FIXITY_CHECK_JOB_TIMEOUT seconds in the past' do
       expect(
         remote_fixity_check.job_unresponsive?(
@@ -86,6 +84,4 @@ describe Atc::Aws::RemoteFixityCheck do
       ).to eq(false)
     end
   end
-
-
 end

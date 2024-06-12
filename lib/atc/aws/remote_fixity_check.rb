@@ -1,3 +1,11 @@
+# frozen_string_literal: true
+
+# rubocop:disable Metrics/AbcSize
+# rubocop:disable Metrics/CyclomaticComplexity
+# rubocop:disable Metrics/MethodLength
+# rubocop:disable Naming/MethodParameterName
+# rubocop:disable Metrics/PerceivedComplexity
+
 class Atc::Aws::RemoteFixityCheck
   STALLED_FIXITY_CHECK_JOB_TIMEOUT = 10.seconds
 
@@ -10,8 +18,8 @@ class Atc::Aws::RemoteFixityCheck
   # @yield [Faye::WebSocket::Client] A new websocket client instance.
   def create_websocket_connection
     Faye::WebSocket::Client.new(@ws_url, nil, {
-        headers: { 'Authorization' => "Bearer: #{@auth_token}" }
-      })
+      headers: { 'Authorization' => "Bearer: #{@auth_token}" }
+    })
   end
 
   # Establishes a websocket connection, initiates a fixity check, and blocks until
@@ -30,13 +38,15 @@ class Atc::Aws::RemoteFixityCheck
       # Handle websocket messages
       ws.on(:message) do |event|
         data = JSON.parse(event.data)
-        if is_welcome_message?(data)
+        if welcome_message?(data)
           send_channel_subscription_message(ws, job_identifier)
-        elsif is_confirm_subscription_message?(data, job_identifier)
-          send_run_fixity_check_for_s3_object_message(ws, job_identifier, bucket_name, object_path, checksum_algorithm_name)
-        elsif is_progress_message?(data, job_identifier)
+        elsif confirm_subscription_message?(data, job_identifier)
+          send_run_fixity_check_for_s3_object_message(
+            ws, job_identifier, bucket_name, object_path, checksum_algorithm_name
+          )
+        elsif progress_message?(data, job_identifier)
           time_of_last_progress_update_message = Time.current
-        elsif is_fixity_check_complete_or_error_message?(data, job_identifier)
+        elsif fixity_check_complete_or_error_message?(data, job_identifier)
           job_response = JSON.parse(data['message'])
         end
       end
@@ -47,7 +57,7 @@ class Atc::Aws::RemoteFixityCheck
       end
     end
 
-    raise Atc::Exceptions::RemoteFixityCheckTimeout, "Timed out while waiting for a response." if job_response.nil?
+    raise Atc::Exceptions::RemoteFixityCheckTimeout, 'Timed out while waiting for a response.' if job_response.nil?
 
     job_response
   end
@@ -80,26 +90,28 @@ class Atc::Aws::RemoteFixityCheck
     )
   end
 
-  def is_welcome_message?(data)
+  def welcome_message?(data)
     data['type'] == 'welcome'
   end
 
-  def is_confirm_subscription_message?(data, job_identifier)
+  def confirm_subscription_message?(data, job_identifier)
     data['type'] == 'confirm_subscription' && JSON.parse(data['identifier'])['job_identifier'] == job_identifier
   end
 
-  def is_custom_message?(data, job_identifier)
+  def custom_message?(data, job_identifier)
     data['type'].nil? && JSON.parse(data['identifier'])['job_identifier'] == job_identifier && data['message'].present?
   end
 
-  def is_progress_message?(data, job_identifier)
-    return false unless is_custom_message?(data, job_identifier)
+  def progress_message?(data, job_identifier)
+    return false unless custom_message?(data, job_identifier)
+
     message_type = JSON.parse(data['message'])['type']
     message_type == 'fixity_check_in_progress'
   end
 
-  def is_fixity_check_complete_or_error_message?(data, job_identifier)
-    return false unless is_custom_message?(data, job_identifier)
+  def fixity_check_complete_or_error_message?(data, job_identifier)
+    return false unless custom_message?(data, job_identifier)
+
     message_type = JSON.parse(data['message'])['type']
     ['fixity_check_complete', 'fixity_check_error'].include?(message_type)
   end
