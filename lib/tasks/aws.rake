@@ -3,6 +3,18 @@
 namespace :atc do
   namespace :aws do
     desc 'Upload a file to Amazon S3.  This task only exists for transfer testing purposes.'
+    task fixity_check: :environment do
+      bucket_name = ENV['bucket_name']
+      object_path = ENV['object_path']
+      checksum_algorithm_name = ENV['checksum_algorithm_name']
+
+      job_identifier = "fixity-check-from-rake-task-#{SecureRandom.uuid}"
+      remote_fixity_check = Atc::Aws::RemoteFixityCheck.new(CHECK_PLEASE['ws_url'], CHECK_PLEASE['auth_token'])
+      response = remote_fixity_check.perform(job_identifier, bucket_name, object_path, checksum_algorithm_name)
+      puts "Response: #{response.inspect}"
+    end
+
+    desc 'Upload a file to Amazon S3.  This task only exists for transfer testing purposes.'
     task upload_file: :environment do
       if Rails.env != 'development'
         puts 'This task is just for transfer testing and should only be run in a development environment.'

@@ -1,0 +1,6 @@
+development:
+  ws_url: 'ws://dev.example.com/cable'
+  auth_token: 'changethis'
+test:
+  ws_url: 'ws://test.example.com/cable'
+  auth_token: 'changethis'

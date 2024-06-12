@@ -5,4 +5,5 @@ module Atc::Exceptions
   class TransferError < AtcError; end
   class ObjectExists < AtcError; end
   class StorageProviderMappingNotFound < AtcError; end
+  class RemoteFixityCheckTimeout < AtcError; end
 end
