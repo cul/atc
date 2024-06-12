@@ -49,6 +49,7 @@
 /config/permissions.yml
 /config/redis.yml
 /config/resque.yml
+/config/check_please.yml
 
 # simplecov coverage report
 /coverage
