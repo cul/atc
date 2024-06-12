@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_29_162321) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_03_194835) do
   create_table "checksum_algorithms", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -25,6 +25,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_29_162321) do
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "error_message"
     t.index ["source_object_id"], name: "index_fixity_verifications_on_source_object_id"
     t.index ["status"], name: "index_fixity_verifications_on_status"
     t.index ["stored_object_id"], name: "index_fixity_verifications_on_stored_object_id"
