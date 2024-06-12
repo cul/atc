@@ -2,7 +2,7 @@
 
 namespace :atc do
   namespace :aws do
-    desc 'Upload a file to Amazon S3.  This task only exists for transfer testing purposes.'
+    desc 'Run a fixity check using a remote CheckPlease app deployment.'
     task fixity_check: :environment do
       bucket_name = ENV['bucket_name']
       object_path = ENV['object_path']
