@@ -1,4 +1,20 @@
 development:
   run_queued_jobs_inline: true
+  source_paths_to_storage_providers:
+    '/digital/preservation/':
+      path_mapping: '' # replace original path prefix with this value when transferring
+      storage_providers:
+        - storage_type: 'aws'
+          container_name: 'example-dev-bucket'
+        - storage_type: 'gcp'
+          container_name: 'example-dev-bucket'
 test:
   run_queued_jobs_inline: true
+  source_paths_to_storage_providers:
+    '/digital/preservation/':
+      path_mapping: '' # replace original path prefix with this value when transferring
+      storage_providers:
+        - storage_type: 'aws'
+          container_name: 'example-test-bucket'
+        - storage_type: 'gcp'
+          container_name: 'example-test-bucket'

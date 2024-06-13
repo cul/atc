@@ -10,6 +10,7 @@ namespace :atc do
       end
 
       local_file_path = ENV['local_file_path']
+      bucket_name = ENV['bucket_name']
       overwrite = ENV['overwrite'] == 'true'
 
       if local_file_path.present?
@@ -35,7 +36,7 @@ namespace :atc do
       # though, and we could potentially make it a rake task argument.
       target_object_key = File.basename(local_file_path)
 
-      gcp_storage_uploader = Atc::Gcp::StorageUploader.new(GCP_STORAGE_CLIENT, GCP_CONFIG[:preservation_bucket_name])
+      gcp_storage_uploader = Atc::Gcp::StorageUploader.new(GCP_STORAGE_CLIENT, bucket_name)
       gcp_storage_uploader.upload_file(
         local_file_path,
         target_object_key,

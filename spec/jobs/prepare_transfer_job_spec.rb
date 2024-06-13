@@ -8,10 +8,54 @@ require 'rails_helper'
 describe PrepareTransferJob do
   let(:prepare_transfer_job) { described_class.new }
   let(:source_object) { FactoryBot.create(:source_object, :with_checksum) }
+  # Capture the first piece of the path, including trailing slash
+  let(:path_prefix) { source_object.path.match(%r{/[^/]+/})[0] }
   let(:source_object_without_checksum) { FactoryBot.create(:source_object) }
   let!(:aws_storage_provider) { FactoryBot.create(:storage_provider, :aws) }
   let!(:gcp_storage_provider) { FactoryBot.create(:storage_provider, :gcp) }
   let(:crc32c_checksum_algorithm) { FactoryBot.create(:checksum_algorithm, :crc32c) }
+  let(:tempfile_base_path) do
+    base_path = nil
+    Tempfile.create('throwaway-file') do |f|
+      base_path = f.path.match(%r{/[^/]+/})[0] # Capture the first piece of the path, including trailing slash
+    end
+    base_path
+  end
+
+  before do
+    stub_const('ATC', ATC.merge({
+      source_paths_to_storage_providers: {
+        # Add a mapping for our source_object's path
+        path_prefix.to_sym => {
+          path_mapping: '',
+          storage_providers: [
+            {
+              storage_type: aws_storage_provider.storage_type,
+              container_name: aws_storage_provider.container_name
+            },
+            {
+              storage_type: gcp_storage_provider.storage_type,
+              container_name: gcp_storage_provider.container_name
+            }
+          ]
+        },
+        # Add a mapping for the tempfile base path (for some of the tests in this file)
+        tempfile_base_path.to_sym => {
+          path_mapping: '',
+          storage_providers: [
+            {
+              storage_type: aws_storage_provider.storage_type,
+              container_name: aws_storage_provider.container_name
+            },
+            {
+              storage_type: gcp_storage_provider.storage_type,
+              container_name: gcp_storage_provider.container_name
+            }
+          ]
+        }
+      }
+    }))
+  end
 
   it 'creates the expected PendingTransfer records' do
     expect(source_object.pending_transfers.length).to eq(0)
