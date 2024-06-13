@@ -214,4 +214,27 @@ describe PrepareTransferJob do
       end
     end
   end
+
+  describe '#select_storage_providers' do
+    it 'raises an exception if an invalid storage provider type is called' do
+      expect {
+        prepare_transfer_job.select_storage_providers(source_object, 'invalid_type')
+      }.to raise_error(ArgumentError)
+    end
+
+    it 'returns the expected storage providers when valid arguments are provided' do
+      expect(prepare_transfer_job.select_storage_providers(source_object, 'aws')).to eq([aws_storage_provider])
+      expect(prepare_transfer_job.select_storage_providers(source_object, 'gcp')).to eq([gcp_storage_provider])
+    end
+
+    it 'does not return a storage provider that is associated with an existing PendingTransfer for the source_object' do
+      FactoryBot.create(:pending_transfer, source_object: source_object, storage_provider: aws_storage_provider)
+      expect(prepare_transfer_job.select_storage_providers(source_object, 'aws')).to eq([])
+    end
+
+    it 'does not return a storage provider that is associated with an existing StoredObject for the source_object' do
+      FactoryBot.create(:stored_object, source_object: source_object, storage_provider: aws_storage_provider)
+      expect(prepare_transfer_job.select_storage_providers(source_object, 'aws')).to eq([])
+    end
+  end
 end
