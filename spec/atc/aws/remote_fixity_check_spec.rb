@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable RSpec/ExampleLength
+
 require 'rails_helper'
 
 describe Atc::Aws::RemoteFixityCheck do
@@ -82,6 +84,162 @@ describe Atc::Aws::RemoteFixityCheck do
           Time.current - (Atc::Aws::RemoteFixityCheck::STALLED_FIXITY_CHECK_JOB_TIMEOUT - 1)
         )
       ).to eq(false)
+    end
+  end
+
+  describe '#send_channel_subscription_message' do
+    it 'sends the expected message' do
+      expect(mock_websocket).to receive(:send).with(
+        {
+          'command': 'subscribe',
+          'identifier': { 'channel': 'FixityCheckChannel', 'job_identifier': job_identifier }.to_json
+        }.to_json
+      )
+      remote_fixity_check.send_channel_subscription_message(mock_websocket, job_identifier)
+    end
+  end
+
+  describe '#send_run_fixity_check_for_s3_object_message' do
+    it 'sends the expected message' do
+      expect(mock_websocket).to receive(:send).with(
+        {
+          'command': 'message',
+          'identifier': { 'channel': 'FixityCheckChannel', 'job_identifier': job_identifier }.to_json,
+          'data': {
+            'action': 'run_fixity_check_for_s3_object',
+            'bucket_name': bucket_name,
+            'object_path': object_path,
+            'checksum_algorithm_name': checksum_algorithm_name
+          }.to_json
+        }.to_json
+      )
+      remote_fixity_check.send_run_fixity_check_for_s3_object_message(
+        mock_websocket,
+        job_identifier,
+        bucket_name,
+        object_path,
+        checksum_algorithm_name
+      )
+    end
+  end
+
+  describe '#welcome_message?' do
+    let(:welcome_message) do
+      { 'type' => 'welcome' }
+    end
+    let(:invalid_welcome_message) do
+      { 'nope' => 'nope' }
+    end
+
+    it 'returns true when matching data is supplied' do
+      expect(remote_fixity_check.welcome_message?(welcome_message)).to eq(true)
+    end
+
+    it 'returns false when non-matching data is supplied' do
+      expect(remote_fixity_check.welcome_message?(invalid_welcome_message)).to eq(false)
+    end
+  end
+
+  describe '#confirm_subscription_message?' do
+    let(:confirm_subscription_message) do
+      {
+        'type' => 'confirm_subscription',
+        'identifier' => {
+          'job_identifier' => job_identifier
+        }.to_json
+      }
+    end
+    let(:invalid_confirm_subscription_message) do
+      { 'nope' => 'nope' }
+    end
+
+    it 'returns true when matching data is supplied' do
+      expect(
+        remote_fixity_check.confirm_subscription_message?(confirm_subscription_message, job_identifier)
+      ).to eq(true)
+    end
+
+    it 'returns false when non-matching data is supplied' do
+      expect(
+        remote_fixity_check.confirm_subscription_message?(invalid_confirm_subscription_message, job_identifier)
+      ).to eq(false)
+    end
+  end
+
+  context 'custom messages' do
+    # fixity_check_in_progress messages are a type of custom message
+    let(:progress_message) do
+      {
+        'identifier' => {
+          'job_identifier' => job_identifier
+        }.to_json,
+        'message' => {
+          'type' => 'fixity_check_in_progress'
+        }.to_json
+      }
+    end
+    # fixity_check_complete messages are a type of custom message
+    let(:fixity_check_complete_message) do
+      {
+        'identifier' => {
+          'job_identifier' => job_identifier
+        }.to_json,
+        'message' => {
+          'type' => 'fixity_check_complete',
+          'data' => { 'example' => 'data' }
+        }.to_json
+      }
+    end
+    # fixity_check_error messages are a type of custom message
+    let(:fixity_check_error_message) do
+      {
+        'identifier' => {
+          'job_identifier' => job_identifier
+        }.to_json,
+        'message' => {
+          'type' => 'fixity_check_error',
+          'data' => { 'example' => 'data' }
+        }.to_json
+      }
+    end
+
+    describe '#custom_message?' do
+      it 'returns true when matching data is supplied' do
+        expect(remote_fixity_check.custom_message?(progress_message, job_identifier)).to eq(true)
+        expect(remote_fixity_check.custom_message?(fixity_check_complete_message, job_identifier)).to eq(true)
+        expect(remote_fixity_check.custom_message?(fixity_check_error_message, job_identifier)).to eq(true)
+      end
+
+      it 'returns false when non-matching data is supplied' do
+        expect(remote_fixity_check.custom_message?({ 'nope' => 'nope' }, job_identifier)).to eq(false)
+      end
+    end
+
+    describe '#progress_message?' do
+      it 'returns true when matching data is supplied' do
+        expect(remote_fixity_check.progress_message?(progress_message, job_identifier)).to eq(true)
+      end
+
+      it 'returns false when non-matching data is supplied' do
+        expect(remote_fixity_check.progress_message?(fixity_check_complete_message, job_identifier)).to eq(false)
+      end
+    end
+
+    describe '#fixity_check_complete_or_error_message?' do
+      it 'returns true when matching data is supplied' do
+        expect(
+          remote_fixity_check.fixity_check_complete_or_error_message?(fixity_check_complete_message, job_identifier)
+        ).to eq(true)
+        expect(
+          remote_fixity_check.fixity_check_complete_or_error_message?(fixity_check_error_message, job_identifier)
+        ).to eq(true)
+      end
+
+      it 'returns false when non-matching data is supplied' do
+        expect(
+          remote_fixity_check.fixity_check_complete_or_error_message?(progress_message, job_identifier)
+        ).to eq(false)
+      end
     end
   end
 end

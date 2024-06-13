@@ -95,11 +95,17 @@ class Atc::Aws::RemoteFixityCheck
   end
 
   def confirm_subscription_message?(data, job_identifier)
-    data['type'] == 'confirm_subscription' && JSON.parse(data['identifier'])['job_identifier'] == job_identifier
+    return false if data['identifier'].nil?
+
+    data['type'] == 'confirm_subscription' && JSON.parse(data['identifier'])&.fetch('job_identifier') == job_identifier
   end
 
   def custom_message?(data, job_identifier)
-    data['type'].nil? && JSON.parse(data['identifier'])['job_identifier'] == job_identifier && data['message'].present?
+    return false if data['type'].present?
+    return false if data['message'].nil?
+    return false if data['identifier'].nil?
+
+    JSON.parse(data['identifier'])&.fetch('job_identifier') == job_identifier
   end
 
   def progress_message?(data, job_identifier)
