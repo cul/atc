@@ -4,10 +4,9 @@ require 'rails_helper'
 
 describe SourceObject do
   let(:sha256_checksum_algorithm) { FactoryBot.create(:checksum_algorithm, :sha256) }
+  let(:source_object) { FactoryBot.create(:source_object) }
 
   describe 'validations' do
-    subject(:source_object) { FactoryBot.create(:source_object) }
-
     it 'has a path_hash of 32 bytes' do
       expect(source_object.path_hash.bytesize).to be 32
     end
@@ -90,6 +89,68 @@ describe SourceObject do
       expect(source_object.save).to eq(true)
       source_object.reload
       expect(source_object.fixity_checksum_value.length).to eq(64)
+    end
+  end
+
+  describe '#storage_providers_for_source_path' do
+    let(:path_prefix) { source_object.path.match(%r{/[^/]+/})[0] }
+    let!(:aws_storage_provider) { FactoryBot.create(:storage_provider, :aws) }
+    let!(:gcp_storage_provider) { FactoryBot.create(:storage_provider, :gcp) }
+
+    context 'with matching source providers defined in atc.yml' do
+      before do
+        stub_const('ATC', ATC.merge({
+          source_paths_to_storage_providers: {
+            # Add a mapping for our source_object's path
+            path_prefix.to_sym => {
+              path_mapping: '',
+              storage_providers: [
+                {
+                  storage_type: aws_storage_provider.storage_type,
+                  container_name: aws_storage_provider.container_name
+                },
+                {
+                  storage_type: gcp_storage_provider.storage_type,
+                  container_name: gcp_storage_provider.container_name
+                }
+              ]
+            }
+          }
+        }))
+      end
+
+      it 'returns the expected source providers' do
+        expect(source_object.storage_providers_for_source_path).to eq([aws_storage_provider, gcp_storage_provider])
+      end
+    end
+
+    context 'with NON-matching source providers defined in atc.yml' do
+      before do
+        stub_const('ATC', ATC.merge({
+          source_paths_to_storage_providers: {
+            # Add a mapping for our source_object's path
+            '/path/does/not/match/': {
+              path_mapping: '',
+              storage_providers: [
+                {
+                  storage_type: aws_storage_provider.storage_type,
+                  container_name: aws_storage_provider.container_name
+                },
+                {
+                  storage_type: gcp_storage_provider.storage_type,
+                  container_name: gcp_storage_provider.container_name
+                }
+              ]
+            }
+          }
+        }))
+      end
+
+      it "raises an exception because this source_object's path cannot be resolved to a StorageProvider" do
+        expect {
+          source_object.storage_providers_for_source_path
+        }.to raise_error(Atc::Exceptions::StorageProviderMappingNotFound)
+      end
     end
   end
 end

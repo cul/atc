@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/AbcSize
 # rubocop:disable Metrics/CyclomaticComplexity
+# rubocop:disable Metrics/PerceivedComplexity
 # rubocop:disable Metrics/MethodLength
 
 class SourceObject < ApplicationRecord
@@ -43,6 +45,14 @@ class SourceObject < ApplicationRecord
           storage_providers << storage_provider unless storage_provider.nil?
         end
       end
+      # If this method is being called, we expect there to be a storage provider for this source_object's path.
+      # So if no storage_providers were found, raise an exception.
+      if storage_providers.empty?
+        raise Atc::Exceptions::StorageProviderMappingNotFound,
+              'Could not find an atc.yml storage provider that maps to the path '\
+              "for SourceObject #{self.id} (path = #{self.path})"
+      end
+
       storage_providers
     end
   end
