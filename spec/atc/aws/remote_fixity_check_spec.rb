@@ -212,6 +212,9 @@ describe Atc::Aws::RemoteFixityCheck do
 
       it 'returns false when non-matching data is supplied' do
         expect(remote_fixity_check.custom_message?({ 'nope' => 'nope' }, job_identifier)).to eq(false)
+        expect(remote_fixity_check.custom_message?({
+          'type' => '', 'message' => '', 'identifier' => ''
+        }, job_identifier)).to eq(false)
       end
     end
 

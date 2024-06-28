@@ -101,7 +101,7 @@ class Atc::Aws::RemoteFixityCheck
   end
 
   def custom_message?(data, job_identifier)
-    return false if data['type'].present?
+    return false unless data['type'].nil?
     return false if data['message'].nil?
     return false if data['identifier'].nil?
 
