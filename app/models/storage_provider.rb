@@ -58,28 +58,18 @@ class StorageProvider < ApplicationRecord
     end
   end
 
-  def local_path_key_map_for_storage_type
-    @local_path_key_map_for_storage_type ||=
-      case self.storage_type
-      when 'aws'
-        AWS_CONFIG[:local_path_key_map]
-      when 'gcp'
-        GCP_CONFIG[:local_path_key_map]
-      else
-        raise_unimplemented_storage_type_error!
-      end
-  end
-
   def local_path_to_stored_path(local_path)
-    local_path_key_map = local_path_key_map_for_storage_type
+    local_path_key_map = ATC[:source_paths_to_storage_providers].transform_values { |config|
+      config[:path_mapping]
+    }.to_h
 
     matching_local_path_prefix = local_path_key_map.keys.find do |local_file_prefix|
       local_path.start_with?(local_file_prefix.to_s)
     end
 
     if matching_local_path_prefix.nil?
-      raise Atc::Exceptions::StorageProviderMappingNotFound, "Could not find #{self.storage_type} storage provider "\
-            "mapping for #{local_path}"
+      raise Atc::Exceptions::StorageProviderMappingNotFound,
+            "Could not find ATC source_paths_to_storage_providers mapping for #{local_path}"
     end
 
     local_path.sub(matching_local_path_prefix.to_s, local_path_key_map[matching_local_path_prefix])

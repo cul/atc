@@ -15,13 +15,7 @@ S3_CLIENT = Aws::S3::Client.new(
 ENV['AWS_REGION'] = AWS_CONFIG[:aws_region]
 
 def validate_aws_config!
-  AWS_CONFIG[:local_path_key_map] ||= {}
-
-  # Make sure that any local_path_key_map key ends with a trailing slash.  This is important
-  # because a leading slash must be absent from the translated bucket key path.
-  AWS_CONFIG[:local_path_key_map].each_key do |key|
-    raise "Found invalid key in aws.yml local_path_key_map: #{key} (key must end with a '/')" unless key.end_with?('/')
-  end
+  # No validations at the moment
 end
 
 validate_aws_config!

@@ -8,13 +8,7 @@ require 'google/cloud/storage'
 GCP_CONFIG = Rails.application.config_for(:gcp).deep_symbolize_keys
 
 def validate_gcp_config!
-  GCP_CONFIG[:local_path_key_map] ||= {}
-
-  # Make sure that any local_path_key_map key ends with a trailing slash.  This is important
-  # because a leading slash must be absent from the translated bucket key path.
-  GCP_CONFIG[:local_path_key_map].each_key do |key|
-    raise "Found invalid key in gcp.yml local_path_key_map: #{key} (key must end with a '/')" unless key.end_with?('/')
-  end
+  # No validations at the moment
 end
 
 validate_gcp_config!

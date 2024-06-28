@@ -8,10 +8,54 @@ require 'rails_helper'
 describe PrepareTransferJob do
   let(:prepare_transfer_job) { described_class.new }
   let(:source_object) { FactoryBot.create(:source_object, :with_checksum) }
+  # Capture the first piece of the path, including trailing slash
+  let(:path_prefix) { source_object.path.match(%r{/[^/]+/})[0] }
   let(:source_object_without_checksum) { FactoryBot.create(:source_object) }
   let!(:aws_storage_provider) { FactoryBot.create(:storage_provider, :aws) }
   let!(:gcp_storage_provider) { FactoryBot.create(:storage_provider, :gcp) }
   let(:crc32c_checksum_algorithm) { FactoryBot.create(:checksum_algorithm, :crc32c) }
+  let(:tempfile_base_path) do
+    base_path = nil
+    Tempfile.create('throwaway-file') do |f|
+      base_path = f.path.match(%r{/[^/]+/})[0] # Capture the first piece of the path, including trailing slash
+    end
+    base_path
+  end
+
+  before do
+    stub_const('ATC', ATC.merge({
+      source_paths_to_storage_providers: {
+        # Add a mapping for our source_object's path
+        path_prefix.to_sym => {
+          path_mapping: '',
+          storage_providers: [
+            {
+              storage_type: aws_storage_provider.storage_type,
+              container_name: aws_storage_provider.container_name
+            },
+            {
+              storage_type: gcp_storage_provider.storage_type,
+              container_name: gcp_storage_provider.container_name
+            }
+          ]
+        },
+        # Add a mapping for the tempfile base path (for some of the tests in this file)
+        tempfile_base_path.to_sym => {
+          path_mapping: '',
+          storage_providers: [
+            {
+              storage_type: aws_storage_provider.storage_type,
+              container_name: aws_storage_provider.container_name
+            },
+            {
+              storage_type: gcp_storage_provider.storage_type,
+              container_name: gcp_storage_provider.container_name
+            }
+          ]
+        }
+      }
+    }))
+  end
 
   it 'creates the expected PendingTransfer records' do
     expect(source_object.pending_transfers.length).to eq(0)
@@ -168,6 +212,29 @@ describe PrepareTransferJob do
         expect(PendingTransfer).not_to receive(:create!)
         prepare_transfer_job.perform(source_object.id, enqueue_successor: false)
       end
+    end
+  end
+
+  describe '#select_storage_providers' do
+    it 'raises an exception if an invalid storage provider type is called' do
+      expect {
+        prepare_transfer_job.select_storage_providers(source_object, 'invalid_type')
+      }.to raise_error(ArgumentError)
+    end
+
+    it 'returns the expected storage providers when valid arguments are provided' do
+      expect(prepare_transfer_job.select_storage_providers(source_object, 'aws')).to eq([aws_storage_provider])
+      expect(prepare_transfer_job.select_storage_providers(source_object, 'gcp')).to eq([gcp_storage_provider])
+    end
+
+    it 'does not return a storage provider that is associated with an existing PendingTransfer for the source_object' do
+      FactoryBot.create(:pending_transfer, source_object: source_object, storage_provider: aws_storage_provider)
+      expect(prepare_transfer_job.select_storage_providers(source_object, 'aws')).to eq([])
+    end
+
+    it 'does not return a storage provider that is associated with an existing StoredObject for the source_object' do
+      FactoryBot.create(:stored_object, source_object: source_object, storage_provider: aws_storage_provider)
+      expect(prepare_transfer_job.select_storage_providers(source_object, 'aws')).to eq([])
     end
   end
 end
