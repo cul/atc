@@ -29,10 +29,9 @@ class VerifyFixityJob < ApplicationJob
   end
 
   def create_pending_fixity_verification(stored_object)
-    fixity_verification_record = FixityVerification.create!(source_object: stored_object.source_object,
-                                                            stored_object: stored_object)
-    fixity_verification_record.pending! # saves to the database
-    fixity_verification_record
+    FixityVerification.create!(source_object: stored_object.source_object,
+                               stored_object: stored_object,
+                               status: :pending)
   end
 
   def instantiate_provider_fixity_check(fixity_verification_record)
@@ -56,6 +55,7 @@ class VerifyFixityJob < ApplicationJob
     elsif object_checksum_and_size_match?(fixity_verification_record, object_checksum, object_size)
       fixity_verification_record.success!
     else
+      fixity_verification_record.error_message = 'Checksum and/or object size mismatch.'
       fixity_verification_record.failure!
     end
   end

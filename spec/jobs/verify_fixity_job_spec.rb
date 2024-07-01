@@ -159,7 +159,7 @@ describe VerifyFixityJob do
       end
 
       context 'and #object_checksum_and_size_match? returns true' do
-        it 'calls FixityVerfication#failure!' do
+        it 'calls FixityVerfication#success!' do
           aws_fixity_check = Atc::Aws::FixityCheck.new(aws_stored_object, 3141)
           allow(aws_fixity_check).to receive(:fixity_checksum_object_size).and_return ['12345FF', 1234, nil]
           allow(verify_fixity_job).to receive(:object_checksum_and_size_match?).and_return true
@@ -209,7 +209,7 @@ describe VerifyFixityJob do
       expect(result).to be true
     end
 
-    it 'returns false if checksums do notmatch' do
+    it 'returns false if checksums do not match' do
       result = verify_fixity_job.checksums_match?(atc_sha256_bin, provider_sha256_hex_mismatch)
       expect(result).to be false
     end

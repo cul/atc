@@ -10,7 +10,10 @@ class Atc::Aws::FixityCheck
 
   def fixity_checksum_object_size
     aws_fixity_check_response =
-      parse_json_response_aws_fixity_websocket_channel_stream
+      aws_fixity_websocket_channel_stream(@bucket_name,
+                                          @object_path,
+                                          @fixity_checksum_algorithm.name.downcase,
+                                          @stream_id)
     case aws_fixity_check_response['type']
     when 'fixity_check_complete'
       [aws_fixity_check_response['data']['checksum_hexdigest'], aws_fixity_check_response['data']['object_size'], nil]
@@ -27,24 +30,18 @@ class Atc::Aws::FixityCheck
     "AWS error response with the following data: #{aws_fixity_check_response['data']} "
   end
 
-  # method will be adapted/changed once helper class method is available
-  def parse_json_response_aws_fixity_websocket_channel_stream
-    JSON.parse(aws_fixity_websocket_channel_stream(@bucket_name,
-                                                   @object_path,
-                                                   @fixity_checksum_algorithm,
-                                                   @stream_id))
-  end
-
   # following is a placeholder. Will be replaced by call to helper class method,
   # or client code will be added to this method instead
   # Method will  possibly be merged with #parse_json_response_aws_fixity_websocket_channel_stream
-  def aws_fixity_websocket_channel_stream(bucket,
-                                          object_key,
-                                          fixity_checksum_algorithm,
-                                          fixity_verification_record_id)
+  def aws_fixity_websocket_channel_stream(bucket_name,
+                                          object_path,
+                                          checksum_algorithm_name,
+                                          job_identifier)
     # fixity_verification_record_id used as stream identifier
     # websocket client code will go here.
-    # Response received (assume JSON) is returned as-is.
+    # Response received (Hash) is returned as-is.
     # No processing of the response in this method.
+    remote_fixity_check = Atc::Aws::RemoteFixityCheck.new(CHECK_PLEASE['ws_url'], CHECK_PLEASE['auth_token'])
+    remote_fixity_check.perform(job_identifier, bucket_name, object_path, checksum_algorithm_name)
   end
 end
