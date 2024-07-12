@@ -26,6 +26,10 @@ namespace :atc do
       with_id_argument('pending_transfer', &block)
     end
 
+    def with_stored_object_id_argument(&block)
+      with_id_argument('stored_object', &block)
+    end
+
     # Yields one or more id integer values based on available ENV values.
     # Reads from one of the following ENV values (using whichever one it finds first):
     # "#{prefix}_id", "#{prefix}_id_file", "source_object_path"
@@ -118,6 +122,17 @@ namespace :atc do
       next unless with_pending_transfer_id_argument() do |pending_transfer_id|
         puts "Queued pending_transfer_id: #{pending_transfer_id}"
         PerformTransferJob.perform_later(pending_transfer_id)
+      end
+
+      puts 'Done'
+    end
+
+    desc "Queue a VerifyFixityJob. "\
+          "This job verifies the fixity for a given StoredObject"
+    task verify_fixity: :environment do
+      next unless with_stored_object_id_argument() do |stored_object_id|
+        puts "Queued stored_object_id: #{stored_object_id}"
+        VerifyFixityJob.perform_later(stored_object_id)
       end
 
       puts 'Done'
