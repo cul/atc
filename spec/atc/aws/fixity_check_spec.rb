@@ -27,7 +27,7 @@ describe Atc::Aws::FixityCheck do
       'data' => { 'error_message' => 'Ooops!',
                   'job_identifier' => 1234,
                   'bucket_name' => 'cul_bucket',
-                  'object_path' => '/I/Am/An/Object',
+                  'object_path' => 'I/Am/An/Object',
                   'checksum_algorithm_name' => 'SHA31415' } }
   end
 
