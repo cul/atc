@@ -17,6 +17,9 @@ AllCops:
     - 'lib/tasks/**/*'
     - 'tmp/**/*'
 
+Metrics/ClassLength:
+  Exclude:
+    - 'lib/atc/aws/remote_fixity_check.rb'
 
 Metrics/MethodLength:
   Exclude:
@@ -31,3 +34,4 @@ Rails/Output:
 
 Lint/MissingCopEnableDirective:
   Enabled: false
+

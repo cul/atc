@@ -20,7 +20,7 @@ module Atc::Utils::AwsChecksumUtils
   # https://github.com/aws/aws-sdk-ruby/blob/6def11f359ba4556c2ddd74dfb1dd4ab91c5dd90/gems/aws-sdk-s3/lib/aws-sdk-s3/multipart_file_uploader.rb#L184
   # We have some tests that monitor whether the underlying compute_default_part_size has changed.
   def self.compute_default_part_size(file_size)
-    Aws::S3::MultipartFileUploader.new.send(:compute_default_part_size, file_size)
+    Aws::S3::MultipartFileUploader.new(client: nil).send(:compute_default_part_size, file_size)
   end
 
   # Calculates a multi-part checksum-of-checksums for the given file and returns
