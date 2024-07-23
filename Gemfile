@@ -77,6 +77,7 @@ group :development, :test do
   # Rubocul for linting
   gem 'rubocul', '~> 4.0.11'
   # gem 'rubocul', path: '../rubocul'
+  gem 'webmock', '~> 3.23.1'
 end
 
 group :development do

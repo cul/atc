@@ -9,8 +9,13 @@ namespace :atc do
       checksum_algorithm_name = ENV['checksum_algorithm_name']
 
       job_identifier = "fixity-check-from-rake-task-#{SecureRandom.uuid}"
-      remote_fixity_check = Atc::Aws::RemoteFixityCheck.new(CHECK_PLEASE['ws_url'], CHECK_PLEASE['auth_token'])
-      response = remote_fixity_check.perform(job_identifier, bucket_name, object_path, checksum_algorithm_name)
+      remote_fixity_check = Atc::Aws::RemoteFixityCheck.new(
+        CHECK_PLEASE['http_base_url'], CHECK_PLEASE['ws_url'], CHECK_PLEASE['auth_token']
+      )
+      response = remote_fixity_check.perform(
+        job_identifier, bucket_name, object_path, checksum_algorithm_name,
+        Atc::Aws::RemoteFixityCheck::HTTP
+      )
       puts "Response: #{response.inspect}"
     end
 

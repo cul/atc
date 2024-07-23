@@ -75,7 +75,7 @@ describe Atc::Utils::AwsChecksumUtils do
 
     it 'depends on the Aws::S3::MultipartFileUploader#compute_default_part_size method, and that method exists' do
       expect {
-        Aws::S3::MultipartFileUploader.new.send(:compute_default_part_size, 100.megabytes)
+        Aws::S3::MultipartFileUploader.new(client: nil).send(:compute_default_part_size, 100.megabytes)
       }.not_to raise_error
     end
   end
