@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable RSpec/MultipleExpectations
 # rubocop:disable RSpec/ExampleLength
 
 require 'rails_helper'

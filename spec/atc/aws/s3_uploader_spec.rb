@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable RSpec/StubbedMock
-
 require 'rails_helper'
 
 describe Atc::Aws::S3Uploader do
