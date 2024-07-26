@@ -18,7 +18,7 @@ class Atc::Aws::RemoteFixityCheck
   end
 
   def http_client
-    @http_conn = ::Faraday.new(url: @http_base_url) do |f|
+    @http_client ||= ::Faraday.new(url: @http_base_url) do |f|
       f.request :authorization, 'Bearer', @auth_token
       f.response :json # decode response bodies as JSON
       f.response :raise_error # raise 4xx and 5xx responses as errors
@@ -38,7 +38,7 @@ class Atc::Aws::RemoteFixityCheck
   def perform(job_identifier, bucket_name, object_path, checksum_algorithm_name, method = WEBSOCKET)
     case method
     when WEBSOCKET
-      perform_websocket(job_identifier, bucket_name, object_path, checksum_algorithm_name)
+      perform_websocket(job_identifier, bucket_name, object_path, checksum_algorithm_name)['data']
     when HTTP
       perform_http(bucket_name, object_path, checksum_algorithm_name)
     else
@@ -54,12 +54,15 @@ class Atc::Aws::RemoteFixityCheck
         'checksum_algorithm_name' => checksum_algorithm_name
       }
     }.to_json
-
     response = http_client.post('/fixity_checks/run_fixity_check_for_s3_object', payload) do |request|
       request.headers['Content-Type'] = 'application/json'
     end
 
     JSON.parse(response.body)
+  rescue StandardError => e
+    {
+      'checksum_hexdigest' => nil, 'object_size' => nil, 'error_message' => "An unexpected error occurred: #{e.message}"
+    }
   end
 
   def perform_websocket(job_identifier, bucket_name, object_path, checksum_algorithm_name)

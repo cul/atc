@@ -45,40 +45,37 @@ describe Atc::Aws::RemoteFixityCheck do
       'object_size' => 123
     }
   end
-  let(:fixity_check_complete_message) do
+  let(:websocket_fixity_check_complete_message_content) do
+    {
+      'type' => 'fixity_check_complete',
+      'data' => successful_fixity_check_response_data
+    }
+  end
+  let(:websocket_fixity_check_complete_message) do
     {
       'identifier' => { 'channel' => 'FixityCheckChannel', 'job_identifier' => job_identifier }.to_json,
-      'message' => {
-        'type' => 'fixity_check_complete',
-        'data' => successful_fixity_check_response_data
-      }.to_json
+      'message' => websocket_fixity_check_complete_message_content.to_json
     }
   end
 
   describe '#perform' do
+    let(:result) do
+      remote_fixity_check.perform(
+        job_identifier, bucket_name, object_path, checksum_algorithm_name, method
+      )
+    end
+
     context 'with method argument of Atc::Aws::RemoteFixityCheck::WEBSOCKET' do
       let(:method) { Atc::Aws::RemoteFixityCheck::WEBSOCKET }
 
-      it 'works as expected' do
-        allow(remote_fixity_check).to receive(:create_websocket_connection).and_return(mock_websocket)
+      before do
+        allow(remote_fixity_check).to receive(:perform_websocket).with(
+          job_identifier, bucket_name, object_path, checksum_algorithm_name
+        ).and_return(websocket_fixity_check_complete_message_content)
+      end
 
-        job_response = nil
-        t = Thread.new do
-          job_response = remote_fixity_check.perform(
-            job_identifier, bucket_name, object_path, checksum_algorithm_name, method
-          )
-        end
-
-        # Wait a moment to allow the job in the other thread to start
-        sleep 2
-
-        # Manually trigger a message
-        mock_websocket.trigger(:message, OpenStruct.new(data: fixity_check_complete_message.to_json))
-
-        # Wait for the thread to finish
-        t.join
-
-        expect(job_response).to eq(JSON.parse(fixity_check_complete_message['message']))
+      it 'invokes the expected underlying methd and returns the expected result' do
+        expect(result).to eq(successful_fixity_check_response_data)
       end
     end
 
@@ -86,18 +83,65 @@ describe Atc::Aws::RemoteFixityCheck do
       let(:method) { Atc::Aws::RemoteFixityCheck::HTTP }
 
       before do
-        stub_request(:post, "#{check_please_app_base_http_url}/fixity_checks/run_fixity_check_for_s3_object").to_return(
-          body: successful_fixity_check_response_data.to_json
+        allow(remote_fixity_check).to receive(:perform_http).with(
+          bucket_name, object_path, checksum_algorithm_name
+        ).and_return(successful_fixity_check_response_data)
+      end
+
+      it 'invokes the expected underlying methd and returns the expected result' do
+        expect(result).to eq(successful_fixity_check_response_data)
+      end
+    end
+  end
+
+  describe '#perform_websocket' do
+    it 'works as expected' do
+      allow(remote_fixity_check).to receive(:create_websocket_connection).and_return(mock_websocket)
+
+      result = nil
+      t = Thread.new do
+        result = remote_fixity_check.perform_websocket(
+          job_identifier, bucket_name, object_path, checksum_algorithm_name
         )
       end
 
-      it 'works as expected' do
-        job_response = remote_fixity_check.perform(
-          job_identifier, bucket_name, object_path, checksum_algorithm_name, method
-        )
+      # Wait a moment to allow the job in the other thread to start
+      sleep 2
 
-        expect(job_response).to eq(successful_fixity_check_response_data)
-      end
+      # Manually trigger a message
+      mock_websocket.trigger(:message, OpenStruct.new(data: websocket_fixity_check_complete_message.to_json))
+
+      # Wait for the thread to finish
+      t.join
+
+      expect(result).to eq(websocket_fixity_check_complete_message_content)
+    end
+  end
+
+  describe '#perform_http' do
+    before do
+      stub_request(:post, "#{check_please_app_base_http_url}/fixity_checks/run_fixity_check_for_s3_object").to_return(
+        body: successful_fixity_check_response_data.to_json
+      )
+    end
+
+    it 'works as expected' do
+      expect(
+        remote_fixity_check.perform_http(
+          bucket_name, object_path, checksum_algorithm_name
+        )
+      ).to eq(successful_fixity_check_response_data)
+    end
+
+    it 'handles unexpected errors' do
+      allow(remote_fixity_check.http_client).to receive(:post).and_raise(StandardError, 'oh no!')
+      expect(remote_fixity_check.perform_http(bucket_name, object_path, checksum_algorithm_name)).to eq(
+        {
+          'checksum_hexdigest' => nil,
+          'object_size' => nil,
+          'error_message' => 'An unexpected error occurred: oh no!'
+        }
+      )
     end
   end
 
@@ -211,7 +255,7 @@ describe Atc::Aws::RemoteFixityCheck do
       }
     end
     # fixity_check_complete messages are a type of custom message
-    let(:fixity_check_complete_message) do
+    let(:websocket_fixity_check_complete_message) do
       {
         'identifier' => {
           'job_identifier' => job_identifier
@@ -238,7 +282,7 @@ describe Atc::Aws::RemoteFixityCheck do
     describe '#custom_message?' do
       it 'returns true when matching data is supplied' do
         expect(remote_fixity_check.custom_message?(progress_message, job_identifier)).to eq(true)
-        expect(remote_fixity_check.custom_message?(fixity_check_complete_message, job_identifier)).to eq(true)
+        expect(remote_fixity_check.custom_message?(websocket_fixity_check_complete_message, job_identifier)).to eq(true)
         expect(remote_fixity_check.custom_message?(fixity_check_error_message, job_identifier)).to eq(true)
       end
 
@@ -256,14 +300,18 @@ describe Atc::Aws::RemoteFixityCheck do
       end
 
       it 'returns false when non-matching data is supplied' do
-        expect(remote_fixity_check.progress_message?(fixity_check_complete_message, job_identifier)).to eq(false)
+        expect(
+          remote_fixity_check.progress_message?(websocket_fixity_check_complete_message, job_identifier)
+        ).to eq(false)
       end
     end
 
     describe '#fixity_check_complete_or_error_message?' do
       it 'returns true when matching data is supplied' do
         expect(
-          remote_fixity_check.fixity_check_complete_or_error_message?(fixity_check_complete_message, job_identifier)
+          remote_fixity_check.fixity_check_complete_or_error_message?(
+            websocket_fixity_check_complete_message, job_identifier
+          )
         ).to eq(true)
         expect(
           remote_fixity_check.fixity_check_complete_or_error_message?(fixity_check_error_message, job_identifier)

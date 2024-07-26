@@ -18,50 +18,55 @@ describe Atc::Aws::FixityCheck do
                       source_object: source_object,
                       storage_provider: aws_storage_provider)
   end
-  let(:aws_hash_response) do
-    { 'type' => 'fixity_check_complete',
-      'data' => { 'checksum_hexdigest' => 'ABCDEF12345', 'object_size' => 1234 } }
-  end
-  let(:aws_error_hash_response) do
-    { 'type' => 'fixity_check_error',
-      'data' => { 'error_message' => 'Ooops!',
-                  'job_identifier' => 1234,
-                  'bucket_name' => 'cul_bucket',
-                  'object_path' => 'I/Am/An/Object',
-                  'checksum_algorithm_name' => 'SHA31415' } }
-  end
 
   describe '#fixity_checksum_object_size' do
-    context 'with an AWS response without errors ' do
-      it 'returns the object checksum and object size, and nil for the aws error message' do
-        allow(aws_fixity_check).to receive(:aws_fixity_websocket_channel_stream) { aws_hash_response }
+    let(:remote_fixity_check) do
+      dbl = instance_double(Atc::Aws::RemoteFixityCheck)
+      allow(dbl).to receive(:perform).and_return(remote_fixity_check_perform_response)
+      dbl
+    end
+
+    before do
+      allow(Atc::Aws::RemoteFixityCheck).to receive(:new).and_return(remote_fixity_check)
+    end
+
+    context 'with a response without errors' do
+      let(:remote_fixity_check_perform_response) do
+        {
+          'checksum_hexdigest' => 'ABCDEF12345',
+          'object_size' => 1234
+        }
+      end
+
+      it 'returns the object checksum and object size, and nil for the error message' do
         result = aws_fixity_check.fixity_checksum_object_size
-        expect(result).to eq(['ABCDEF12345', 1234, nil])
+        expect(result).to eq(
+          [
+            remote_fixity_check_perform_response['checksum_hexdigest'],
+            remote_fixity_check_perform_response['object_size'],
+            nil
+          ]
+        )
       end
     end
 
-    context 'with an AWS response with errors ' do
+    context 'with a response with errors' do
+      let(:remote_fixity_check_perform_response) do
+        {
+          'error_message' => 'Ooops!'
+        }
+      end
+
       it 'returns nil for the object checksum and object size' do
-        allow(aws_fixity_check).to receive(:aws_fixity_websocket_channel_stream) { aws_error_hash_response }
         result = aws_fixity_check.fixity_checksum_object_size
         expect(result[0]).to eq nil
         expect(result[1]).to eq nil
       end
 
-      it 'returns the error message (including data)' do
-        allow(aws_fixity_check).to receive(:aws_fixity_websocket_channel_stream) { aws_error_hash_response }
+      it 'returns the error message' do
         result = aws_fixity_check.fixity_checksum_object_size
-        expect(result[2]).to include('Ooops!')
-        expect(result[2]).to include('cul_bucket')
+        expect(result[2]).to eq(remote_fixity_check_perform_response['error_message'])
       end
-    end
-  end
-
-  describe '#response_data_as_string' do
-    it 'returns the aws response data info as a string' do
-      result = aws_fixity_check.response_data_as_string aws_error_hash_response
-      expect(result).to include('Ooops!')
-      expect(result).to include('cul_bucket')
     end
   end
 end
