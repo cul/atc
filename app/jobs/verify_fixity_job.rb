@@ -18,6 +18,15 @@ class VerifyFixityJob < ApplicationJob
     fixity_verification_record = create_pending_fixity_verification stored_object
     provider_fixity_check = instantiate_provider_fixity_check fixity_verification_record
     verify_fixity(fixity_verification_record, provider_fixity_check)
+  rescue StandardError => e
+    handle_unexpected_error(fixity_verification_record, e) unless fixity_verification_record.nil?
+  end
+
+  def handle_unexpected_error(fixity_verification_record, err)
+    fixity_verification_record.update!(
+      status: :failure,
+      error_message: "An unexpected error occurred: #{err.message}"
+    )
   end
 
   def process_existing_fixity_verification_record(existing_fixity_verification_record)
@@ -49,6 +58,7 @@ class VerifyFixityJob < ApplicationJob
 
   def verify_fixity(fixity_verification_record, provider_fixity_check)
     object_checksum, object_size, fixity_check_error = provider_fixity_check.fixity_checksum_object_size
+
     if fixity_check_error.present?
       fixity_verification_record.error_message = fixity_check_error
       fixity_verification_record.failure!

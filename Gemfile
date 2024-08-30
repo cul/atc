@@ -75,7 +75,7 @@ group :development, :test do
   # Use sqlite3 as the database for Active Record
   gem 'sqlite3', '~> 1.4'
   # Rubocul for linting
-  gem 'rubocul', '~> 4.0.11'
+  gem 'rubocul', '~> 4.0.12'
   # gem 'rubocul', path: '../rubocul'
   gem 'webmock', '~> 3.23.1'
 end

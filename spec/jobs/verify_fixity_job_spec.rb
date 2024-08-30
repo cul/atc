@@ -67,6 +67,22 @@ describe VerifyFixityJob do
         verify_fixity_job.perform(gcp_stored_object.id)
       end
     end
+
+    it 'handles unexpected errors' do
+      allow(verify_fixity_job).to receive(:verify_fixity).and_raise(StandardError, 'oh no!')
+      expect(verify_fixity_job).to receive(:handle_unexpected_error)
+      verify_fixity_job.perform(aws_stored_object.id)
+    end
+  end
+
+  describe '#handle_unexpected_error' do
+    it 'updates the given FixityVerificationRecord as expected' do
+      expect(aws_fixity_verification_pending).to receive(:update!).and_call_original
+      verify_fixity_job.handle_unexpected_error(aws_fixity_verification_pending, StandardError.new('oh no!'))
+      expect(aws_fixity_verification_pending.status).to eq('failure')
+      expect(aws_fixity_verification_pending.error_message).to eq('An unexpected error occurred: oh no!')
+      expect(aws_fixity_verification_pending.changed?).to eq(false) # verify that the record has no unsaved changes
+    end
   end
 
   describe '#process_existing_fixity_verification_record' do
