@@ -18,7 +18,7 @@ class Atc::Aws::RemoteFixityCheck
   end
 
   def http_client
-    @http_client ||= ::Faraday.new(url: @http_base_url) do |f|
+    @http_client ||= ::Faraday.new(url: @http_base_url, request: { timeout: CHECK_PLEASE['http_timeout'] }) do |f|
       f.request :authorization, 'Bearer', @auth_token
       f.response :json # decode response bodies as JSON
       f.response :raise_error # raise 4xx and 5xx responses as errors
