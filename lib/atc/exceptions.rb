@@ -7,4 +7,5 @@ module Atc::Exceptions
   class ObjectExists < AtcError; end
   class StorageProviderMappingNotFound < AtcError; end
   class RemoteFixityCheckTimeout < AtcError; end
+  class PollingWaitTimeoutError < AtcError; end
 end

@@ -25,7 +25,7 @@ class VerifyFixityJob < ApplicationJob
   def handle_unexpected_error(fixity_verification_record, err)
     fixity_verification_record.update!(
       status: :failure,
-      error_message: "An unexpected error occurred: #{err.message}"
+      error_message: "An unexpected error occurred: #{err.class.name} -> #{err.message}"
     )
   end
 

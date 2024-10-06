@@ -8,8 +8,11 @@
 
 class Atc::Aws::RemoteFixityCheck
   STALLED_FIXITY_CHECK_JOB_TIMEOUT = 10.seconds
+  POLLING_DELAY = 2.seconds
+  MAX_WAIT_TIME_FOR_POLLING_JOB_START = 1.minute
   WEBSOCKET = 'websocket'
   HTTP = 'http'
+  HTTP_POLLING = 'http_polling'
 
   def initialize(http_base_url, ws_url, auth_token)
     @http_base_url = http_base_url
@@ -41,6 +44,8 @@ class Atc::Aws::RemoteFixityCheck
       perform_websocket(job_identifier, bucket_name, object_path, checksum_algorithm_name)['data']
     when HTTP
       perform_http(bucket_name, object_path, checksum_algorithm_name)
+    when HTTP_POLLING
+      perform_http_polling(bucket_name, object_path, checksum_algorithm_name)
     else
       raise ArgumentError, "Unsupported perform method: #{method}"
     end
@@ -61,7 +66,70 @@ class Atc::Aws::RemoteFixityCheck
     JSON.parse(response.body)
   rescue StandardError => e
     {
-      'checksum_hexdigest' => nil, 'object_size' => nil, 'error_message' => "An unexpected error occurred: #{e.message}"
+      'checksum_hexdigest' => nil, 'object_size' => nil,
+      'error_message' => "An unexpected error occurred: #{e.class.name} -> #{e.message}"
+    }
+  end
+
+  def perform_http_polling(bucket_name, object_path, checksum_algorithm_name)
+    start_time = Time.current
+    payload = {
+      'fixity_check' => {
+        'bucket_name' => bucket_name,
+        'object_path' => object_path,
+        'checksum_algorithm_name' => checksum_algorithm_name
+      }
+    }.to_json
+
+    fixity_check_create_response = http_client.post('/fixity_checks', payload) { |request|
+      request.headers['Content-Type'] = 'application/json'
+    }.body
+
+    if fixity_check_create_response['error_message'].present?
+      # Raise any unexpected error message.  It will be handled elsewhere.
+      raise Atc::Exceptions::AtcError,
+            fixity_check_create_response['error_message']
+    end
+
+    # If we got here, that means that the fixity check request was created successfully.
+    # Now we'll poll and wait for it to complete.
+    last_progress_update_time = nil
+    fixity_check_response = nil
+    loop do
+      sleep POLLING_DELAY
+      fixity_check_response = http_client.get("/fixity_checks/#{fixity_check_create_response['id']}") { |request|
+        request.headers['Content-Type'] = 'application/json'
+      }.body
+      status = fixity_check_response['status']
+
+      break if ['success', 'error'].include?(status)
+
+      # If we receive a pending status, we're waiting for a background job to start processing our request.
+      # Ideally this won't be for too long, since we expect there to be at least as manay CheckPlease background
+      # workers as there are ATC fixity check request workers, but we'll add a timeout here just in case anything
+      # is ever incorrectly configured, just so that this job doesn't ever hang indefinitely.
+      if status == 'pending'
+        next if Time.current - start_time < MAX_WAIT_TIME_FOR_POLLING_JOB_START
+
+        raise Atc::Exceptions::PollingWaitTimeoutError,
+              'Polling wait time has exceeded MAX_WAIT_TIME_FOR_POLLING_JOB_START '\
+              "(#{MAX_WAIT_TIME_FOR_POLLING_JOB_START} seconds)"
+      end
+
+      # If we got here, that means that the job is in progress.  Let's account for the
+      # possibility of the job timing out, if something goes wrong on the CheckPlease app side.
+
+      last_progress_update_time = Time.zone.parse(fixity_check_response['updated_at'])
+      if job_unresponsive?(last_progress_update_time)
+        raise Atc::Exceptions::RemoteFixityCheckTimeout,
+              'Timed out while waiting for a response.'
+      end
+    end
+    fixity_check_response
+  rescue StandardError => e
+    {
+      'checksum_hexdigest' => nil, 'object_size' => nil,
+      'error_message' => "An unexpected error occurred: #{e.class.name} -> #{e.message}"
     }
   end
 
