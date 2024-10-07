@@ -7,7 +7,9 @@
 # rubocop:disable Metrics/PerceivedComplexity
 
 class Atc::Aws::RemoteFixityCheck
-  STALLED_FIXITY_CHECK_JOB_TIMEOUT = 10.seconds
+  # This value shouldn't be too high because we want to detect stalled jobs fairly soon after they stall,
+  # but it should be high enough to account for downtime/delays related to CheckPlease app deployments.
+  STALLED_FIXITY_CHECK_JOB_TIMEOUT = 1.minute
   POLLING_DELAY = 2.seconds
   MAX_WAIT_TIME_FOR_POLLING_JOB_START = 1.hour
   WEBSOCKET = 'websocket'
@@ -72,7 +74,6 @@ class Atc::Aws::RemoteFixityCheck
   end
 
   def perform_http_polling(bucket_name, object_path, checksum_algorithm_name)
-    start_time = Time.current
     payload = {
       'fixity_check' => {
         'bucket_name' => bucket_name,
@@ -97,33 +98,31 @@ class Atc::Aws::RemoteFixityCheck
     fixity_check_response = nil
     loop do
       sleep POLLING_DELAY
+
       fixity_check_response = http_client.get("/fixity_checks/#{fixity_check_create_response['id']}") { |request|
         request.headers['Content-Type'] = 'application/json'
       }.body
+
       status = fixity_check_response['status']
 
       break if ['success', 'error'].include?(status)
 
-      # If we receive a pending status, we're waiting for a background job to start processing our request.
-      # Ideally this won't be for too long, since we expect there to be at least as manay CheckPlease background
-      # workers as there are ATC fixity check request workers, but we'll add a timeout here just in case anything
-      # is ever incorrectly configured, just so that this job doesn't ever hang indefinitely.
-      if status == 'pending'
-        next if Time.current - start_time < MAX_WAIT_TIME_FOR_POLLING_JOB_START
-
-        raise Atc::Exceptions::PollingWaitTimeoutError,
-              'Polling wait time has exceeded MAX_WAIT_TIME_FOR_POLLING_JOB_START '\
-              "(#{MAX_WAIT_TIME_FOR_POLLING_JOB_START} seconds)"
-      end
+      # If the fixity check has a 'pending' status, we'll skip this polling iteration and try again in the next poll
+      # operation.  It is the reponsibility of the CheckPlease app to periodically clean up jobs that have been pending
+      # for too long, so we don't need to worry about that case in this app.
+      next if status == 'pending'
 
       # If we got here, that means that the job is in progress.  Let's account for the
       # possibility of the job timing out, if something goes wrong on the CheckPlease app side.
-
       last_progress_update_time = Time.zone.parse(fixity_check_response['updated_at'])
       if job_unresponsive?(last_progress_update_time)
         raise Atc::Exceptions::RemoteFixityCheckTimeout,
               'Timed out while waiting for a response.'
       end
+    rescue Faraday::Error => e
+      # If we run into a network error, log it, but continue looping
+      Rails.logger.info 'Error connecting to CheckPlease app during fixity check polling '\
+                        "loop iteration: #{e.class.name} -> #{e.message}"
     end
     fixity_check_response
   rescue StandardError => e
