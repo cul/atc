@@ -9,7 +9,7 @@
 class Atc::Aws::RemoteFixityCheck
   STALLED_FIXITY_CHECK_JOB_TIMEOUT = 10.seconds
   POLLING_DELAY = 2.seconds
-  MAX_WAIT_TIME_FOR_POLLING_JOB_START = 1.minute
+  MAX_WAIT_TIME_FOR_POLLING_JOB_START = 1.hour
   WEBSOCKET = 'websocket'
   HTTP = 'http'
   HTTP_POLLING = 'http_polling'
