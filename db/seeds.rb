@@ -20,6 +20,3 @@ ChecksumAlgorithm.find_or_create_by!(
 	name: 'CRC32C', empty_binary_value: Digest::CRC32c.new.digest
 )
 
-StorageProvider.find_or_create_by!(storage_type: StorageProvider.storage_types[:aws], container_name: 'cul-dlstor-digital-preservation')
-StorageProvider.find_or_create_by!(storage_type: StorageProvider.storage_types[:gcp], container_name: 'cul-dlstor-digital-preservation')
-StorageProvider.find_or_create_by!(storage_type: StorageProvider.storage_types[:cul], container_name: 'netapp')

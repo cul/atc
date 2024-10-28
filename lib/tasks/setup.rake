@@ -36,6 +36,27 @@ namespace :atc do
       end
     end
 
+    desc 'Set up StorageProviders'
+    task storage_providers: :environment do
+      storage_provider_container_name = ENV['storage_provider_container_name']
+      if storage_provider_container_name.nil?
+        puts 'Missing storage_provider_container_name (Example: storage_provider_container_name=some-bucket-name)'
+        next
+      end
+
+      [
+        { storage_type: StorageProvider.storage_types[:aws], container_name: storage_provider_container_name },
+        { storage_type: StorageProvider.storage_types[:gcp], container_name: storage_provider_container_name },
+      ].each do |storage_provider_args|
+        if StorageProvider.exists?(**storage_provider_args)
+          puts "#{Rainbow("StorageProvider already exists (skipping): #{storage_provider_args.inspect}").blue.bright}\n"
+        else
+          StorageProvider.create!(**storage_provider_args)
+          puts Rainbow("Created StorageProvider: #{storage_provider_args.inspect}").green
+        end
+      end
+    end
+
     desc 'Set up test config files'
     task test_storage_providers: :environment do
       [
