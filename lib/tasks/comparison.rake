@@ -41,5 +41,25 @@ namespace :atc do
 
       puts "Done!"
     end
+
+    desc 'List multipart info for an S3 object (including part size)'
+    # Example usage: bucket_name=cul-dlstor-digital-testing1 path='test-5gb-file-ubuntu.iso'
+    task list_multipart_info: :environment do
+      bucket_name = ENV['bucket_name']
+      path = ENV['path']
+
+      attributes = S3_CLIENT.get_object_attributes(
+        bucket: bucket_name,
+        key: path,
+        object_attributes: %w[ETag Checksum ObjectParts StorageClass ObjectSize]
+      )
+
+      if attributes.object_parts.blank?
+        puts "Single part file."
+      else
+        puts "Found multipart file (#{attributes.object_parts.total_parts_count} parts) "\
+              "with individual part array data for #{attributes.object_parts.parts.length} parts."
+      end
+    end
   end
 end

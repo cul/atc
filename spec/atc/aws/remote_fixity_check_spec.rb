@@ -139,7 +139,7 @@ describe Atc::Aws::RemoteFixityCheck do
         {
           'checksum_hexdigest' => nil,
           'object_size' => nil,
-          'error_message' => 'An unexpected error occurred: oh no!'
+          'error_message' => 'An unexpected error occurred: StandardError -> oh no!'
         }
       )
     end

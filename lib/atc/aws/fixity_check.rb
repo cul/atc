@@ -4,6 +4,7 @@ class Atc::Aws::FixityCheck
   def initialize(stored_object, fixity_check_identifier)
     @bucket_name = stored_object.storage_provider.container_name
     @object_path = stored_object.path
+    @expected_object_size = stored_object.source_object.object_size
     @fixity_checksum_algorithm = stored_object.source_object.fixity_checksum_algorithm
     @fixity_check_identifier = fixity_check_identifier
   end
@@ -18,7 +19,9 @@ class Atc::Aws::FixityCheck
     ).perform(
       @fixity_check_identifier, @bucket_name,
       @object_path, @fixity_checksum_algorithm.name.downcase,
-      Atc::Aws::RemoteFixityCheck::HTTP
+      # A synchronous HTTP check is faster than polling for smaller files,
+      # so we'll only use the polling method for larger files.
+      @expected_object_size < 1.gigabyte ? Atc::Aws::RemoteFixityCheck::HTTP : Atc::Aws::RemoteFixityCheck::HTTP_POLLING
     )
     [response['checksum_hexdigest'], response['object_size'], response['error_message']]
   end

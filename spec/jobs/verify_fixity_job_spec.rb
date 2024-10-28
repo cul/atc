@@ -80,7 +80,9 @@ describe VerifyFixityJob do
       expect(aws_fixity_verification_pending).to receive(:update!).and_call_original
       verify_fixity_job.handle_unexpected_error(aws_fixity_verification_pending, StandardError.new('oh no!'))
       expect(aws_fixity_verification_pending.status).to eq('failure')
-      expect(aws_fixity_verification_pending.error_message).to eq('An unexpected error occurred: oh no!')
+      expect(aws_fixity_verification_pending.error_message).to eq(
+        'An unexpected error occurred: StandardError -> oh no!'
+      )
       expect(aws_fixity_verification_pending.changed?).to eq(false) # verify that the record has no unsaved changes
     end
   end

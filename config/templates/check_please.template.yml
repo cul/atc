@@ -1,6 +1,10 @@
 development:
+  http_base_url: 'http://dev.example.com'
   ws_url: 'ws://dev.example.com/cable'
   auth_token: 'changethis'
+  http_timeout: 300 # 5 minutes
 test:
+  http_base_url: 'http://test.example.com'
   ws_url: 'ws://test.example.com/cable'
   auth_token: 'changethis'
+  http_timeout: 300 # 5 minutes

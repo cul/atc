@@ -7,9 +7,14 @@
 # rubocop:disable Metrics/PerceivedComplexity
 
 class Atc::Aws::RemoteFixityCheck
-  STALLED_FIXITY_CHECK_JOB_TIMEOUT = 10.seconds
+  # This value shouldn't be too high because we want to detect stalled jobs fairly soon after they stall,
+  # but it should be high enough to account for downtime/delays related to CheckPlease app deployments.
+  STALLED_FIXITY_CHECK_JOB_TIMEOUT = 1.minute
+  POLLING_DELAY = 2.seconds
+  MAX_WAIT_TIME_FOR_POLLING_JOB_START = 1.hour
   WEBSOCKET = 'websocket'
   HTTP = 'http'
+  HTTP_POLLING = 'http_polling'
 
   def initialize(http_base_url, ws_url, auth_token)
     @http_base_url = http_base_url
@@ -18,7 +23,7 @@ class Atc::Aws::RemoteFixityCheck
   end
 
   def http_client
-    @http_client ||= ::Faraday.new(url: @http_base_url) do |f|
+    @http_client ||= ::Faraday.new(url: @http_base_url, request: { timeout: CHECK_PLEASE['http_timeout'] }) do |f|
       f.request :authorization, 'Bearer', @auth_token
       f.response :json # decode response bodies as JSON
       f.response :raise_error # raise 4xx and 5xx responses as errors
@@ -41,6 +46,8 @@ class Atc::Aws::RemoteFixityCheck
       perform_websocket(job_identifier, bucket_name, object_path, checksum_algorithm_name)['data']
     when HTTP
       perform_http(bucket_name, object_path, checksum_algorithm_name)
+    when HTTP_POLLING
+      perform_http_polling(bucket_name, object_path, checksum_algorithm_name)
     else
       raise ArgumentError, "Unsupported perform method: #{method}"
     end
@@ -61,7 +68,67 @@ class Atc::Aws::RemoteFixityCheck
     JSON.parse(response.body)
   rescue StandardError => e
     {
-      'checksum_hexdigest' => nil, 'object_size' => nil, 'error_message' => "An unexpected error occurred: #{e.message}"
+      'checksum_hexdigest' => nil, 'object_size' => nil,
+      'error_message' => "An unexpected error occurred: #{e.class.name} -> #{e.message}"
+    }
+  end
+
+  def perform_http_polling(bucket_name, object_path, checksum_algorithm_name)
+    payload = {
+      'fixity_check' => {
+        'bucket_name' => bucket_name,
+        'object_path' => object_path,
+        'checksum_algorithm_name' => checksum_algorithm_name
+      }
+    }.to_json
+
+    fixity_check_create_response = http_client.post('/fixity_checks', payload) { |request|
+      request.headers['Content-Type'] = 'application/json'
+    }.body
+
+    if fixity_check_create_response['error_message'].present?
+      # Raise any unexpected error message.  It will be handled elsewhere.
+      raise Atc::Exceptions::AtcError,
+            fixity_check_create_response['error_message']
+    end
+
+    # If we got here, that means that the fixity check request was created successfully.
+    # Now we'll poll and wait for it to complete.
+    last_progress_update_time = nil
+    fixity_check_response = nil
+    loop do
+      sleep POLLING_DELAY
+
+      fixity_check_response = http_client.get("/fixity_checks/#{fixity_check_create_response['id']}") { |request|
+        request.headers['Content-Type'] = 'application/json'
+      }.body
+
+      status = fixity_check_response['status']
+
+      break if ['success', 'error'].include?(status)
+
+      # If the fixity check has a 'pending' status, we'll skip this polling iteration and try again in the next poll
+      # operation.  It is the reponsibility of the CheckPlease app to periodically clean up jobs that have been pending
+      # for too long, so we don't need to worry about that case in this app.
+      next if status == 'pending'
+
+      # If we got here, that means that the job is in progress.  Let's account for the
+      # possibility of the job timing out, if something goes wrong on the CheckPlease app side.
+      last_progress_update_time = Time.zone.parse(fixity_check_response['updated_at'])
+      if job_unresponsive?(last_progress_update_time)
+        raise Atc::Exceptions::RemoteFixityCheckTimeout,
+              'Timed out while waiting for a response.'
+      end
+    rescue Faraday::Error => e
+      # If we run into a network error, log it, but continue looping
+      Rails.logger.info 'Error connecting to CheckPlease app during fixity check polling '\
+                        "loop iteration: #{e.class.name} -> #{e.message}"
+    end
+    fixity_check_response
+  rescue StandardError => e
+    {
+      'checksum_hexdigest' => nil, 'object_size' => nil,
+      'error_message' => "An unexpected error occurred: #{e.class.name} -> #{e.message}"
     }
   end
 

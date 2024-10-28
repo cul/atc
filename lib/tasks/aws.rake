@@ -14,7 +14,7 @@ namespace :atc do
       )
       response = remote_fixity_check.perform(
         job_identifier, bucket_name, object_path, checksum_algorithm_name,
-        Atc::Aws::RemoteFixityCheck::HTTP
+        Atc::Aws::RemoteFixityCheck::HTTP_POLLING
       )
       puts "Response: #{response.inspect}"
     end
