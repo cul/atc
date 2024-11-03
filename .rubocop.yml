@@ -17,12 +17,22 @@ AllCops:
     - 'lib/tasks/**/*'
     - 'tmp/**/*'
 
+Layout/LineLength:
+  Exclude:
+    - lib/atc/aip_reader.rb
+    - spec/atc/aip_reader_spec.rb
+
+Metrics/AbcSize:
+  Exclude:
+    - lib/atc/aip_reader.rb
+
 Metrics/ClassLength:
   Exclude:
     - 'lib/atc/aws/remote_fixity_check.rb'
 
 Metrics/MethodLength:
   Exclude:
+    - lib/atc/aip_reader.rb
     - 'lib/atc/loaders/checksum_loader.rb'
     - 'lib/atc/utils/aws_multipart_checksum_utils.rb'
     - 'lib/atc/aws/s3_uploader.rb'
@@ -31,6 +41,7 @@ Metrics/MethodLength:
 Rails/Output:
   Exclude:
     - 'lib/atc/aws/s3_uploader.rb'
+    - 'lib/atc/aip_reader.rb'
 
 Lint/MissingCopEnableDirective:
   Enabled: false

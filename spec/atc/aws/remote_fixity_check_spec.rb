@@ -45,6 +45,15 @@ describe Atc::Aws::RemoteFixityCheck do
       'object_size' => 123
     }
   end
+  let(:fixity_check_poll_create_response_data) do
+    {
+      'id' => 1,
+      'job_identifier' => SecureRandom.uuid,
+      'bucket_name' => bucket_name,
+      'object_path' => object_path,
+      'checksum_algorithm_name' => checksum_algorithm_name
+    }
+  end
   let(:websocket_fixity_check_complete_message_content) do
     {
       'type' => 'fixity_check_complete',
@@ -135,11 +144,56 @@ describe Atc::Aws::RemoteFixityCheck do
 
     it 'handles unexpected errors' do
       allow(remote_fixity_check.http_client).to receive(:post).and_raise(StandardError, 'oh no!')
-      expect(remote_fixity_check.perform_http(bucket_name, object_path, checksum_algorithm_name)).to eq(
+      expect(remote_fixity_check.perform_http(bucket_name, object_path, checksum_algorithm_name)).to match(
         {
           'checksum_hexdigest' => nil,
           'object_size' => nil,
-          'error_message' => 'An unexpected error occurred: StandardError -> oh no!'
+          'error_message' => /An unexpected error occurred: StandardError -> oh no!/
+        }
+      )
+    end
+  end
+
+  describe '#perform_http_polling' do
+    let(:fixity_check_poll_pending_status_response_data) do
+      { 'status' => 'pending' }
+    end
+    let(:fixity_check_poll_success_status_response_data) do
+      successful_fixity_check_response_data.merge({ 'status' => 'success' })
+    end
+    let(:successful_fixity_check_polling_response_data) do
+      successful_fixity_check_response_data.merge({ 'status' => 'success' })
+    end
+
+    before do
+      stub_request(:post, "#{check_please_app_base_http_url}/fixity_checks").to_return({
+        body: fixity_check_poll_create_response_data.to_json
+      })
+      stub_request(
+        :get,
+        "#{check_please_app_base_http_url}/fixity_checks/#{fixity_check_poll_create_response_data['id']}"
+      ).to_return(
+        { body: fixity_check_poll_pending_status_response_data.to_json }, # pending
+        { body: fixity_check_poll_pending_status_response_data.to_json }, # pending
+        { body: fixity_check_poll_success_status_response_data.to_json } # success
+      )
+    end
+
+    it 'works as expected' do
+      expect(
+        remote_fixity_check.perform_http_polling(
+          bucket_name, object_path, checksum_algorithm_name
+        )
+      ).to eq(successful_fixity_check_polling_response_data)
+    end
+
+    it 'handles unexpected errors' do
+      allow(remote_fixity_check.http_client).to receive(:post).and_raise(StandardError, 'oh no!')
+      expect(remote_fixity_check.perform_http(bucket_name, object_path, checksum_algorithm_name)).to match(
+        {
+          'checksum_hexdigest' => nil,
+          'object_size' => nil,
+          'error_message' => /An unexpected error occurred: StandardError -> oh no!/
         }
       )
     end

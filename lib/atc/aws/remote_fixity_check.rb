@@ -9,9 +9,8 @@
 class Atc::Aws::RemoteFixityCheck
   # This value shouldn't be too high because we want to detect stalled jobs fairly soon after they stall,
   # but it should be high enough to account for downtime/delays related to CheckPlease app deployments.
-  STALLED_FIXITY_CHECK_JOB_TIMEOUT = 1.minute
+  STALLED_FIXITY_CHECK_JOB_TIMEOUT = 2.minutes
   POLLING_DELAY = 2.seconds
-  MAX_WAIT_TIME_FOR_POLLING_JOB_START = 1.hour
   WEBSOCKET = 'websocket'
   HTTP = 'http'
   HTTP_POLLING = 'http_polling'
@@ -25,7 +24,6 @@ class Atc::Aws::RemoteFixityCheck
   def http_client
     @http_client ||= ::Faraday.new(url: @http_base_url, request: { timeout: CHECK_PLEASE['http_timeout'] }) do |f|
       f.request :authorization, 'Bearer', @auth_token
-      f.response :json # decode response bodies as JSON
       f.response :raise_error # raise 4xx and 5xx responses as errors
       f.adapter :net_http # Use the Net::HTTP adapter
     end
@@ -61,15 +59,14 @@ class Atc::Aws::RemoteFixityCheck
         'checksum_algorithm_name' => checksum_algorithm_name
       }
     }.to_json
-    response = http_client.post('/fixity_checks/run_fixity_check_for_s3_object', payload) do |request|
-      request.headers['Content-Type'] = 'application/json'
-    end
 
-    JSON.parse(response.body)
+    JSON.parse(http_client.post('/fixity_checks/run_fixity_check_for_s3_object', payload) { |request|
+      request.headers['Content-Type'] = 'application/json'
+    }.body)
   rescue StandardError => e
     {
       'checksum_hexdigest' => nil, 'object_size' => nil,
-      'error_message' => "An unexpected error occurred: #{e.class.name} -> #{e.message}"
+      'error_message' => "An unexpected error occurred: #{e.class.name} -> #{e.message}\n\t#{e.backtrace.join("\n\t")}"
     }
   end
 
@@ -82,9 +79,9 @@ class Atc::Aws::RemoteFixityCheck
       }
     }.to_json
 
-    fixity_check_create_response = http_client.post('/fixity_checks', payload) { |request|
+    fixity_check_create_response = JSON.parse(http_client.post('/fixity_checks', payload) { |request|
       request.headers['Content-Type'] = 'application/json'
-    }.body
+    }.body)
 
     if fixity_check_create_response['error_message'].present?
       # Raise any unexpected error message.  It will be handled elsewhere.
@@ -99,9 +96,11 @@ class Atc::Aws::RemoteFixityCheck
     loop do
       sleep POLLING_DELAY
 
-      fixity_check_response = http_client.get("/fixity_checks/#{fixity_check_create_response['id']}") { |request|
-        request.headers['Content-Type'] = 'application/json'
-      }.body
+      fixity_check_response = JSON.parse(
+        http_client.get("/fixity_checks/#{fixity_check_create_response['id']}") { |request|
+          request.headers['Content-Type'] = 'application/json'
+        }.body
+      )
 
       status = fixity_check_response['status']
 
@@ -128,7 +127,7 @@ class Atc::Aws::RemoteFixityCheck
   rescue StandardError => e
     {
       'checksum_hexdigest' => nil, 'object_size' => nil,
-      'error_message' => "An unexpected error occurred: #{e.class.name} -> #{e.message}"
+      'error_message' => "An unexpected error occurred: #{e.class.name} -> #{e.message}\n\t#{e.backtrace.join("\n\t")}"
     }
   end
 

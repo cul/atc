@@ -1,0 +1,4 @@
+Bag-Software-Agent: bagit.py v1.7.0 <https://github.com/LibraryOfCongress/bagit-python>
+Bagging-Date: 2024-09-10
+External-Identifier: 4558310f-9573-457b-bee9-6b2cd354b51e
+Payload-Oxum: 153720.10

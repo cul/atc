@@ -80,7 +80,7 @@ class PerformTransferJob < ApplicationJob
 
     # If we got here, that means that the upload was successful.  We can convert this
     # PendingTransfer record into a StoredObject record.
-    StoredObject.create!(
+    stored_object = StoredObject.create!(
       path: previously_attempted_stored_paths.last,
       source_object: pending_transfer.source_object,
       storage_provider: pending_transfer.storage_provider,
@@ -92,6 +92,9 @@ class PerformTransferJob < ApplicationJob
 
     # And then delete the PendingTransfer record because it's no longer needed:
     pending_transfer.destroy
+
+    # And finally, queue a fixity check job for the successfully transferred object
+    VerifyFixityJob.perform_later(stored_object.id)
   rescue StandardError => e
     unless e.is_a?(ActiveRecord::RecordNotFound)
       # If an unexpected error occurs, capture it and mark this job as a failure.

@@ -33,6 +33,15 @@ describe PerformTransferJob do
     expect(StoredObject.first.path).to eq(object_key)
   end
 
+  it 'queues a VerifyFixityJob after successfully creating a StoredObject record' do
+    allow(aws_storage_provider).to receive(:perform_transfer).with(
+      pending_transfer, object_key, metadata: expected_metadata
+    )
+    allow(VerifyFixityJob).to receive(:perform_later)
+    perform_transfer_job.perform(pending_transfer.id)
+    expect(VerifyFixityJob).to have_received(:perform_later).with(StoredObject.first.id)
+  end
+
   it 'does not create a StoredObject record when a StoredObject record already exists '\
     'for the same storage provider + source_object pair' do
     FactoryBot.create(
