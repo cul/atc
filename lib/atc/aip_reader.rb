@@ -80,11 +80,13 @@ class Atc::AipReader
         print "\rGenerating AIP checksum mapping (#{counter += 1})..." if @verbose
       end
     end
-    puts '' if @verbose
 
     # And we'll manually generate a checksum for the tagmanifest file, since it doesn't contain its own checksum
     file_paths_to_checksums[self.tagmanifest_file_path] =
       "Digest::#{self.checksum_type.upcase}".constantize.file(self.tagmanifest_file_path).hexdigest
+    print "\rGenerating AIP checksum mapping (#{counter += 1})..." if @verbose
+
+    puts '' if @verbose
 
     @file_path_to_checksum_map = file_paths_to_checksums
   end
