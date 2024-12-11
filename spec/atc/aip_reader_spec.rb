@@ -121,27 +121,4 @@ describe Atc::AipReader do
       )
     end
   end
-
-  describe '.generate_file_list' do
-    it 'returns the expected file list when all files are readable' do
-      expect(described_class.generate_file_list(path_to_aip_fixture_copy).sort).to eq(expected_file_path_to_checksum_map.keys.sort)
-    end
-
-    it 'raises an exception when some files in the AIP are not readable, and the error message lists the unreadable files' do
-      # all files readable by default
-      allow(File).to receive(:readable?).and_return(true)
-      # pretend that bagit.txt is not readable
-      allow(File).to receive(:readable?).with(File.join(path_to_aip_fixture_copy, 'bagit.txt')).and_return(false)
-      # pretend that data/README.html is not readable
-      allow(File).to receive(:readable?).with(File.join(path_to_aip_fixture_copy, 'data/README.html')).and_return(false)
-      expect {
-        described_class.generate_file_list(path_to_aip_fixture_copy)
-      }.to raise_error(
-        Atc::Exceptions::UnreadableAip,
-        "The following files could not be read:\n"\
-        "#{File.join(path_to_aip_fixture_copy, 'bagit.txt')}\n"\
-        "#{File.join(path_to_aip_fixture_copy, 'data/README.html')}"
-      )
-    end
-  end
 end

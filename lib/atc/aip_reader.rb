@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
-class Atc::AipReader
+class Atc::AipReader < Atc::DirectoryReader
   SUPPORTED_CHECKSUM_ALGORITHMS_IN_ORDER_OF_PREFERENCE = ['sha256', 'sha512', 'md5'].freeze
 
-  attr_reader :path, :manifest_file_path, :tagmanifest_file_path, :checksum_type, :file_path_to_checksum_map
+  attr_reader :manifest_file_path, :tagmanifest_file_path, :checksum_type, :file_path_to_checksum_map
 
   def initialize(aip_path, verbose: false)
-    @verbose = verbose
-    @path = aip_path
-    @file_list = self.class.generate_file_list(self.path)
+    super(aip_path, verbose: verbose)
     @manifest_file_path, @tagmanifest_file_path = select_best_manifest_files
     validate!
     @checksum_type = @manifest_file_path.match(/.+-(.+).txt/)[1]
@@ -23,38 +21,11 @@ class Atc::AipReader
   end
 
   # @visibility private
-  # Iterates over all files in the AIP (regardless of whether they appear in the manifest or tagmanifest files)
-  # and returns an array with all paths.  If any unreadable files are encountered, an error is raised with a message
-  # that details which files could not be read.
-  def self.generate_file_list(directory_path)
-    readable_files = []
-    unreadable_files = []
-    counter = 0
-    print 'Generating file list (0)...' if @verbose
-    Atc::Utils::FileUtils.stream_recursive_directory_read(directory_path) do |file_path|
-      if File.readable?(file_path)
-        readable_files << file_path
-      else
-        unreadable_files << file_path
-      end
-      print "\rGenerating file list (#{counter += 1})..." if @verbose
-    end
-    puts '' if @verbose
-
-    if unreadable_files.length.positive?
-      raise Atc::Exceptions::UnreadableAip,
-            "The following files could not be read:\n#{unreadable_files.sort.join("\n")}"
-    end
-
-    readable_files
-  end
-
-  # @visibility private
-  # This method ensures that all files in @file_list have a corresponding checksum and raises an error if any files
+  # This method ensures that all files in self.file_list have a corresponding checksum and raises an error if any files
   # do not have a checksum.
   def ensure_file_list_checksum_coverage!
     files_without_checksums = []
-    @file_list.each do |file_path|
+    self.file_list.each do |file_path|
       files_without_checksums << file_path unless file_path_to_checksum_map.key?(file_path)
     end
 

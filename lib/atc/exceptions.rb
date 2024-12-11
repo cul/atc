@@ -9,8 +9,8 @@ module Atc::Exceptions
   class RemoteFixityCheckTimeout < AtcError; end
   class PollingWaitTimeoutError < AtcError; end
 
-  class AipLoadError < AtcError; end
-  class InvalidAip < AipLoadError; end
-  class UnreadableAip < AipLoadError; end
-  class MissingAipChecksums < AipLoadError; end
+  class DirectoryLoadError < AtcError; end
+  class UnreadableFiles < DirectoryLoadError; end
+  class InvalidAip < DirectoryLoadError; end
+  class MissingAipChecksums < DirectoryLoadError; end
 end
