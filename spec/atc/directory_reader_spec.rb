@@ -7,7 +7,8 @@ describe Atc::DirectoryReader do
 
   let(:path_to_directory_fixture_copy) do
     tmpdir_path = Dir.mktmpdir('sample_directory_')
-    FileUtils.cp_r("#{file_fixture('sample_directory')}/.", tmpdir_path) # copy the CONTENTS of path_to_directory_fixture to tmpdir_path
+    # copy the CONTENTS of path_to_directory_fixture to tmpdir_path
+    FileUtils.cp_r("#{file_fixture('sample_directory')}/.", tmpdir_path)
     tmpdir_path
   end
 
@@ -51,13 +52,18 @@ describe Atc::DirectoryReader do
       expect(described_class.generate_file_list(path_to_directory_fixture_copy).sort).to eq(expected_file_list.sort)
     end
 
-    it 'raises an exception when some files in the directory are not readable, and the error message lists the unreadable files' do
+    it 'raises an exception when some files in the directory are not readable, '\
+        'and the error message lists the unreadable files' do
       # all files readable by default
       allow(File).to receive(:readable?).and_return(true)
       # pretend that sample-file1.txt is not readable
-      allow(File).to receive(:readable?).with(File.join(path_to_directory_fixture_copy, 'sample-file1.txt')).and_return(false)
+      allow(File).to receive(:readable?).with(
+        File.join(path_to_directory_fixture_copy, 'sample-file1.txt')
+      ).and_return(false)
       # pretend that sample-file2.txt is not readable
-      allow(File).to receive(:readable?).with(File.join(path_to_directory_fixture_copy, 'sample-file2.txt')).and_return(false)
+      allow(File).to receive(:readable?).with(
+        File.join(path_to_directory_fixture_copy, 'sample-file2.txt')
+      ).and_return(false)
       expect {
         described_class.generate_file_list(path_to_directory_fixture_copy)
       }.to raise_error(

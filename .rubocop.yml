@@ -33,15 +33,17 @@ Metrics/ClassLength:
 Metrics/MethodLength:
   Exclude:
     - lib/atc/aip_reader.rb
-    - 'lib/atc/loaders/checksum_loader.rb'
-    - 'lib/atc/utils/aws_multipart_checksum_utils.rb'
-    - 'lib/atc/aws/s3_uploader.rb'
-    - 'lib/atc/utils/aws_checksum_utils.rb'
+    - lib/atc/directory_reader.rb
+    - lib/atc/loaders/checksum_loader.rb
+    - lib/atc/utils/aws_multipart_checksum_utils.rb
+    - lib/atc/aws/s3_uploader.rb
+    - lib/atc/utils/aws_checksum_utils.rb
 
 Rails/Output:
   Exclude:
     - 'lib/atc/aws/s3_uploader.rb'
     - 'lib/atc/aip_reader.rb'
+    - 'lib/atc/directory_reader.rb'
 
 Lint/MissingCopEnableDirective:
   Enabled: false
