@@ -1,0 +1,1477 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/version111/mets.xsd">
+  <mets:metsHdr CREATEDATE="2024-09-10T21:51:28"/>
+  <mets:dmdSec ID="dmdSec_1">
+    <mets:mdWrap MDTYPE="PREMIS:OBJECT">
+      <mets:xmlData>
+        <premis:object xmlns:premis="http://www.loc.gov/premis/v3" xsi:type="premis:intellectualEntity" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+          <premis:objectIdentifier>
+            <premis:objectIdentifierType>UUID</premis:objectIdentifierType>
+            <premis:objectIdentifierValue>4558310f-9573-457b-bee9-6b2cd354b51e</premis:objectIdentifierValue>
+          </premis:objectIdentifier>
+          <premis:originalName>sample_1-4558310f-9573-457b-bee9-6b2cd354b51e</premis:originalName>
+        </premis:object>
+      </mets:xmlData>
+    </mets:mdWrap>
+  </mets:dmdSec>
+  <mets:amdSec ID="amdSec_1">
+    <mets:techMD ID="techMD_1">
+      <mets:mdWrap MDTYPE="PREMIS:OBJECT">
+        <mets:xmlData>
+          <premis:object xmlns:premis="http://www.loc.gov/premis/v3" xsi:type="premis:file" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>UUID</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>e6e776a7-2885-4ba8-ae1c-8f29f6a74057</premis:objectIdentifierValue>
+            </premis:objectIdentifier>
+            <premis:objectCharacteristics>
+              <premis:compositionLevel>0</premis:compositionLevel>
+              <premis:fixity>
+                <premis:messageDigestAlgorithm>sha256</premis:messageDigestAlgorithm>
+                <premis:messageDigest>84ce6b3cb87d4c810975a88e1a24c87db8e4668ada11a6034a764d634d8466d9</premis:messageDigest>
+              </premis:fixity>
+              <premis:size>159</premis:size>
+              <premis:format>
+                <premis:formatDesignation>
+                  <premis:formatName>Plain Text</premis:formatName>
+                  <premis:formatVersion></premis:formatVersion>
+                </premis:formatDesignation>
+                <premis:formatRegistry>
+                  <premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+                  <premis:formatRegistryKey>x-fmt/111</premis:formatRegistryKey>
+                </premis:formatRegistry>
+              </premis:format>
+              <premis:creatingApplication>
+                <premis:dateCreatedByApplication>2024-09-10</premis:dateCreatedByApplication>
+              </premis:creatingApplication>
+              <premis:objectCharacteristicsExtension>
+                <fits xmlns="http://hul.harvard.edu/ois/xml/ns/fits/fits_output" xsi:schemaLocation="http://hul.harvard.edu/ois/xml/ns/fits/fits_output http://hul.harvard.edu/ois/xml/xsd/fits/fits_output.xsd" version="1.1.0" timestamp="9/10/24 9:51 PM">
+                  <identification>
+                    <identity format="Plain text" mimetype="text/plain" toolname="FITS" toolversion="1.1.0">
+                      <tool toolname="Droid" toolversion="6.1.5"/>
+                      <tool toolname="Jhove" toolversion="1.16"/>
+                      <tool toolname="file utility" toolversion="5.11"/>
+                      <externalIdentifier toolname="Droid" toolversion="6.1.5" type="puid">x-fmt/111</externalIdentifier>
+                    </identity>
+                  </identification>
+                  <fileinfo>
+                    <size toolname="Jhove" toolversion="1.16">159</size>
+                    <filepath toolname="OIS File Information" toolversion="0.2" status="SINGLE_RESULT">/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/metadataReminder/sample_1-4558310f-9573-457b-bee9-6b2cd354b51e/objects/metadata/transfers/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/directory_tree.txt</filepath>
+                    <filename toolname="OIS File Information" toolversion="0.2" status="SINGLE_RESULT">directory_tree.txt</filename>
+                    <md5checksum toolname="OIS File Information" toolversion="0.2" status="SINGLE_RESULT">6a3bbd231c4c05e73b204f1cf6ae23a6</md5checksum>
+                    <fslastmodified toolname="OIS File Information" toolversion="0.2" status="SINGLE_RESULT">1726005073000</fslastmodified>
+                  </fileinfo>
+                  <filestatus>
+                    <well-formed toolname="Jhove" toolversion="1.16" status="SINGLE_RESULT">true</well-formed>
+                    <valid toolname="Jhove" toolversion="1.16" status="SINGLE_RESULT">true</valid>
+                  </filestatus>
+                  <metadata>
+                    <text>
+                      <linebreak toolname="Jhove" toolversion="1.16" status="SINGLE_RESULT">LF</linebreak>
+                      <charset toolname="Jhove" toolversion="1.16">UTF-8</charset>
+                    </text>
+                  </metadata>
+                  <toolOutput>
+                    <tool name="Droid" version="6.1.5">
+                      <results xmlns="">
+                        <result>
+                          <filePuid>x-fmt/111</filePuid>
+                          <formatName>Plain Text File</formatName>
+                          <mimeType>text/plain</mimeType>
+                          <version>null</version>
+                        </result>
+                      </results>
+                    </tool>
+                    <tool name="Jhove" version="1.16">
+                      <repInfo xmlns="" uri="/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/metadataReminder/sample_1-4558310f-9573-457b-bee9-6b2cd354b51e/objects/metadata/transfers/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/directory_tree.txt">
+                        <reportingModule release="1.6" date="2014-07-18">UTF8-hul</reportingModule>
+                        <lastModified>2024-09-10T21:51:13+00:00</lastModified>
+                        <size>159</size>
+                        <format>UTF-8</format>
+                        <status>Well-Formed and valid</status>
+                        <mimeType>text/plain; charset=UTF-8</mimeType>
+                        <properties>
+                          <property>
+                            <name>UTF8Metadata</name>
+                            <values arity="List" type="Property">
+                              <property>
+                                <name>Characters</name>
+                                <values arity="Scalar" type="Long">
+                                  <value>153</value>
+                                </values>
+                              </property>
+                              <property>
+                                <name>UnicodeBlocks</name>
+                                <values arity="List" type="String">
+                                  <value>Basic Latin</value>
+                                  <value>Box Drawing</value>
+                                </values>
+                              </property>
+                              <property>
+                                <name>LineEndings</name>
+                                <values arity="List" type="String">
+                                  <value>LF</value>
+                                </values>
+                              </property>
+                            </values>
+                          </property>
+                        </properties>
+                        <note>Additional representation information includes the line endings: CR, LF, or CRLF</note>
+                      </repInfo>
+                    </tool>
+                    <tool name="file utility" version="5.11">
+                      <fileUtilityOutput xmlns="">
+                        <rawOutput>UTF-8 Unicode text
+text/plain; charset=utf-8</rawOutput>
+                        <mimetype>text/plain</mimetype>
+                        <format>Plain text</format>
+                        <charset>UTF-8</charset>
+                      </fileUtilityOutput>
+                    </tool>
+                    <tool name="OIS File Information" version="0.2">
+                      <fits xsi:schemaLocation="http://hul.harvard.edu/ois/xml/ns/fits/fits_output http://hul.harvard.edu/ois/xml/xsd/fits/fits_output.xsd">
+                        <fileinfo>
+                          <filepath>/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/metadataReminder/sample_1-4558310f-9573-457b-bee9-6b2cd354b51e/objects/metadata/transfers/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/directory_tree.txt</filepath>
+                          <filename>directory_tree.txt</filename>
+                          <size>159</size>
+                          <md5checksum>6a3bbd231c4c05e73b204f1cf6ae23a6</md5checksum>
+                          <fslastmodified>1726005073000</fslastmodified>
+                        </fileinfo>
+                      </fits>
+                    </tool>
+                    <tool name="ffident" version="0.2">
+                      <ffidentOutput xmlns="">
+                        <shortName/>
+                        <longName>Unknown Binary</longName>
+                        <group/>
+                        <mimetypes>
+                          <mimetype>application/octet-stream</mimetype>
+                        </mimetypes>
+                        <fileExtensions/>
+                      </ffidentOutput>
+                    </tool>
+                    <tool name="Tika" version="1.10">
+                      <metadata xmlns="">
+                        <field name="X-Parsed-By">
+                          <value>org.apache.tika.parser.DefaultParser</value>
+                          <value>org.apache.tika.parser.txt.TXTParser</value>
+                        </field>
+                        <field name="Content-Encoding">
+                          <value>UTF-8</value>
+                        </field>
+                        <field name="Content-Type">
+                          <value>text/plain; charset=UTF-8</value>
+                        </field>
+                      </metadata>
+                    </tool>
+                  </toolOutput>
+                  <statistics fitsExecutionTime="278">
+                    <tool toolname="OIS Audio Information" toolversion="0.1" status="did not run"/>
+                    <tool toolname="ADL Tool" toolversion="0.1" status="did not run"/>
+                    <tool toolname="VTT Tool" toolversion="0.1" status="did not run"/>
+                    <tool toolname="Droid" toolversion="6.1.5" executionTime="46"/>
+                    <tool toolname="Jhove" toolversion="1.16" executionTime="55"/>
+                    <tool toolname="file utility" toolversion="5.11" executionTime="28"/>
+                    <tool toolname="Exiftool" toolversion="11.70" status="did not run"/>
+                    <tool toolname="NLNZ Metadata Extractor" toolversion="3.6GA" status="did not run"/>
+                    <tool toolname="OIS File Information" toolversion="0.2" executionTime="1"/>
+                    <tool toolname="OIS XML Metadata" toolversion="0.2" status="did not run"/>
+                    <tool toolname="ffident" toolversion="0.2" executionTime="3"/>
+                    <tool toolname="Tika" toolversion="1.10" executionTime="273"/>
+                  </statistics>
+                </fits>
+              </premis:objectCharacteristicsExtension>
+            </premis:objectCharacteristics>
+            <premis:originalName>%SIPDirectory%objects/metadata/transfers/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/directory_tree.txt</premis:originalName>
+          </premis:object>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:techMD>
+    <mets:digiprovMD ID="digiprovMD_1">
+      <mets:mdWrap MDTYPE="PREMIS:EVENT">
+        <mets:xmlData>
+          <premis:event xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:eventIdentifier>
+              <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+              <premis:eventIdentifierValue>4c5c0f74-1675-4fb1-ba7c-2ab406f3dca9</premis:eventIdentifierValue>
+            </premis:eventIdentifier>
+            <premis:eventType>ingestion</premis:eventType>
+            <premis:eventDateTime>2024-09-10T21:51:15+00:00</premis:eventDateTime>
+            <premis:eventDetailInformation>
+              <premis:eventDetail></premis:eventDetail>
+            </premis:eventDetailInformation>
+            <premis:eventOutcomeInformation>
+              <premis:eventOutcome></premis:eventOutcome>
+              <premis:eventOutcomeDetail>
+                <premis:eventOutcomeDetailNote></premis:eventOutcomeDetailNote>
+              </premis:eventOutcomeDetail>
+            </premis:eventOutcomeInformation>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>preservation system</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>Archivematica-1.10.1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>repository code</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>CUL</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>Archivematica user pk</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+          </premis:event>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_2">
+      <mets:mdWrap MDTYPE="PREMIS:EVENT">
+        <mets:xmlData>
+          <premis:event xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:eventIdentifier>
+              <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+              <premis:eventIdentifierValue>3401617c-7641-4da1-80da-160515656489</premis:eventIdentifierValue>
+            </premis:eventIdentifier>
+            <premis:eventType>message digest calculation</premis:eventType>
+            <premis:eventDateTime>2024-09-10T21:51:15+00:00</premis:eventDateTime>
+            <premis:eventDetailInformation>
+              <premis:eventDetail>program="python"; module="hashlib.sha256()"</premis:eventDetail>
+            </premis:eventDetailInformation>
+            <premis:eventOutcomeInformation>
+              <premis:eventOutcome></premis:eventOutcome>
+              <premis:eventOutcomeDetail>
+                <premis:eventOutcomeDetailNote>84ce6b3cb87d4c810975a88e1a24c87db8e4668ada11a6034a764d634d8466d9</premis:eventOutcomeDetailNote>
+              </premis:eventOutcomeDetail>
+            </premis:eventOutcomeInformation>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>preservation system</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>Archivematica-1.10.1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>repository code</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>CUL</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>Archivematica user pk</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+          </premis:event>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_3">
+      <mets:mdWrap MDTYPE="PREMIS:EVENT">
+        <mets:xmlData>
+          <premis:event xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:eventIdentifier>
+              <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+              <premis:eventIdentifierValue>c3f44af2-f86d-4003-aa26-90187cc3ee43</premis:eventIdentifierValue>
+            </premis:eventIdentifier>
+            <premis:eventType>virus check</premis:eventType>
+            <premis:eventDateTime>2024-09-10T21:51:17+00:00</premis:eventDateTime>
+            <premis:eventDetailInformation>
+              <premis:eventDetail>program="ClamAV (clamd)"; version="ClamAV 0.101.5"; virusDefinitions="25819/Thu May 21 12:20:55 2020"</premis:eventDetail>
+            </premis:eventDetailInformation>
+            <premis:eventOutcomeInformation>
+              <premis:eventOutcome>Pass</premis:eventOutcome>
+              <premis:eventOutcomeDetail>
+                <premis:eventOutcomeDetailNote></premis:eventOutcomeDetailNote>
+              </premis:eventOutcomeDetail>
+            </premis:eventOutcomeInformation>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>preservation system</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>Archivematica-1.10.1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>repository code</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>CUL</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>Archivematica user pk</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+          </premis:event>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_4">
+      <mets:mdWrap MDTYPE="PREMIS:EVENT">
+        <mets:xmlData>
+          <premis:event xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:eventIdentifier>
+              <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+              <premis:eventIdentifierValue>a9342588-a8ee-49b1-be8e-58d8db1c8002</premis:eventIdentifierValue>
+            </premis:eventIdentifier>
+            <premis:eventType>format identification</premis:eventType>
+            <premis:eventDateTime>2024-09-10T21:51:19+00:00</premis:eventDateTime>
+            <premis:eventDetailInformation>
+              <premis:eventDetail>program="Siegfried"; version="1.7.10"</premis:eventDetail>
+            </premis:eventDetailInformation>
+            <premis:eventOutcomeInformation>
+              <premis:eventOutcome>Positive</premis:eventOutcome>
+              <premis:eventOutcomeDetail>
+                <premis:eventOutcomeDetailNote>x-fmt/111</premis:eventOutcomeDetailNote>
+              </premis:eventOutcomeDetail>
+            </premis:eventOutcomeInformation>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>preservation system</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>Archivematica-1.10.1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>repository code</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>CUL</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>Archivematica user pk</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+          </premis:event>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_5">
+      <mets:mdWrap MDTYPE="PREMIS:AGENT">
+        <mets:xmlData>
+          <premis:agent xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:agentIdentifier>
+              <premis:agentIdentifierType>preservation system</premis:agentIdentifierType>
+              <premis:agentIdentifierValue>Archivematica-1.10.1</premis:agentIdentifierValue>
+            </premis:agentIdentifier>
+            <premis:agentName>Archivematica</premis:agentName>
+            <premis:agentType>software</premis:agentType>
+          </premis:agent>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_6">
+      <mets:mdWrap MDTYPE="PREMIS:AGENT">
+        <mets:xmlData>
+          <premis:agent xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:agentIdentifier>
+              <premis:agentIdentifierType>repository code</premis:agentIdentifierType>
+              <premis:agentIdentifierValue>CUL</premis:agentIdentifierValue>
+            </premis:agentIdentifier>
+            <premis:agentName>Columbia University Library</premis:agentName>
+            <premis:agentType>organization</premis:agentType>
+          </premis:agent>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_7">
+      <mets:mdWrap MDTYPE="PREMIS:AGENT">
+        <mets:xmlData>
+          <premis:agent xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:agentIdentifier>
+              <premis:agentIdentifierType>Archivematica user pk</premis:agentIdentifierType>
+              <premis:agentIdentifierValue>1</premis:agentIdentifierValue>
+            </premis:agentIdentifier>
+            <premis:agentName>username="ldpd", first_name="LDPD Service Account", last_name=""</premis:agentName>
+            <premis:agentType>Archivematica user</premis:agentType>
+          </premis:agent>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+  </mets:amdSec>
+  <mets:amdSec ID="amdSec_2">
+    <mets:techMD ID="techMD_2">
+      <mets:mdWrap MDTYPE="PREMIS:OBJECT">
+        <mets:xmlData>
+          <premis:object xmlns:premis="http://www.loc.gov/premis/v3" xsi:type="premis:file" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>UUID</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>058fedd0-e412-43d7-85a5-ac93c7efb4d6</premis:objectIdentifierValue>
+            </premis:objectIdentifier>
+            <premis:objectCharacteristics>
+              <premis:compositionLevel>0</premis:compositionLevel>
+              <premis:fixity>
+                <premis:messageDigestAlgorithm>sha256</premis:messageDigestAlgorithm>
+                <premis:messageDigest>11586d2eb43b73e539caa3d158c883336c0e2c904b309c0c5ffe2c9b83d562a1</premis:messageDigest>
+              </premis:fixity>
+              <premis:size>16</premis:size>
+              <premis:format>
+                <premis:formatDesignation>
+                  <premis:formatName>Plain Text</premis:formatName>
+                  <premis:formatVersion></premis:formatVersion>
+                </premis:formatDesignation>
+                <premis:formatRegistry>
+                  <premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+                  <premis:formatRegistryKey>x-fmt/111</premis:formatRegistryKey>
+                </premis:formatRegistry>
+              </premis:format>
+              <premis:creatingApplication>
+                <premis:dateCreatedByApplication>2024-09-10</premis:dateCreatedByApplication>
+              </premis:creatingApplication>
+              <premis:objectCharacteristicsExtension>
+                <fits xmlns="http://hul.harvard.edu/ois/xml/ns/fits/fits_output" xsi:schemaLocation="http://hul.harvard.edu/ois/xml/ns/fits/fits_output http://hul.harvard.edu/ois/xml/xsd/fits/fits_output.xsd" version="1.1.0" timestamp="9/10/24 9:50 PM">
+                  <identification>
+                    <identity format="Plain text" mimetype="text/plain" toolname="FITS" toolversion="1.1.0">
+                      <tool toolname="Droid" toolversion="6.1.5"/>
+                      <tool toolname="Jhove" toolversion="1.16"/>
+                      <tool toolname="file utility" toolversion="5.11"/>
+                      <externalIdentifier toolname="Droid" toolversion="6.1.5" type="puid">x-fmt/111</externalIdentifier>
+                    </identity>
+                  </identification>
+                  <fileinfo>
+                    <size toolname="Jhove" toolversion="1.16">16</size>
+                    <filepath toolname="OIS File Information" toolversion="0.2" status="SINGLE_RESULT">/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/extractPackagesChoice/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/objects/sample-file.txt</filepath>
+                    <filename toolname="OIS File Information" toolversion="0.2" status="SINGLE_RESULT">sample-file.txt</filename>
+                    <md5checksum toolname="OIS File Information" toolversion="0.2" status="SINGLE_RESULT">02bcabffffd16fe0fc250f08cad95e0c</md5checksum>
+                    <fslastmodified toolname="OIS File Information" toolversion="0.2" status="SINGLE_RESULT">1726004169000</fslastmodified>
+                  </fileinfo>
+                  <filestatus>
+                    <well-formed toolname="Jhove" toolversion="1.16" status="SINGLE_RESULT">true</well-formed>
+                    <valid toolname="Jhove" toolversion="1.16" status="SINGLE_RESULT">true</valid>
+                  </filestatus>
+                  <metadata>
+                    <text>
+                      <linebreak toolname="Jhove" toolversion="1.16" status="SINGLE_RESULT">LF</linebreak>
+                      <charset toolname="Jhove" toolversion="1.16">US-ASCII</charset>
+                    </text>
+                  </metadata>
+                  <toolOutput>
+                    <tool name="Droid" version="6.1.5">
+                      <results xmlns="">
+                        <result>
+                          <filePuid>x-fmt/111</filePuid>
+                          <formatName>Plain Text File</formatName>
+                          <mimeType>text/plain</mimeType>
+                          <version>null</version>
+                        </result>
+                      </results>
+                    </tool>
+                    <tool name="Jhove" version="1.16">
+                      <repInfo xmlns="" uri="/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/extractPackagesChoice/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/objects/sample-file.txt">
+                        <reportingModule release="1.3" date="2006-09-05">ASCII-hul</reportingModule>
+                        <lastModified>2024-09-10T21:36:09+00:00</lastModified>
+                        <size>16</size>
+                        <format>ASCII</format>
+                        <status>Well-Formed and valid</status>
+                        <mimeType>text/plain; charset=US-ASCII</mimeType>
+                        <properties>
+                          <property>
+                            <name>ASCIIMetadata</name>
+                            <values arity="List" type="Property">
+                              <property>
+                                <name>LineEndings</name>
+                                <values arity="List" type="String">
+                                  <value>LF</value>
+                                </values>
+                              </property>
+                            </values>
+                          </property>
+                        </properties>
+                      </repInfo>
+                    </tool>
+                    <tool name="file utility" version="5.11">
+                      <fileUtilityOutput xmlns="">
+                        <rawOutput>ASCII text
+text/plain; charset=us-ascii</rawOutput>
+                        <mimetype>text/plain</mimetype>
+                        <format>Plain text</format>
+                        <charset>US-ASCII</charset>
+                      </fileUtilityOutput>
+                    </tool>
+                    <tool name="OIS File Information" version="0.2">
+                      <fits xsi:schemaLocation="http://hul.harvard.edu/ois/xml/ns/fits/fits_output http://hul.harvard.edu/ois/xml/xsd/fits/fits_output.xsd">
+                        <fileinfo>
+                          <filepath>/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/extractPackagesChoice/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/objects/sample-file.txt</filepath>
+                          <filename>sample-file.txt</filename>
+                          <size>16</size>
+                          <md5checksum>02bcabffffd16fe0fc250f08cad95e0c</md5checksum>
+                          <fslastmodified>1726004169000</fslastmodified>
+                        </fileinfo>
+                      </fits>
+                    </tool>
+                    <tool name="ffident" version="0.2">
+                      <ffidentOutput xmlns="">
+                        <shortName/>
+                        <longName>Unknown Binary</longName>
+                        <group/>
+                        <mimetypes>
+                          <mimetype>application/octet-stream</mimetype>
+                        </mimetypes>
+                        <fileExtensions/>
+                      </ffidentOutput>
+                    </tool>
+                    <tool name="Tika" version="1.10">
+                      <metadata xmlns="">
+                        <field name="X-Parsed-By">
+                          <value>org.apache.tika.parser.DefaultParser</value>
+                          <value>org.apache.tika.parser.txt.TXTParser</value>
+                        </field>
+                        <field name="Content-Encoding">
+                          <value>ISO-8859-1</value>
+                        </field>
+                        <field name="Content-Type">
+                          <value>text/plain; charset=ISO-8859-1</value>
+                        </field>
+                      </metadata>
+                    </tool>
+                  </toolOutput>
+                  <statistics fitsExecutionTime="224">
+                    <tool toolname="OIS Audio Information" toolversion="0.1" status="did not run"/>
+                    <tool toolname="ADL Tool" toolversion="0.1" status="did not run"/>
+                    <tool toolname="VTT Tool" toolversion="0.1" status="did not run"/>
+                    <tool toolname="Droid" toolversion="6.1.5" executionTime="54"/>
+                    <tool toolname="Jhove" toolversion="1.16" executionTime="56"/>
+                    <tool toolname="file utility" toolversion="5.11" executionTime="27"/>
+                    <tool toolname="Exiftool" toolversion="11.70" status="did not run"/>
+                    <tool toolname="NLNZ Metadata Extractor" toolversion="3.6GA" status="did not run"/>
+                    <tool toolname="OIS File Information" toolversion="0.2" executionTime="1"/>
+                    <tool toolname="OIS XML Metadata" toolversion="0.2" status="did not run"/>
+                    <tool toolname="ffident" toolversion="0.2" executionTime="3"/>
+                    <tool toolname="Tika" toolversion="1.10" executionTime="218"/>
+                  </statistics>
+                </fits>
+              </premis:objectCharacteristicsExtension>
+            </premis:objectCharacteristics>
+            <premis:originalName>%transferDirectory%objects/sample-file.txt</premis:originalName>
+          </premis:object>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:techMD>
+    <mets:digiprovMD ID="digiprovMD_8">
+      <mets:mdWrap MDTYPE="PREMIS:EVENT">
+        <mets:xmlData>
+          <premis:event xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:eventIdentifier>
+              <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+              <premis:eventIdentifierValue>5562bf27-4105-4b60-aeb2-bae5be344d01</premis:eventIdentifierValue>
+            </premis:eventIdentifier>
+            <premis:eventType>ingestion</premis:eventType>
+            <premis:eventDateTime>2024-09-10T21:50:13+00:00</premis:eventDateTime>
+            <premis:eventDetailInformation>
+              <premis:eventDetail></premis:eventDetail>
+            </premis:eventDetailInformation>
+            <premis:eventOutcomeInformation>
+              <premis:eventOutcome></premis:eventOutcome>
+              <premis:eventOutcomeDetail>
+                <premis:eventOutcomeDetailNote></premis:eventOutcomeDetailNote>
+              </premis:eventOutcomeDetail>
+            </premis:eventOutcomeInformation>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>preservation system</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>Archivematica-1.10.1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>repository code</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>CUL</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>Archivematica user pk</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+          </premis:event>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_9">
+      <mets:mdWrap MDTYPE="PREMIS:EVENT">
+        <mets:xmlData>
+          <premis:event xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:eventIdentifier>
+              <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+              <premis:eventIdentifierValue>e9975858-2faa-400f-956a-97c0d9aff838</premis:eventIdentifierValue>
+            </premis:eventIdentifier>
+            <premis:eventType>message digest calculation</premis:eventType>
+            <premis:eventDateTime>2024-09-10T21:50:13+00:00</premis:eventDateTime>
+            <premis:eventDetailInformation>
+              <premis:eventDetail>program="python"; module="hashlib.sha256()"</premis:eventDetail>
+            </premis:eventDetailInformation>
+            <premis:eventOutcomeInformation>
+              <premis:eventOutcome></premis:eventOutcome>
+              <premis:eventOutcomeDetail>
+                <premis:eventOutcomeDetailNote>11586d2eb43b73e539caa3d158c883336c0e2c904b309c0c5ffe2c9b83d562a1</premis:eventOutcomeDetailNote>
+              </premis:eventOutcomeDetail>
+            </premis:eventOutcomeInformation>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>preservation system</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>Archivematica-1.10.1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>repository code</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>CUL</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>Archivematica user pk</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+          </premis:event>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_10">
+      <mets:mdWrap MDTYPE="PREMIS:EVENT">
+        <mets:xmlData>
+          <premis:event xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:eventIdentifier>
+              <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+              <premis:eventIdentifierValue>aa8a1de9-4b09-4a2a-bc18-9cd9a87a9242</premis:eventIdentifierValue>
+            </premis:eventIdentifier>
+            <premis:eventType>virus check</premis:eventType>
+            <premis:eventDateTime>2024-09-10T21:50:17+00:00</premis:eventDateTime>
+            <premis:eventDetailInformation>
+              <premis:eventDetail>program="ClamAV (clamd)"; version="ClamAV 0.101.5"; virusDefinitions="25819/Thu May 21 12:20:55 2020"</premis:eventDetail>
+            </premis:eventDetailInformation>
+            <premis:eventOutcomeInformation>
+              <premis:eventOutcome>Pass</premis:eventOutcome>
+              <premis:eventOutcomeDetail>
+                <premis:eventOutcomeDetailNote></premis:eventOutcomeDetailNote>
+              </premis:eventOutcomeDetail>
+            </premis:eventOutcomeInformation>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>preservation system</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>Archivematica-1.10.1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>repository code</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>CUL</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>Archivematica user pk</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+          </premis:event>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_11">
+      <mets:mdWrap MDTYPE="PREMIS:EVENT">
+        <mets:xmlData>
+          <premis:event xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:eventIdentifier>
+              <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+              <premis:eventIdentifierValue>07d5602d-95d6-43f8-99d4-e0f021e130f5</premis:eventIdentifierValue>
+            </premis:eventIdentifier>
+            <premis:eventType>format identification</premis:eventType>
+            <premis:eventDateTime>2024-09-10T21:50:23+00:00</premis:eventDateTime>
+            <premis:eventDetailInformation>
+              <premis:eventDetail>program="Siegfried"; version="1.7.10"</premis:eventDetail>
+            </premis:eventDetailInformation>
+            <premis:eventOutcomeInformation>
+              <premis:eventOutcome>Positive</premis:eventOutcome>
+              <premis:eventOutcomeDetail>
+                <premis:eventOutcomeDetailNote>x-fmt/111</premis:eventOutcomeDetailNote>
+              </premis:eventOutcomeDetail>
+            </premis:eventOutcomeInformation>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>preservation system</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>Archivematica-1.10.1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>repository code</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>CUL</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>Archivematica user pk</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+          </premis:event>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_12">
+      <mets:mdWrap MDTYPE="PREMIS:AGENT">
+        <mets:xmlData>
+          <premis:agent xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:agentIdentifier>
+              <premis:agentIdentifierType>preservation system</premis:agentIdentifierType>
+              <premis:agentIdentifierValue>Archivematica-1.10.1</premis:agentIdentifierValue>
+            </premis:agentIdentifier>
+            <premis:agentName>Archivematica</premis:agentName>
+            <premis:agentType>software</premis:agentType>
+          </premis:agent>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_13">
+      <mets:mdWrap MDTYPE="PREMIS:AGENT">
+        <mets:xmlData>
+          <premis:agent xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:agentIdentifier>
+              <premis:agentIdentifierType>repository code</premis:agentIdentifierType>
+              <premis:agentIdentifierValue>CUL</premis:agentIdentifierValue>
+            </premis:agentIdentifier>
+            <premis:agentName>Columbia University Library</premis:agentName>
+            <premis:agentType>organization</premis:agentType>
+          </premis:agent>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_14">
+      <mets:mdWrap MDTYPE="PREMIS:AGENT">
+        <mets:xmlData>
+          <premis:agent xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:agentIdentifier>
+              <premis:agentIdentifierType>Archivematica user pk</premis:agentIdentifierType>
+              <premis:agentIdentifierValue>1</premis:agentIdentifierValue>
+            </premis:agentIdentifier>
+            <premis:agentName>username="ldpd", first_name="LDPD Service Account", last_name=""</premis:agentName>
+            <premis:agentType>Archivematica user</premis:agentType>
+          </premis:agent>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+  </mets:amdSec>
+  <mets:amdSec ID="amdSec_3">
+    <mets:techMD ID="techMD_3">
+      <mets:mdWrap MDTYPE="PREMIS:OBJECT">
+        <mets:xmlData>
+          <premis:object xmlns:premis="http://www.loc.gov/premis/v3" xsi:type="premis:file" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:objectIdentifier>
+              <premis:objectIdentifierType>UUID</premis:objectIdentifierType>
+              <premis:objectIdentifierValue>014b17eb-0b9d-465f-834c-70ae440fc435</premis:objectIdentifierValue>
+            </premis:objectIdentifier>
+            <premis:objectCharacteristics>
+              <premis:compositionLevel>0</premis:compositionLevel>
+              <premis:fixity>
+                <premis:messageDigestAlgorithm>sha256</premis:messageDigestAlgorithm>
+                <premis:messageDigest>8136cc8231084326cfcfe34b764e82330e61196a87fade6c1dd9d5423c5f3fc0</premis:messageDigest>
+              </premis:fixity>
+              <premis:size>18905</premis:size>
+              <premis:format>
+                <premis:formatDesignation>
+                  <premis:formatName>XML</premis:formatName>
+                  <premis:formatVersion>1.0</premis:formatVersion>
+                </premis:formatDesignation>
+                <premis:formatRegistry>
+                  <premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+                  <premis:formatRegistryKey>fmt/101</premis:formatRegistryKey>
+                </premis:formatRegistry>
+              </premis:format>
+              <premis:creatingApplication>
+                <premis:dateCreatedByApplication>2024-09-10</premis:dateCreatedByApplication>
+              </premis:creatingApplication>
+              <premis:objectCharacteristicsExtension>
+                <fits xmlns="http://hul.harvard.edu/ois/xml/ns/fits/fits_output" xsi:schemaLocation="http://hul.harvard.edu/ois/xml/ns/fits/fits_output http://hul.harvard.edu/ois/xml/xsd/fits/fits_output.xsd" version="1.1.0" timestamp="9/10/24 9:51 PM">
+                  <identification>
+                    <identity format="Extensible Markup Language" mimetype="text/xml" toolname="FITS" toolversion="1.1.0">
+                      <tool toolname="Droid" toolversion="6.1.5"/>
+                      <tool toolname="file utility" toolversion="5.11"/>
+                      <tool toolname="Exiftool" toolversion="11.70"/>
+                      <tool toolname="NLNZ Metadata Extractor" toolversion="3.6GA"/>
+                      <tool toolname="OIS XML Metadata" toolversion="0.2"/>
+                      <tool toolname="ffident" toolversion="0.2"/>
+                      <tool toolname="Tika" toolversion="1.10"/>
+                      <version toolname="Droid" toolversion="6.1.5">1.0</version>
+                      <externalIdentifier toolname="Droid" toolversion="6.1.5" type="puid">fmt/101</externalIdentifier>
+                    </identity>
+                  </identification>
+                  <fileinfo>
+                    <size toolname="Jhove" toolversion="1.16">18905</size>
+                    <filepath toolname="OIS File Information" toolversion="0.2" status="SINGLE_RESULT">/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/metadataReminder/sample_1-4558310f-9573-457b-bee9-6b2cd354b51e/objects/submissionDocumentation/transfer-sample_1-99254175-7b00-474b-ac29-3b2a04a04901/METS.xml</filepath>
+                    <filename toolname="OIS File Information" toolversion="0.2" status="SINGLE_RESULT">METS.xml</filename>
+                    <md5checksum toolname="OIS File Information" toolversion="0.2" status="SINGLE_RESULT">00111a9238f78c6f304d40a272b79e47</md5checksum>
+                    <fslastmodified toolname="OIS File Information" toolversion="0.2" status="SINGLE_RESULT">1726005032000</fslastmodified>
+                  </fileinfo>
+                  <filestatus/>
+                  <metadata>
+                    <text>
+                      <charset toolname="NLNZ Metadata Extractor" toolversion="3.6GA" status="SINGLE_RESULT">UTF-8</charset>
+                      <markupBasis toolname="Exiftool" toolversion="11.70">XML</markupBasis>
+                      <markupBasisVersion toolname="NLNZ Metadata Extractor" toolversion="3.6GA" status="SINGLE_RESULT">1.0</markupBasisVersion>
+                      <markupLanguage toolname="OIS XML Metadata" toolversion="0.2" status="SINGLE_RESULT">http://www.loc.gov/standards/mets/version111/mets.xsd</markupLanguage>
+                    </text>
+                  </metadata>
+                  <toolOutput>
+                    <tool name="Droid" version="6.1.5">
+                      <results xmlns="">
+                        <result>
+                          <filePuid>fmt/101</filePuid>
+                          <formatName>Extensible Markup Language</formatName>
+                          <mimeType>application/xml, text/xml</mimeType>
+                          <version>1.0</version>
+                        </result>
+                      </results>
+                    </tool>
+                    <tool name="Jhove" version="1.16">
+                      <repInfo xmlns="" uri="/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/metadataReminder/sample_1-4558310f-9573-457b-bee9-6b2cd354b51e/objects/submissionDocumentation/transfer-sample_1-99254175-7b00-474b-ac29-3b2a04a04901/METS.xml">
+                        <reportingModule release="1.3" date="2006-09-05">ASCII-hul</reportingModule>
+                        <lastModified>2024-09-10T21:50:32+00:00</lastModified>
+                        <size>18905</size>
+                        <format>ASCII</format>
+                        <status>Well-Formed and valid</status>
+                        <mimeType>text/plain; charset=US-ASCII</mimeType>
+                        <properties>
+                          <property>
+                            <name>ASCIIMetadata</name>
+                            <values arity="List" type="Property">
+                              <property>
+                                <name>LineEndings</name>
+                                <values arity="List" type="String">
+                                  <value>LF</value>
+                                </values>
+                              </property>
+                            </values>
+                          </property>
+                        </properties>
+                      </repInfo>
+                    </tool>
+                    <tool name="file utility" version="5.11">
+                      <fileUtilityOutput xmlns="">
+                        <rawOutput>XML 1.0 document text
+application/xml; charset=us-ascii</rawOutput>
+                        <mimetype>application/xml</mimetype>
+                        <format>XML 1.0 document text</format>
+                      </fileUtilityOutput>
+                    </tool>
+                    <tool name="Exiftool" version="11.70">
+                      <exiftool xmlns="">
+                        <rawOutput>ExifToolVersion	11.70
+FileName	METS.xml
+Directory	/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/metadataReminder/sample_1-4558310f-9573-457b-bee9-6b2cd354b51e/objects/submissionDocumentation/transfer-sample_1-99254175-7b00-474b-ac29-3b2a04a04901
+FileSize	18 kB
+FileModifyDate	2024:09:10 21:50:32+00:00
+FileAccessDate	2024:09:10 21:51:02+00:00
+FileInodeChangeDate	2024:09:10 21:51:00+00:00
+FilePermissions	rw-r--r--
+FileType	XML
+FileTypeExtension	xml
+MIMEType	application/xml
+MetsObjid	99254175-7b00-474b-ac29-3b2a04a04901
+MetsSchemaLocation	http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/version111/mets.xsd
+MetsMetsHdrCreatedate	2024:09:10 21:50:32
+MetsMetsHdrAgentOthertype	SOFTWARE
+MetsMetsHdrAgentRole	CREATOR
+MetsMetsHdrAgentType	OTHER
+MetsMetsHdrAgentName	97b85726-ce9f-4493-9631-32ba05f87eca
+MetsMetsHdrAgentNote	Archivematica dashboard UUID
+MetsAmdSecId	amdSec_15240
+MetsAmdSecTechMDId	techMD_15240
+MetsAmdSecTechMDCreated	2024:09:10 21:50:32
+MetsAmdSecTechMDStatus	current
+MetsAmdSecTechMDMdWrapMdtype	PREMIS:OBJECT
+MetsAmdSecTechMDMdWrapXmlDataObjectSchemaLocation	http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd
+MetsAmdSecTechMDMdWrapXmlDataObjectType	premis:file
+MetsAmdSecTechMDMdWrapXmlDataObjectVersion	3.0
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectIdentifierObjectIdentifierType	UUID
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectIdentifierObjectIdentifierValue	058fedd0-e412-43d7-85a5-ac93c7efb4d6
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsCompositionLevel	0
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFixityMessageDigestAlgorithm	SHA-256
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFixityMessageDigest	11586d2eb43b73e539caa3d158c883336c0e2c904b309c0c5ffe2c9b83d562a1
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsSize	16
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFormatFormatDesignationFormatName	Plain Text
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFormatFormatDesignationFormatVersion	
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFormatFormatRegistryFormatRegistryName	PRONOM
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFormatFormatRegistryFormatRegistryKey	x-fmt/111
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsCreatingApplicationDateCreatedByApplication	2024-09-10
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsXmlns	http://hul.harvard.edu/ois/xml/ns/fits/fits_output
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsSchemaLocation	http://hul.harvard.edu/ois/xml/ns/fits/fits_output http://hul.harvard.edu/ois/xml/xsd/fits/fits_output.xsd
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsVersion	1.1.0
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsTimestamp	9/10/24 9:50 PM
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityFormat	Plain text
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityMimetype	text/plain
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityToolname	FITS
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityToolversion	1.1.0
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityToolToolname	Droid
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityToolToolversion	6.1.5
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityExternalIdentifierToolname	Droid
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityExternalIdentifierToolversion	6.1.5
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityExternalIdentifierType	puid
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityExternalIdentifier	x-fmt/111
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoSizeToolname	Jhove
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoSizeToolversion	1.16
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoSize	16
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilepathToolname	OIS File Information
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilepathToolversion	0.2
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilepathStatus	SINGLE_RESULT
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilepath	/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/extractPackagesChoice/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/objects/sample-file.txt
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilenameToolname	OIS File Information
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilenameToolversion	0.2
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilenameStatus	SINGLE_RESULT
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilename	sample-file.txt
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoMd5checksumToolname	OIS File Information
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoMd5checksumToolversion	0.2
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoMd5checksumStatus	SINGLE_RESULT
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoMd5checksum	02bcabffffd16fe0fc250f08cad95e0c
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFslastmodifiedToolname	OIS File Information
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFslastmodifiedToolversion	0.2
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFslastmodifiedStatus	SINGLE_RESULT
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFslastmodified	1726004169000
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusWell-formedToolname	Jhove
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusWell-formedToolversion	1.16
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusWell-formedStatus	SINGLE_RESULT
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusWell-formed	true
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusValidToolname	Jhove
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusValidToolversion	1.16
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusValidStatus	SINGLE_RESULT
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusValid	true
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextLinebreakToolname	Jhove
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextLinebreakToolversion	1.16
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextLinebreakStatus	SINGLE_RESULT
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextLinebreak	LF
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextCharsetToolname	Jhove
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextCharsetToolversion	1.16
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextCharset	US-ASCII
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolName	Droid
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolVersion	6.1.5
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolResultsXmlns	
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolResultsResultFilePuid	x-fmt/111
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolResultsResultFormatName	Plain Text File
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolResultsResultMimeType	text/plain
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolResultsResultVersion	null
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoXmlns	
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoUri	/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/extractPackagesChoice/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/objects/sample-file.txt
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoReportingModuleRelease	1.3
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoReportingModuleDate	2006-09-05
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoReportingModule	ASCII-hul
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoLastModified	2024:09:10 21:36:09+00:00
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoSize	16
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoFormat	ASCII
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoStatus	Well-Formed and valid
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoMimeType	text/plain; charset=US-ASCII
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyName	ASCIIMetadata
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesArity	List
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesType	Property
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesPropertyName	LineEndings
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesPropertyValuesArity	List
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesPropertyValuesType	String
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesPropertyValuesValue	LF
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFileUtilityOutputXmlns	
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFileUtilityOutputRawOutput	ASCII text.text/plain; charset=us-ascii
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFileUtilityOutputMimetype	text/plain
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFileUtilityOutputFormat	Plain text
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFileUtilityOutputCharset	US-ASCII
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsSchemaLocation	http://hul.harvard.edu/ois/xml/ns/fits/fits_output http://hul.harvard.edu/ois/xml/xsd/fits/fits_output.xsd
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoFilepath	/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/extractPackagesChoice/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/objects/sample-file.txt
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoFilename	sample-file.txt
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoSize	16
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoMd5checksum	02bcabffffd16fe0fc250f08cad95e0c
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoFslastmodified	1726004169000
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFfidentOutputXmlns	
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFfidentOutputShortName	
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFfidentOutputLongName	Unknown Binary
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFfidentOutputGroup	
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFfidentOutputMimetypesMimetype	application/octet-stream
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFfidentOutputFileExtensions	
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolMetadataXmlns	
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolMetadataFieldName	X-Parsed-By
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolMetadataFieldValue	org.apache.tika.parser.DefaultParser
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsFitsExecutionTime	224
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsToolToolname	OIS Audio Information
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsToolToolversion	0.1
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsToolStatus	did not run
+MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsToolExecutionTime	54
+MetsAmdSecTechMDMdWrapXmlDataObjectOriginalName	%transferDirectory%objects/sample-file.txt
+MetsAmdSecDigiprovMDId	digiprovMD_62882
+MetsAmdSecDigiprovMDCreated	2024:09:10 21:50:32
+MetsAmdSecDigiprovMDMdWrapMdtype	PREMIS:EVENT
+MetsAmdSecDigiprovMDMdWrapXmlDataEventSchemaLocation	http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd
+MetsAmdSecDigiprovMDMdWrapXmlDataEventVersion	3.0
+MetsAmdSecDigiprovMDMdWrapXmlDataEventEventIdentifierEventIdentifierType	UUID
+MetsAmdSecDigiprovMDMdWrapXmlDataEventEventIdentifierEventIdentifierValue	5562bf27-4105-4b60-aeb2-bae5be344d01
+MetsAmdSecDigiprovMDMdWrapXmlDataEventEventType	ingestion
+MetsAmdSecDigiprovMDMdWrapXmlDataEventEventDateTime	2024:09:10 21:50:13+00:00
+MetsAmdSecDigiprovMDMdWrapXmlDataEventEventDetailInformationEventDetail	
+MetsAmdSecDigiprovMDMdWrapXmlDataEventEventOutcomeInformationEventOutcome	
+MetsAmdSecDigiprovMDMdWrapXmlDataEventEventOutcomeInformationEventOutcomeDetailEventOutcomeDetailNote	
+MetsAmdSecDigiprovMDMdWrapXmlDataEventLinkingAgentIdentifierLinkingAgentIdentifierType	preservation system
+MetsAmdSecDigiprovMDMdWrapXmlDataEventLinkingAgentIdentifierLinkingAgentIdentifierValue	Archivematica-1.10.1
+MetsFileSecFileGrpUse	original
+MetsFileSecFileGrpFileId	file-058fedd0-e412-43d7-85a5-ac93c7efb4d6
+MetsFileSecFileGrpFileGroupid	Group-058fedd0-e412-43d7-85a5-ac93c7efb4d6
+MetsFileSecFileGrpFileAdmid	amdSec_15240
+MetsFileSecFileGrpFileChecksum	11586d2eb43b73e539caa3d158c883336c0e2c904b309c0c5ffe2c9b83d562a1
+MetsFileSecFileGrpFileChecksumtype	SHA-256
+MetsFileSecFileGrpFileFLocatHref	objects/sample-file.txt
+MetsFileSecFileGrpFileFLocatLoctype	OTHER
+MetsFileSecFileGrpFileFLocatOtherloctype	SYSTEM
+MetsStructMapId	structMap_1
+MetsStructMapLabel	Archivematica default
+MetsStructMapType	physical
+MetsStructMapDivType	Directory
+MetsStructMapDivLabel	sample_1-99254175-7b00-474b-ac29-3b2a04a04901
+MetsStructMapDivDivType	Directory
+MetsStructMapDivDivLabel	objects
+MetsStructMapDivDivDivType	Item
+MetsStructMapDivDivDivLabel	sample-file.txt
+MetsStructMapDivDivDivFptrFileid	file-058fedd0-e412-43d7-85a5-ac93c7efb4d6</rawOutput>
+                        <ExifToolVersion>11.70</ExifToolVersion>
+                        <FileName>METS.xml</FileName>
+                        <Directory>/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/metadataReminder/sample_1-4558310f-9573-457b-bee9-6b2cd354b51e/objects/submissionDocumentation/transfer-sample_1-99254175-7b00-474b-ac29-3b2a04a04901</Directory>
+                        <FileSize>18 kB</FileSize>
+                        <FileModifyDate>2024:09:10 21:50:32+00:00</FileModifyDate>
+                        <FileAccessDate>2024:09:10 21:51:02+00:00</FileAccessDate>
+                        <FileInodeChangeDate>2024:09:10 21:51:00+00:00</FileInodeChangeDate>
+                        <FilePermissions>rw-r--r--</FilePermissions>
+                        <FileType>XML</FileType>
+                        <FileTypeExtension>xml</FileTypeExtension>
+                        <MIMEType>application/xml</MIMEType>
+                        <MetsObjid>99254175-7b00-474b-ac29-3b2a04a04901</MetsObjid>
+                        <MetsSchemaLocation>http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/version111/mets.xsd</MetsSchemaLocation>
+                        <MetsMetsHdrCreatedate>2024:09:10 21:50:32</MetsMetsHdrCreatedate>
+                        <MetsMetsHdrAgentOthertype>SOFTWARE</MetsMetsHdrAgentOthertype>
+                        <MetsMetsHdrAgentRole>CREATOR</MetsMetsHdrAgentRole>
+                        <MetsMetsHdrAgentType>OTHER</MetsMetsHdrAgentType>
+                        <MetsMetsHdrAgentName>97b85726-ce9f-4493-9631-32ba05f87eca</MetsMetsHdrAgentName>
+                        <MetsMetsHdrAgentNote>Archivematica dashboard UUID</MetsMetsHdrAgentNote>
+                        <MetsAmdSecId>amdSec_15240</MetsAmdSecId>
+                        <MetsAmdSecTechMDId>techMD_15240</MetsAmdSecTechMDId>
+                        <MetsAmdSecTechMDCreated>2024:09:10 21:50:32</MetsAmdSecTechMDCreated>
+                        <MetsAmdSecTechMDStatus>current</MetsAmdSecTechMDStatus>
+                        <MetsAmdSecTechMDMdWrapMdtype>PREMIS:OBJECT</MetsAmdSecTechMDMdWrapMdtype>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectSchemaLocation>http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd</MetsAmdSecTechMDMdWrapXmlDataObjectSchemaLocation>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectType>premis:file</MetsAmdSecTechMDMdWrapXmlDataObjectType>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectVersion>3.0</MetsAmdSecTechMDMdWrapXmlDataObjectVersion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectIdentifierObjectIdentifierType>UUID</MetsAmdSecTechMDMdWrapXmlDataObjectObjectIdentifierObjectIdentifierType>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectIdentifierObjectIdentifierValue>058fedd0-e412-43d7-85a5-ac93c7efb4d6</MetsAmdSecTechMDMdWrapXmlDataObjectObjectIdentifierObjectIdentifierValue>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsCompositionLevel>0</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsCompositionLevel>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFixityMessageDigestAlgorithm>SHA-256</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFixityMessageDigestAlgorithm>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFixityMessageDigest>11586d2eb43b73e539caa3d158c883336c0e2c904b309c0c5ffe2c9b83d562a1</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFixityMessageDigest>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsSize>16</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsSize>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFormatFormatDesignationFormatName>Plain Text</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFormatFormatDesignationFormatName>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFormatFormatRegistryFormatRegistryName>PRONOM</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFormatFormatRegistryFormatRegistryName>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFormatFormatRegistryFormatRegistryKey>x-fmt/111</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsFormatFormatRegistryFormatRegistryKey>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsCreatingApplicationDateCreatedByApplication>2024-09-10</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsCreatingApplicationDateCreatedByApplication>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsXmlns>http://hul.harvard.edu/ois/xml/ns/fits/fits_output</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsXmlns>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsSchemaLocation>http://hul.harvard.edu/ois/xml/ns/fits/fits_output http://hul.harvard.edu/ois/xml/xsd/fits/fits_output.xsd</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsSchemaLocation>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsVersion>1.1.0</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsVersion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsTimestamp>9/10/24 9:50 PM</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsTimestamp>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityFormat>Plain text</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityFormat>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityMimetype>text/plain</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityMimetype>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityToolname>FITS</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityToolname>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityToolversion>1.1.0</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityToolversion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityToolToolname>Droid</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityToolToolname>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityToolToolversion>6.1.5</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityToolToolversion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityExternalIdentifierToolname>Droid</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityExternalIdentifierToolname>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityExternalIdentifierToolversion>6.1.5</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityExternalIdentifierToolversion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityExternalIdentifierType>puid</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityExternalIdentifierType>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityExternalIdentifier>x-fmt/111</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsIdentificationIdentityExternalIdentifier>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoSizeToolname>Jhove</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoSizeToolname>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoSizeToolversion>1.16</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoSizeToolversion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoSize>16</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoSize>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilepathToolname>OIS File Information</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilepathToolname>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilepathToolversion>0.2</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilepathToolversion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilepathStatus>SINGLE_RESULT</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilepathStatus>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilepath>/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/extractPackagesChoice/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/objects/sample-file.txt</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilepath>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilenameToolname>OIS File Information</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilenameToolname>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilenameToolversion>0.2</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilenameToolversion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilenameStatus>SINGLE_RESULT</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilenameStatus>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilename>sample-file.txt</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFilename>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoMd5checksumToolname>OIS File Information</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoMd5checksumToolname>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoMd5checksumToolversion>0.2</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoMd5checksumToolversion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoMd5checksumStatus>SINGLE_RESULT</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoMd5checksumStatus>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoMd5checksum>02bcabffffd16fe0fc250f08cad95e0c</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoMd5checksum>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFslastmodifiedToolname>OIS File Information</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFslastmodifiedToolname>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFslastmodifiedToolversion>0.2</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFslastmodifiedToolversion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFslastmodifiedStatus>SINGLE_RESULT</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFslastmodifiedStatus>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFslastmodified>1726004169000</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFileinfoFslastmodified>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusWell-formedToolname>Jhove</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusWell-formedToolname>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusWell-formedToolversion>1.16</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusWell-formedToolversion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusWell-formedStatus>SINGLE_RESULT</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusWell-formedStatus>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusWell-formed>true</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusWell-formed>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusValidToolname>Jhove</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusValidToolname>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusValidToolversion>1.16</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusValidToolversion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusValidStatus>SINGLE_RESULT</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusValidStatus>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusValid>true</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsFilestatusValid>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextLinebreakToolname>Jhove</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextLinebreakToolname>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextLinebreakToolversion>1.16</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextLinebreakToolversion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextLinebreakStatus>SINGLE_RESULT</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextLinebreakStatus>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextLinebreak>LF</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextLinebreak>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextCharsetToolname>Jhove</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextCharsetToolname>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextCharsetToolversion>1.16</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextCharsetToolversion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextCharset>US-ASCII</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsMetadataTextCharset>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolName>Droid</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolName>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolVersion>6.1.5</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolVersion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolResultsResultFilePuid>x-fmt/111</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolResultsResultFilePuid>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolResultsResultFormatName>Plain Text File</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolResultsResultFormatName>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolResultsResultMimeType>text/plain</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolResultsResultMimeType>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolResultsResultVersion>null</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolResultsResultVersion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoUri>/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/extractPackagesChoice/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/objects/sample-file.txt</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoUri>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoReportingModuleRelease>1.3</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoReportingModuleRelease>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoReportingModuleDate>2006-09-05</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoReportingModuleDate>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoReportingModule>ASCII-hul</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoReportingModule>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoLastModified>2024:09:10 21:36:09+00:00</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoLastModified>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoSize>16</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoSize>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoFormat>ASCII</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoFormat>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoStatus>Well-Formed and valid</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoStatus>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoMimeType>text/plain; charset=US-ASCII</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoMimeType>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyName>ASCIIMetadata</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyName>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesArity>List</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesArity>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesType>Property</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesType>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesPropertyName>LineEndings</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesPropertyName>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesPropertyValuesArity>List</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesPropertyValuesArity>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesPropertyValuesType>String</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesPropertyValuesType>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesPropertyValuesValue>LF</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolRepInfoPropertiesPropertyValuesPropertyValuesValue>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFileUtilityOutputRawOutput>ASCII text.text/plain; charset=us-ascii</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFileUtilityOutputRawOutput>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFileUtilityOutputMimetype>text/plain</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFileUtilityOutputMimetype>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFileUtilityOutputFormat>Plain text</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFileUtilityOutputFormat>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFileUtilityOutputCharset>US-ASCII</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFileUtilityOutputCharset>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsSchemaLocation>http://hul.harvard.edu/ois/xml/ns/fits/fits_output http://hul.harvard.edu/ois/xml/xsd/fits/fits_output.xsd</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsSchemaLocation>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoFilepath>/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/extractPackagesChoice/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/objects/sample-file.txt</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoFilepath>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoFilename>sample-file.txt</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoFilename>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoSize>16</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoSize>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoMd5checksum>02bcabffffd16fe0fc250f08cad95e0c</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoMd5checksum>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoFslastmodified>1726004169000</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFitsFileinfoFslastmodified>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFfidentOutputLongName>Unknown Binary</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFfidentOutputLongName>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFfidentOutputMimetypesMimetype>application/octet-stream</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolFfidentOutputMimetypesMimetype>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolMetadataFieldName>X-Parsed-By</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolMetadataFieldName>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolMetadataFieldValue>org.apache.tika.parser.DefaultParser</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsToolOutputToolMetadataFieldValue>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsFitsExecutionTime>224</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsFitsExecutionTime>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsToolToolname>OIS Audio Information</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsToolToolname>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsToolToolversion>0.1</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsToolToolversion>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsToolStatus>did not run</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsToolStatus>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsToolExecutionTime>54</MetsAmdSecTechMDMdWrapXmlDataObjectObjectCharacteristicsObjectCharacteristicsExtensionFitsStatisticsToolExecutionTime>
+                        <MetsAmdSecTechMDMdWrapXmlDataObjectOriginalName>%transferDirectory%objects/sample-file.txt</MetsAmdSecTechMDMdWrapXmlDataObjectOriginalName>
+                        <MetsAmdSecDigiprovMDId>digiprovMD_62882</MetsAmdSecDigiprovMDId>
+                        <MetsAmdSecDigiprovMDCreated>2024:09:10 21:50:32</MetsAmdSecDigiprovMDCreated>
+                        <MetsAmdSecDigiprovMDMdWrapMdtype>PREMIS:EVENT</MetsAmdSecDigiprovMDMdWrapMdtype>
+                        <MetsAmdSecDigiprovMDMdWrapXmlDataEventSchemaLocation>http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd</MetsAmdSecDigiprovMDMdWrapXmlDataEventSchemaLocation>
+                        <MetsAmdSecDigiprovMDMdWrapXmlDataEventVersion>3.0</MetsAmdSecDigiprovMDMdWrapXmlDataEventVersion>
+                        <MetsAmdSecDigiprovMDMdWrapXmlDataEventEventIdentifierEventIdentifierType>UUID</MetsAmdSecDigiprovMDMdWrapXmlDataEventEventIdentifierEventIdentifierType>
+                        <MetsAmdSecDigiprovMDMdWrapXmlDataEventEventIdentifierEventIdentifierValue>5562bf27-4105-4b60-aeb2-bae5be344d01</MetsAmdSecDigiprovMDMdWrapXmlDataEventEventIdentifierEventIdentifierValue>
+                        <MetsAmdSecDigiprovMDMdWrapXmlDataEventEventType>ingestion</MetsAmdSecDigiprovMDMdWrapXmlDataEventEventType>
+                        <MetsAmdSecDigiprovMDMdWrapXmlDataEventEventDateTime>2024:09:10 21:50:13+00:00</MetsAmdSecDigiprovMDMdWrapXmlDataEventEventDateTime>
+                        <MetsAmdSecDigiprovMDMdWrapXmlDataEventLinkingAgentIdentifierLinkingAgentIdentifierType>preservation system</MetsAmdSecDigiprovMDMdWrapXmlDataEventLinkingAgentIdentifierLinkingAgentIdentifierType>
+                        <MetsAmdSecDigiprovMDMdWrapXmlDataEventLinkingAgentIdentifierLinkingAgentIdentifierValue>Archivematica-1.10.1</MetsAmdSecDigiprovMDMdWrapXmlDataEventLinkingAgentIdentifierLinkingAgentIdentifierValue>
+                        <MetsFileSecFileGrpUse>original</MetsFileSecFileGrpUse>
+                        <MetsFileSecFileGrpFileId>file-058fedd0-e412-43d7-85a5-ac93c7efb4d6</MetsFileSecFileGrpFileId>
+                        <MetsFileSecFileGrpFileGroupid>Group-058fedd0-e412-43d7-85a5-ac93c7efb4d6</MetsFileSecFileGrpFileGroupid>
+                        <MetsFileSecFileGrpFileAdmid>amdSec_15240</MetsFileSecFileGrpFileAdmid>
+                        <MetsFileSecFileGrpFileChecksum>11586d2eb43b73e539caa3d158c883336c0e2c904b309c0c5ffe2c9b83d562a1</MetsFileSecFileGrpFileChecksum>
+                        <MetsFileSecFileGrpFileChecksumtype>SHA-256</MetsFileSecFileGrpFileChecksumtype>
+                        <MetsFileSecFileGrpFileFLocatHref>objects/sample-file.txt</MetsFileSecFileGrpFileFLocatHref>
+                        <MetsFileSecFileGrpFileFLocatLoctype>OTHER</MetsFileSecFileGrpFileFLocatLoctype>
+                        <MetsFileSecFileGrpFileFLocatOtherloctype>SYSTEM</MetsFileSecFileGrpFileFLocatOtherloctype>
+                        <MetsStructMapId>structMap_1</MetsStructMapId>
+                        <MetsStructMapLabel>Archivematica default</MetsStructMapLabel>
+                        <MetsStructMapType>physical</MetsStructMapType>
+                        <MetsStructMapDivType>Directory</MetsStructMapDivType>
+                        <MetsStructMapDivLabel>sample_1-99254175-7b00-474b-ac29-3b2a04a04901</MetsStructMapDivLabel>
+                        <MetsStructMapDivDivType>Directory</MetsStructMapDivDivType>
+                        <MetsStructMapDivDivLabel>objects</MetsStructMapDivDivLabel>
+                        <MetsStructMapDivDivDivType>Item</MetsStructMapDivDivDivType>
+                        <MetsStructMapDivDivDivLabel>sample-file.txt</MetsStructMapDivDivDivLabel>
+                        <MetsStructMapDivDivDivFptrFileid>file-058fedd0-e412-43d7-85a5-ac93c7efb4d6</MetsStructMapDivDivDivFptrFileid>
+                      </exiftool>
+                    </tool>
+                    <tool name="NLNZ Metadata Extractor" version="3.6GA">
+                      <XML xmlns="">
+                        <METADATA>
+                          <FILENAME>METS.xml</FILENAME>
+                          <SEPARATOR>/</SEPARATOR>
+                          <PARENT>/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/metadataReminder/sample_1-4558310f-9573-457b-bee9-6b2cd354b51e/objects/submissionDocumentation/transfer-sample_1-99254175-7b00-474b-ac29-3b2a04a04901</PARENT>
+                          <CANONICALPATH>/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/metadataReminder/sample_1-4558310f-9573-457b-bee9-6b2cd354b51e/objects/submissionDocumentation/transfer-sample_1-99254175-7b00-474b-ac29-3b2a04a04901/METS.xml</CANONICALPATH>
+                          <ABSOLUTEPATH>/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/metadataReminder/sample_1-4558310f-9573-457b-bee9-6b2cd354b51e/objects/submissionDocumentation/transfer-sample_1-99254175-7b00-474b-ac29-3b2a04a04901/METS.xml</ABSOLUTEPATH>
+                          <PATH>/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/metadataReminder/sample_1-4558310f-9573-457b-bee9-6b2cd354b51e/objects/submissionDocumentation/transfer-sample_1-99254175-7b00-474b-ac29-3b2a04a04901/METS.xml</PATH>
+                          <FILE>true</FILE>
+                          <DIRECTORY>false</DIRECTORY>
+                          <FILELENGTH>18905</FILELENGTH>
+                          <HIDDEN>false</HIDDEN>
+                          <ABSOLUTE>true</ABSOLUTE>
+                          <URL>file:/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/metadataReminder/sample_1-4558310f-9573-457b-bee9-6b2cd354b51e/objects/submissionDocumentation/transfer-sample_1-99254175-7b00-474b-ac29-3b2a04a04901/METS.xml</URL>
+                          <URI>file:/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/metadataReminder/sample_1-4558310f-9573-457b-bee9-6b2cd354b51e/objects/submissionDocumentation/transfer-sample_1-99254175-7b00-474b-ac29-3b2a04a04901/METS.xml</URI>
+                          <READ>true</READ>
+                          <WRITE>true</WRITE>
+                          <EXTENSION>xml</EXTENSION>
+                          <MODIFIED>2024-09-10 21:50:32</MODIFIED>
+                          <DATE>20240910</DATE>
+                          <DATEPATTERN>yyyyMMdd</DATEPATTERN>
+                          <TIME>215032000</TIME>
+                          <TIMEPATTERN>HHmmssSSS</TIMEPATTERN>
+                          <TYPE>application/xml</TYPE>
+                          <PID>null</PID>
+                          <OID>null</OID>
+                          <FID>null</FID>
+                          <PROCESSOR>unknown</PROCESSOR>
+                        </METADATA>
+                        <INFORMATION>
+                          <VERSION>1.0</VERSION>
+                          <ENCODING>UTF-8</ENCODING>
+                          <STANDALONE>unspecified</STANDALONE>
+                        </INFORMATION>
+                      </XML>
+                    </tool>
+                    <tool name="OIS File Information" version="0.2">
+                      <fits xsi:schemaLocation="http://hul.harvard.edu/ois/xml/ns/fits/fits_output http://hul.harvard.edu/ois/xml/xsd/fits/fits_output.xsd">
+                        <fileinfo>
+                          <filepath>/var/archivematica/sharedDirectory/watchedDirectories/workFlowDecisions/metadataReminder/sample_1-4558310f-9573-457b-bee9-6b2cd354b51e/objects/submissionDocumentation/transfer-sample_1-99254175-7b00-474b-ac29-3b2a04a04901/METS.xml</filepath>
+                          <filename>METS.xml</filename>
+                          <size>18905</size>
+                          <md5checksum>00111a9238f78c6f304d40a272b79e47</md5checksum>
+                          <fslastmodified>1726005032000</fslastmodified>
+                        </fileinfo>
+                      </fits>
+                    </tool>
+                    <tool name="OIS XML Metadata" version="0.2">
+                      <fits xsi:schemaLocation="http://hul.harvard.edu/ois/xml/ns/fits/fits_output http://hul.harvard.edu/ois/xml/xsd/fits/fits_output.xsd">
+                        <identification>
+                          <identity format="Extensible Markup Language" mimetype="text/xml"/>
+                        </identification>
+                        <metadata>
+                          <text>
+                            <markupLanguage>http://www.loc.gov/standards/mets/version111/mets.xsd</markupLanguage>
+                          </text>
+                        </metadata>
+                      </fits>
+                    </tool>
+                    <tool name="ffident" version="0.2">
+                      <ffidentOutput xmlns="">
+                        <shortName>XML</shortName>
+                        <longName>Extensible Markup Language</longName>
+                        <group>doc</group>
+                        <mimetypes>
+                          <mimetype>text/xml</mimetype>
+                        </mimetypes>
+                        <fileExtensions>
+                          <extension>xml</extension>
+                        </fileExtensions>
+                      </ffidentOutput>
+                    </tool>
+                    <tool name="Tika" version="1.10">
+                      <metadata xmlns="">
+                        <field name="X-Parsed-By">
+                          <value>org.apache.tika.parser.DefaultParser</value>
+                          <value>org.apache.tika.parser.xml.DcXMLParser</value>
+                        </field>
+                        <field name="Content-Type">
+                          <value>application/xml</value>
+                        </field>
+                      </metadata>
+                    </tool>
+                  </toolOutput>
+                  <statistics fitsExecutionTime="285">
+                    <tool toolname="OIS Audio Information" toolversion="0.1" status="did not run"/>
+                    <tool toolname="ADL Tool" toolversion="0.1" status="did not run"/>
+                    <tool toolname="VTT Tool" toolversion="0.1" status="did not run"/>
+                    <tool toolname="Droid" toolversion="6.1.5" executionTime="61"/>
+                    <tool toolname="Jhove" toolversion="1.16" executionTime="277"/>
+                    <tool toolname="file utility" toolversion="5.11" executionTime="22"/>
+                    <tool toolname="Exiftool" toolversion="11.70" executionTime="158"/>
+                    <tool toolname="NLNZ Metadata Extractor" toolversion="3.6GA" executionTime="226"/>
+                    <tool toolname="OIS File Information" toolversion="0.2" executionTime="5"/>
+                    <tool toolname="OIS XML Metadata" toolversion="0.2" executionTime="4"/>
+                    <tool toolname="ffident" toolversion="0.2" executionTime="6"/>
+                    <tool toolname="Tika" toolversion="1.10" executionTime="278"/>
+                  </statistics>
+                </fits>
+              </premis:objectCharacteristicsExtension>
+            </premis:objectCharacteristics>
+            <premis:originalName>%SIPDirectory%objects/submissionDocumentation/transfer-sample_1-99254175-7b00-474b-ac29-3b2a04a04901/METS.xml</premis:originalName>
+          </premis:object>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:techMD>
+    <mets:digiprovMD ID="digiprovMD_15">
+      <mets:mdWrap MDTYPE="PREMIS:EVENT">
+        <mets:xmlData>
+          <premis:event xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:eventIdentifier>
+              <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+              <premis:eventIdentifierValue>2eeac5f2-2066-4825-8d49-aaf12a1f152c</premis:eventIdentifierValue>
+            </premis:eventIdentifier>
+            <premis:eventType>ingestion</premis:eventType>
+            <premis:eventDateTime>2024-09-10T21:51:01+00:00</premis:eventDateTime>
+            <premis:eventDetailInformation>
+              <premis:eventDetail></premis:eventDetail>
+            </premis:eventDetailInformation>
+            <premis:eventOutcomeInformation>
+              <premis:eventOutcome></premis:eventOutcome>
+              <premis:eventOutcomeDetail>
+                <premis:eventOutcomeDetailNote></premis:eventOutcomeDetailNote>
+              </premis:eventOutcomeDetail>
+            </premis:eventOutcomeInformation>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>preservation system</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>Archivematica-1.10.1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>repository code</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>CUL</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>Archivematica user pk</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+          </premis:event>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_16">
+      <mets:mdWrap MDTYPE="PREMIS:EVENT">
+        <mets:xmlData>
+          <premis:event xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:eventIdentifier>
+              <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+              <premis:eventIdentifierValue>5d8f554c-3d3a-4783-bcf2-1752e939641b</premis:eventIdentifierValue>
+            </premis:eventIdentifier>
+            <premis:eventType>message digest calculation</premis:eventType>
+            <premis:eventDateTime>2024-09-10T21:51:02+00:00</premis:eventDateTime>
+            <premis:eventDetailInformation>
+              <premis:eventDetail>program="python"; module="hashlib.sha256()"</premis:eventDetail>
+            </premis:eventDetailInformation>
+            <premis:eventOutcomeInformation>
+              <premis:eventOutcome></premis:eventOutcome>
+              <premis:eventOutcomeDetail>
+                <premis:eventOutcomeDetailNote>8136cc8231084326cfcfe34b764e82330e61196a87fade6c1dd9d5423c5f3fc0</premis:eventOutcomeDetailNote>
+              </premis:eventOutcomeDetail>
+            </premis:eventOutcomeInformation>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>preservation system</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>Archivematica-1.10.1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>repository code</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>CUL</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>Archivematica user pk</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+          </premis:event>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_17">
+      <mets:mdWrap MDTYPE="PREMIS:EVENT">
+        <mets:xmlData>
+          <premis:event xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:eventIdentifier>
+              <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+              <premis:eventIdentifierValue>67cb99db-2f15-48e3-8765-f3197b8b5e30</premis:eventIdentifierValue>
+            </premis:eventIdentifier>
+            <premis:eventType>virus check</premis:eventType>
+            <premis:eventDateTime>2024-09-10T21:51:04+00:00</premis:eventDateTime>
+            <premis:eventDetailInformation>
+              <premis:eventDetail>program="ClamAV (clamd)"; version="ClamAV 0.101.5"; virusDefinitions="25819/Thu May 21 12:20:55 2020"</premis:eventDetail>
+            </premis:eventDetailInformation>
+            <premis:eventOutcomeInformation>
+              <premis:eventOutcome>Pass</premis:eventOutcome>
+              <premis:eventOutcomeDetail>
+                <premis:eventOutcomeDetailNote></premis:eventOutcomeDetailNote>
+              </premis:eventOutcomeDetail>
+            </premis:eventOutcomeInformation>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>preservation system</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>Archivematica-1.10.1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>repository code</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>CUL</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>Archivematica user pk</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+          </premis:event>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_18">
+      <mets:mdWrap MDTYPE="PREMIS:EVENT">
+        <mets:xmlData>
+          <premis:event xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:eventIdentifier>
+              <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+              <premis:eventIdentifierValue>f1b1db8a-5dd9-4c25-b792-fe5e77a03900</premis:eventIdentifierValue>
+            </premis:eventIdentifier>
+            <premis:eventType>format identification</premis:eventType>
+            <premis:eventDateTime>2024-09-10T21:51:06+00:00</premis:eventDateTime>
+            <premis:eventDetailInformation>
+              <premis:eventDetail>program="Siegfried"; version="1.7.10"</premis:eventDetail>
+            </premis:eventDetailInformation>
+            <premis:eventOutcomeInformation>
+              <premis:eventOutcome>Positive</premis:eventOutcome>
+              <premis:eventOutcomeDetail>
+                <premis:eventOutcomeDetailNote>fmt/101</premis:eventOutcomeDetailNote>
+              </premis:eventOutcomeDetail>
+            </premis:eventOutcomeInformation>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>preservation system</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>Archivematica-1.10.1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>repository code</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>CUL</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+            <premis:linkingAgentIdentifier>
+              <premis:linkingAgentIdentifierType>Archivematica user pk</premis:linkingAgentIdentifierType>
+              <premis:linkingAgentIdentifierValue>1</premis:linkingAgentIdentifierValue>
+            </premis:linkingAgentIdentifier>
+          </premis:event>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_19">
+      <mets:mdWrap MDTYPE="PREMIS:AGENT">
+        <mets:xmlData>
+          <premis:agent xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:agentIdentifier>
+              <premis:agentIdentifierType>preservation system</premis:agentIdentifierType>
+              <premis:agentIdentifierValue>Archivematica-1.10.1</premis:agentIdentifierValue>
+            </premis:agentIdentifier>
+            <premis:agentName>Archivematica</premis:agentName>
+            <premis:agentType>software</premis:agentType>
+          </premis:agent>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_20">
+      <mets:mdWrap MDTYPE="PREMIS:AGENT">
+        <mets:xmlData>
+          <premis:agent xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:agentIdentifier>
+              <premis:agentIdentifierType>repository code</premis:agentIdentifierType>
+              <premis:agentIdentifierValue>CUL</premis:agentIdentifierValue>
+            </premis:agentIdentifier>
+            <premis:agentName>Columbia University Library</premis:agentName>
+            <premis:agentType>organization</premis:agentType>
+          </premis:agent>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+    <mets:digiprovMD ID="digiprovMD_21">
+      <mets:mdWrap MDTYPE="PREMIS:AGENT">
+        <mets:xmlData>
+          <premis:agent xmlns:premis="http://www.loc.gov/premis/v3" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" version="3.0">
+            <premis:agentIdentifier>
+              <premis:agentIdentifierType>Archivematica user pk</premis:agentIdentifierType>
+              <premis:agentIdentifierValue>1</premis:agentIdentifierValue>
+            </premis:agentIdentifier>
+            <premis:agentName>username="ldpd", first_name="LDPD Service Account", last_name=""</premis:agentName>
+            <premis:agentType>Archivematica user</premis:agentType>
+          </premis:agent>
+        </mets:xmlData>
+      </mets:mdWrap>
+    </mets:digiprovMD>
+  </mets:amdSec>
+  <mets:fileSec>
+    <mets:fileGrp USE="original">
+      <mets:file GROUPID="Group-058fedd0-e412-43d7-85a5-ac93c7efb4d6" ID="file-058fedd0-e412-43d7-85a5-ac93c7efb4d6" ADMID="amdSec_2">
+        <mets:FLocat xlink:href="objects/sample-file.txt" LOCTYPE="OTHER" OTHERLOCTYPE="SYSTEM"/>
+      </mets:file>
+    </mets:fileGrp>
+    <mets:fileGrp USE="submissionDocumentation">
+      <mets:file GROUPID="Group-014b17eb-0b9d-465f-834c-70ae440fc435" ID="file-014b17eb-0b9d-465f-834c-70ae440fc435" ADMID="amdSec_3">
+        <mets:FLocat xlink:href="objects/submissionDocumentation/transfer-sample_1-99254175-7b00-474b-ac29-3b2a04a04901/METS.xml" LOCTYPE="OTHER" OTHERLOCTYPE="SYSTEM"/>
+      </mets:file>
+    </mets:fileGrp>
+    <mets:fileGrp USE="metadata">
+      <mets:file GROUPID="Group-e6e776a7-2885-4ba8-ae1c-8f29f6a74057" ID="file-e6e776a7-2885-4ba8-ae1c-8f29f6a74057" ADMID="amdSec_1">
+        <mets:FLocat xlink:href="objects/metadata/transfers/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/directory_tree.txt" LOCTYPE="OTHER" OTHERLOCTYPE="SYSTEM"/>
+      </mets:file>
+    </mets:fileGrp>
+  </mets:fileSec>
+  <mets:structMap ID="structMap_1" LABEL="Archivematica default" TYPE="physical">
+    <mets:div LABEL="sample_1-4558310f-9573-457b-bee9-6b2cd354b51e" TYPE="Directory" DMDID="dmdSec_1">
+      <mets:div LABEL="objects" TYPE="Directory">
+        <mets:div LABEL="metadata" TYPE="Directory">
+          <mets:div LABEL="transfers" TYPE="Directory">
+            <mets:div LABEL="sample_1-99254175-7b00-474b-ac29-3b2a04a04901" TYPE="Directory">
+              <mets:div LABEL="directory_tree.txt" TYPE="Item">
+                <mets:fptr FILEID="file-e6e776a7-2885-4ba8-ae1c-8f29f6a74057"/>
+              </mets:div>
+            </mets:div>
+          </mets:div>
+        </mets:div>
+        <mets:div LABEL="sample-file.txt" TYPE="Item">
+          <mets:fptr FILEID="file-058fedd0-e412-43d7-85a5-ac93c7efb4d6"/>
+        </mets:div>
+        <mets:div LABEL="submissionDocumentation" TYPE="Directory">
+          <mets:div LABEL="transfer-sample_1-99254175-7b00-474b-ac29-3b2a04a04901" TYPE="Directory">
+            <mets:div LABEL="METS.xml" TYPE="Item">
+              <mets:fptr FILEID="file-014b17eb-0b9d-465f-834c-70ae440fc435"/>
+            </mets:div>
+          </mets:div>
+        </mets:div>
+      </mets:div>
+    </mets:div>
+  </mets:structMap>
+</mets:mets>

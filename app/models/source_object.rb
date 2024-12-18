@@ -34,6 +34,7 @@ class SourceObject < ApplicationRecord
   def storage_providers_for_source_path
     @storage_providers_for_source_path ||= begin
       storage_providers = []
+
       ATC[:source_paths_to_storage_providers]&.each do |path_prefix, config|
         next unless self.path.start_with?(path_prefix.to_s)
 
@@ -45,6 +46,7 @@ class SourceObject < ApplicationRecord
           storage_providers << storage_provider unless storage_provider.nil?
         end
       end
+
       # If this method is being called, we expect there to be a storage provider for this source_object's path.
       # So if no storage_providers were found, raise an exception.
       if storage_providers.empty?

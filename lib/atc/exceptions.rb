@@ -8,4 +8,9 @@ module Atc::Exceptions
   class StorageProviderMappingNotFound < AtcError; end
   class RemoteFixityCheckTimeout < AtcError; end
   class PollingWaitTimeoutError < AtcError; end
+
+  class DirectoryLoadError < AtcError; end
+  class UnreadableFiles < DirectoryLoadError; end
+  class InvalidAip < DirectoryLoadError; end
+  class MissingAipChecksums < DirectoryLoadError; end
 end

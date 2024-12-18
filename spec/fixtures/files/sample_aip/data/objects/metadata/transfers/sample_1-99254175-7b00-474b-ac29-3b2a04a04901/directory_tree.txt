@@ -1,0 +1,4 @@
+/var/archivematica/sharedDirectory/currentlyProcessing/sample_1-99254175-7b00-474b-ac29-3b2a04a04901/objects/
+└── sample-file.txt
+
+0 directories, 1 file
