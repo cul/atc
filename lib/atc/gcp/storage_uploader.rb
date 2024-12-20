@@ -34,11 +34,15 @@ class Atc::Gcp::StorageUploader
                                       calculate_crc32c(local_file_path, verbose: options[:verbose])
 
     puts 'Performing upload...' if options[:verbose]
-    bucket.create_file(
-      local_file_path, object_key,
-      content_type: BestType.mime_type.for_file_name(local_file_path),
-      crc32c: precalculated_whole_file_crc32c, metadata: options[:metadata]
-    )
+
+    Retriable.retriable(on: [Google::Cloud::UnavailableError], tries: 3, base_interval: 1) do
+      bucket.create_file(
+        local_file_path, object_key,
+        content_type: BestType.mime_type.for_file_name(local_file_path),
+        crc32c: precalculated_whole_file_crc32c, metadata: options[:metadata]
+      )
+    end
+
     true
   rescue Google::Cloud::InvalidArgumentError, Google::Apis::ClientError => e
     wrap_and_re_raise_gcp_storage_client_error(e, local_file_path, object_key)

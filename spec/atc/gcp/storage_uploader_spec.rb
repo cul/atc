@@ -125,5 +125,18 @@ describe Atc::Gcp::StorageUploader do
         end
       end
     end
+
+    context 'retry behavior' do
+      it 'retries when it encounters a Google::Cloud::UnavailableError, and re-raises after retries are exhausted' do
+        Tempfile.create(['example-file-to-checksum', '.tiff']) do |f|
+          f.write('A')
+          f.flush
+          expect(bucket).to receive(:create_file).exactly(3).times.and_raise(Google::Cloud::UnavailableError)
+          expect {
+            storage_uploader.upload_file(f.path, object_key, metadata: { 'metadata-key' => 'metadata-value' })
+          }.to raise_error(Google::Cloud::UnavailableError)
+        end
+      end
+    end
   end
 end

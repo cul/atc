@@ -38,6 +38,7 @@ Metrics/MethodLength:
     - lib/atc/utils/aws_multipart_checksum_utils.rb
     - lib/atc/aws/s3_uploader.rb
     - lib/atc/utils/aws_checksum_utils.rb
+    - lib/atc/gcp/storage_uploader.rb
 
 Rails/Output:
   Exclude:
