@@ -213,6 +213,31 @@ namespace :atc do
         puts "AWS transfers complete? #{number_of_local_files == aws_stored_object_count ? Rainbow("YES").green : Rainbow("NO").red.bright}"
         puts "GCP transfers complete? #{number_of_local_files == gcp_stored_object_count ? Rainbow("YES").green : Rainbow("NO").red.bright}"
         puts "Fixity verifications complete? #{number_of_local_files == grouped_status_counts['success'] ? Rainbow("YES").green : Rainbow("NO").red.bright}"
+
+        # If any fixity check failures were found, suggest that the user re-run a fixity check for them.
+        if grouped_status_counts&.fetch('failure', 0) > 0
+          stored_object_ids_for_failed_fixity_verifications = FixityVerification.where(
+            'status = ? AND source_object_id IN (SELECT id from source_objects WHERE path LIKE ?)',
+            FixityVerification.statuses[:failure],
+            "#{source_directory_path}%"
+          ).pluck(:stored_object_id)
+
+          puts Rainbow(
+                "\nWarning: At least one fixity check was reported as a failure.  "\
+                'In most cases, this is caused by a network issue and is not actually a sign of a failed transfer.  '\
+                "To re-run these fixity checks, run each of these rake task commands:\n"
+          ).orange.bright
+
+          stored_object_ids_for_failed_fixity_verifications.each do |stored_object_id|
+            puts "RAILS_ENV=#{ENV['RAILS_ENV'] || 'development'} bundle exec rake atc:queue:verify_fixity stored_object_id=#{stored_object_id}"
+          end
+
+          puts Rainbow(
+                "\nAfter the above commands have been run, each reported FixityVerification failure will change to a "\
+                'pending state instead, and the verification will re-run in the background.  Large files will '\
+                'take a while to re-verify, but you can run the status task to monitor progress.'
+          ).orange.bright
+        end
       end
 
       puts "\nStatus check finished in #{time.real.round(2)} seconds.\n\n"
