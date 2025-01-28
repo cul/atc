@@ -32,7 +32,6 @@ class PerformTransferJob < ApplicationJob
       return
     end
 
-    # TODO: Add support for gcp!
     unless storage_provider.storage_implemented?
       Rails.logger.warn "Skipping PendingTransfer #{pending_transfer.id} because its "\
                         "storage_provider.storage_type value (#{storage_provider.storage_type}) "\
@@ -96,13 +95,14 @@ class PerformTransferJob < ApplicationJob
     # And finally, queue a fixity check job for the successfully transferred object
     VerifyFixityJob.perform_later(stored_object.id)
   rescue StandardError => e
-    unless e.is_a?(ActiveRecord::RecordNotFound)
-      # If an unexpected error occurs, capture it and mark this job as a failure.
-      pending_transfer.update(
-        status: :failure,
-        error_message: e.message
-      )
-    end
+    # If the PendingTransfer was deleted by some other process, ignore this error.
+    return if e.is_a?(ActiveRecord::RecordNotFound)
+
+    # If an unexpected error occurs, capture it and mark this job as a failure.
+    pending_transfer.update(
+      status: :failure,
+      error_message: e.message
+    )
 
     # And re-raise so that normal job error handling can continue
     raise e

@@ -112,6 +112,11 @@ namespace :atc do
     desc 'Check the status of a source directory that was previously loaded.'
     task status: :environment do
       source_directory_path = ENV['path']
+      extra_info = ENV['extra_info'] == 'true'
+
+      if extra_info
+        puts Rainbow("Running with extra_info=true option.  This will take longer.").blue.bright
+      end
 
       if source_directory_path.blank?
         puts Rainbow("Missing required argument: source_directory_path").red.bright
@@ -146,28 +151,6 @@ namespace :atc do
         fixity_checksum_count = SourceObject.where('path LIKE ? AND fixity_checksum_value IS NOT NULL', "#{source_directory_path}%").count
         puts Rainbow("SourceObjects with fixity checksums: #{fixity_checksum_count}").blue.bright
         puts "-> All SourceObjects should have fixity checksums (#{Rainbow(number_of_local_files).blue.bright}).\n\n"
-
-        # # NOTE: The section below is currently commented out because it might not actually be helpful
-        # # for determining the status of a source directory transfer.  PendingTransfer count rises and falls while
-        # # a transfer occurs because PerformTransferJobs are always prioritized over PrepareTransferJobs.
-        # #
-        # # Check to see how many of the source directory files have PendingTransfer records
-        # {
-        #   'AWS' => 0, # storage_type 0 is AWS
-        #   'GCP' => 1 # storage_type 1 is GCP
-        # }.each do |storage_provider_type_name, storage_provider_type_value|
-        #   count = PendingTransfer.where(
-        #     'storage_provider_id IN (SELECT id FROM storage_providers WHERE storage_type = ?) '\
-        #     'AND '\
-        #     'source_object_id IN (SELECT id from source_objects WHERE path LIKE ?)',
-        #     storage_provider_type_value,
-        #     "#{source_directory_path}%"
-        #   ).count
-        #   puts Rainbow("#{storage_provider_type_name} PendingTransfers: #{count}").blue.bright
-        # end
-        # puts "-> PendingTransfers should equal 0 when all pre-transfer checksums have been calculated."
-        # puts "NOTE: PendingTransfer numbers will rise and fall while the source directory transfer is in progress."
-        # puts "Changes in these numbers are only an indication that the transfer is in progress. \n\n"
 
         # Check to see how many of the source directory files have StoredObject records
         aws_stored_object_count = StoredObject.where(
@@ -214,33 +197,94 @@ namespace :atc do
         puts "GCP transfers complete? #{number_of_local_files == gcp_stored_object_count ? Rainbow("YES").green : Rainbow("NO").red.bright}"
         puts "Fixity verifications complete? #{number_of_local_files == grouped_status_counts['success'] ? Rainbow("YES").green : Rainbow("NO").red.bright}"
 
-        # If any fixity check failures were found, suggest that the user re-run a fixity check for them.
-        if grouped_status_counts&.fetch('failure', 0) > 0
-          stored_object_ids_for_failed_fixity_verifications = FixityVerification.where(
-            'status = ? AND source_object_id IN (SELECT id from source_objects WHERE path LIKE ?)',
-            FixityVerification.statuses[:failure],
-            "#{source_directory_path}%"
-          ).pluck(:stored_object_id)
+        if extra_info
+          # If there's a mismatch between fixity_checksum_count and aws_stored_object_count, print info for how to fix this
+          if fixity_checksum_count != aws_stored_object_count
+            source_objects_witout_associated_aws_stored_objects = SourceObject.where(
+              %Q(
+                path LIKE ?
+                AND
+                id NOT IN
+                (
+                  SELECT source_object_id FROM stored_objects
+                  WHERE
+                  storage_provider_id IN (
+                    SELECT id FROM storage_providers WHERE storage_type = ?
+                  )
+                )
+              ),
+              "#{source_directory_path}%",
+              0
+            ).pluck(:id)
 
-          puts Rainbow(
-                "\nWarning: At least one fixity check was reported as a failure.  "\
-                'In most cases, this is caused by a network issue and is not actually a sign of a failed transfer.  '\
-                "To re-run these fixity checks, run each of these rake task commands:\n"
-          ).orange.bright
+            puts Rainbow(
+                  "\nWarning: At least one SourceObject did not make it to AWS as a StoredObject.  "\
+                  "To fix this, run each of these rake task commands:\n"
+            ).orange.bright
 
-          stored_object_ids_for_failed_fixity_verifications.each do |stored_object_id|
-            puts "RAILS_ENV=#{ENV['RAILS_ENV'] || 'development'} bundle exec rake atc:queue:verify_fixity stored_object_id=#{stored_object_id}"
+            source_objects_witout_associated_aws_stored_objects.each do |source_object_id|
+              puts "RAILS_ENV=#{ENV['RAILS_ENV'] || 'development'} bundle exec rake atc:queue:prepare_transfer source_object_id=#{source_object_id} enqueue_successor=true run_again=true"
+            end
           end
 
-          puts Rainbow(
-                "\nAfter the above commands have been run, each reported FixityVerification failure will change to a "\
-                'pending state instead, and the verification will re-run in the background.  Large files will '\
-                'take a while to re-verify, but you can run the status task to monitor progress.'
-          ).orange.bright
+          # If there's a mismatch between fixity_checksum_count and gcp_stored_object_count, print info for how to fix this
+          if fixity_checksum_count != gcp_stored_object_count
+            source_objects_witout_associated_gcp_stored_objects = SourceObject.where(
+              %Q(
+                path LIKE ?
+                AND
+                id NOT IN
+                (
+                  SELECT source_object_id FROM stored_objects
+                  WHERE
+                  storage_provider_id IN (
+                    SELECT id FROM storage_providers WHERE storage_type = ?
+                  )
+                )
+              ),
+              "#{source_directory_path}%",
+              1
+            ).pluck(:id)
+
+            puts Rainbow(
+                  "\nWarning: At least one SourceObject did not make it to GCP as a StoredObject.  "\
+                  "To fix this, run each of these rake task commands:\n"
+            ).orange.bright
+
+            source_objects_witout_associated_gcp_stored_objects.each do |source_object_id|
+              puts "RAILS_ENV=#{ENV['RAILS_ENV'] || 'development'} bundle exec rake atc:queue:prepare_transfer source_object_id=#{source_object_id} enqueue_successor=true run_again=true"
+            end
+          end
+
+          # If any fixity check failures were found, suggest that the user re-run a fixity check for them.
+          if grouped_status_counts&.fetch('failure', 0) > 0
+            stored_object_ids_for_failed_fixity_verifications = FixityVerification.where(
+              'status = ? AND source_object_id IN (SELECT id from source_objects WHERE path LIKE ?)',
+              FixityVerification.statuses[:failure],
+              "#{source_directory_path}%"
+            ).pluck(:stored_object_id)
+
+            puts Rainbow(
+                  "\nWarning: At least one fixity check was reported as a failure.  "\
+                  'In most cases, this is caused by a network issue and is not actually a sign of a failed transfer.  '\
+                  "To re-run these fixity checks, run each of these rake task commands:\n"
+            ).orange.bright
+
+            stored_object_ids_for_failed_fixity_verifications.each do |stored_object_id|
+              puts "RAILS_ENV=#{ENV['RAILS_ENV'] || 'development'} bundle exec rake atc:queue:verify_fixity stored_object_id=#{stored_object_id}"
+            end
+
+            puts Rainbow(
+                  "\nAfter the above commands have been run, each reported FixityVerification failure will change to a "\
+                  'pending state instead, and the verification will re-run in the background.  Large files will '\
+                  'take a while to re-verify, but you can run the status task to monitor progress.'
+            ).orange.bright
+          end
         end
       end
 
       puts "\nStatus check finished in #{time.real.round(2)} seconds.\n\n"
+      puts "For more detailed info, add the extra_info=true parameter." unless extra_info
     end
   end
 end

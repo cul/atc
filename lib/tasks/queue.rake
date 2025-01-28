@@ -107,9 +107,13 @@ namespace :atc do
           "This job creates PendingTransfers for a SourceObject."
     task prepare_transfer: :environment do
       enqueue_successor = parse_enqueue_successor_argument()
+      run_again = ENV['run_again'] == 'true'
 
       next unless with_source_object_id_argument() do |source_object_id|
         puts "Queued source_object_id: #{source_object_id}"
+        if run_again
+          PendingTransfer.destroy_by(source_object_id: source_object_id)
+        end
         PrepareTransferJob.perform_later(source_object_id, enqueue_successor: enqueue_successor)
       end
 
