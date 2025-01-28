@@ -2,6 +2,7 @@ ATC: v<%= APP_VERSION %>
 
 <% if user_signed_in? %>
   <p>You are signed in as user: <%= current_user.uid %></p>
+  <p><%= link_to('View Resque status', '/resque') %></p>
   <% # The sign out route uses a DELETE method to prevent CSRF attacks. %>
   <p>
     <%= form_with(url: destroy_user_session_path, method: "delete") do |form| %>
