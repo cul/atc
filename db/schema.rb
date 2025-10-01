@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_03_194835) do
+ActiveRecord::Schema[7.1].define(version: 2025_05_24_120351) do
   create_table "checksum_algorithms", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -95,6 +95,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_03_194835) do
     t.binary "transfer_checksum_value", limit: 4
     t.integer "transfer_checksum_part_size"
     t.integer "transfer_checksum_part_count"
+    t.boolean "is_backfilled_entry", default: false
     t.index ["source_object_id"], name: "index_stored_objects_on_source_object_id"
     t.index ["storage_provider_id", "path_hash"], name: "index_stored_objects_on_storage_provider_id_and_path_hash", unique: true
     t.index ["storage_provider_id", "source_object_id"], name: "idx_on_storage_provider_id_source_object_id_25088e9be4", unique: true

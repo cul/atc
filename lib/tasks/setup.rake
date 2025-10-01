@@ -25,7 +25,10 @@ namespace :atc do
       [
         { name: 'SHA256', empty_binary_value: Digest::SHA256.new.digest },
         { name: 'SHA512', empty_binary_value: Digest::SHA512.new.digest },
-        { name: 'CRC32C', empty_binary_value: Digest::CRC32c.new.digest }
+        { name: 'CRC32C', empty_binary_value: Digest::CRC32c.new.digest },
+        # NOTE: If we add MD5 later and use it for the transfer_checksum_algorithm, we'll need to adjust the size of
+        # the transfer_checksum_algorithm column becuse it currently holds a maximum of 4 bytes.
+        # { name: 'MD5', empty_binary_value: Digest::MD5.new.digest }
       ].each do |checksum_algorithm_args|
         if ChecksumAlgorithm.exists?(name: checksum_algorithm_args[:name])
           puts "#{Rainbow("ChecksumAlgorithm already exists (skipping): #{checksum_algorithm_args[:name]}").blue.bright}\n"
