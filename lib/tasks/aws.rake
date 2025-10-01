@@ -71,8 +71,6 @@ namespace :atc do
       number_of_objects_skipped_based_on_key_suffix_filter = 0
       errors_encountered = []
 
-      puts "--------------------"
-      puts "Results:"
       auto_paginating_list_object_v2({
         bucket: bucket_name,
         prefix: key_prefix
@@ -111,8 +109,10 @@ namespace :atc do
         else
           number_of_non_intelligent_tiering_objects_skipped += 1
         end
-
       end
+
+      puts "--------------------"
+      puts "Results:"
 
       if dry_run
         puts "Number of intelligent tiering object restoration requests that would have been made (if this wasn't a dry run): #{number_of_intelligent_tiering_object_resoration_requests_submitted}"
@@ -127,52 +127,6 @@ namespace :atc do
             "The current time is #{Time.current}, so the files should be available after #{Time.current + 5.hours}."
       puts  "--------------------"
       puts "Errors: " + (errors_encountered.empty? ? 'None' : "\n#{errors_encountered.join("\n")}")
-
-      # pids.each_with_index do |pid|
-      #   print "Checking #{pid}..."
-      #   dobj = DigitalObject::Base.find(pid)
-      #   fobj = dobj.fedora_object
-			# 	storage_object = Hyacinth::Storage.storage_object_for(fobj.datastreams['content'].dsLocation)
-			# 	if storage_object.is_a?(Hyacinth::Storage::S3Object)
-			# 		# NOTE: storage_object.s3_object.restore will return nil if the object has not been restored yet,
-			# 		# but it will return a string if a restore operation has already been run on the object and it is
-			# 		# in the process of being restored.
-			# 		if storage_object.s3_object.archive_status == 'ARCHIVE_ACCESS'
-			# 			if storage_object.s3_object.restore.nil?
-			# 				puts "Need to restore object at: #{storage_object.location_uri}"
-			# 				puts "---> Restoring archived object..."
-			# 				bucket_name = storage_object.s3_object.bucket_name
-			# 				key = storage_object.s3_object.key
-			# 				# Make sure that bucket_name and key aren't blank.  They shouldn't ever be blank at this point in the
-			# 				# code, but we want to make sure not to call restore if either of them somehow are blank.
-			# 				raise if bucket_name.blank? || key.blank?
-
-			# 				begin
-			# 					restore_object_response = storage_object.s3_object.restore_object({
-			# 						bucket: bucket_name,
-			# 						key: key,
-			# 						# For an object in Intelligent Tiering Archive Instant storage, we just pass an empty hash here.
-			# 						# No further configuration is needed.
-			# 						restore_request: {}
-			# 					})
-			# 					puts "---> Object restoration request submitted!  The object should be available within 3-5 hours."
-			# 				rescue Aws::S3::Errors::ServiceError => e
-			# 					puts "---> An unexpected error occurred while attempting to restore the object."
-			# 				end
-			# 			else
-			# 				puts "---> A restore request has already been made for this object and restoration is in progress: #{storage_object.s3_object.restore}"
-			# 			end
-			# 		else
-			# 			puts "---> Object is not currently in ARCHIVE_ACCESS state, so we will not make any changes."
-			# 		end
-
-			# 		# puts "Do we need to restore this object?"
-			# 	elsif storage_object.is_a?(Hyacinth::Storage::FileObject)
-			# 		puts "No need to restore this object because it's available on the local filesystem."
-			# 	else
-			# 		puts "Ignoring unknown object type: #{storage_object.class.name}"
-			# 	end
-      # end
     end
 
     desc 'Run a fixity check using a remote CheckPlease app deployment.'
