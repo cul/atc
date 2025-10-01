@@ -2,6 +2,133 @@
 
 namespace :atc do
   namespace :aws do
+    # Calls the S3_CLIENT#list_objects_v2 method multiple times to automatically page through all results.
+    # S3_CLIENT#list_objects_v2 method returns up to 1000 results per call, and returns a token that can be
+    # used in subsequent calls to get the next page of results.  This method wraps that paging functionality.
+    def auto_paginating_list_object_v2(list_objects_v2_opts)
+      next_continuation_token = nil
+
+      counter = 0
+      loop do
+        counter += 1
+        result_object = S3_CLIENT.list_objects_v2(list_objects_v2_opts.merge({
+          continuation_token: next_continuation_token
+        }))
+
+        S3_CLIENT.list_objects_v2(list_objects_v2_opts).contents.each do |object|
+          yield object
+        end
+
+        next_continuation_token = result_object.next_continuation_token
+        break if next_continuation_token.nil?
+      end
+    end
+
+
+    desc  'For the given bucket_name and key_prefix, iterates over objects and generates a list of their file extensions and counts'
+    task list_file_extensions: :environment do
+      bucket_name = ENV['bucket_name']
+      key_prefix = ENV['key_prefix']
+
+      extension_counts = {}
+
+      auto_paginating_list_object_v2({
+        bucket: bucket_name,
+        prefix: key_prefix
+      }) do |object|
+        ext = File.extname(object.key)
+        extension_counts[ext] ||= 0
+        extension_counts[ext] += 1
+      end
+
+      # Sort the files by count, descending.
+      extension_counts.to_a.sort_by {|pair| pair[1] }.reverse.each do |pair|
+        puts "#{pair[0]}: #{pair[1]}"
+      end
+    end
+
+    desc  'For the given bucket_name and key_prefix, iterates over objects in Intelligent Tiering and restores them '\
+          ' if they have already transitioned to the Archive Access tier.'
+    task restore_archived_objects: :environment do
+      bucket_name = ENV['bucket_name']
+      key_prefix = ENV['key_prefix']
+      key_suffix_filter = ENV['key_suffix_filter']
+      dry_run = ENV['dry_run'] == 'true'
+
+      puts ""
+
+      puts "This is a dry run because dry_run=true has been set.  No objects will actually be restored during this run.\n\n" if dry_run
+
+      if key_suffix_filter.present?
+        puts "Searching for objects (and filtering on objects with keys that end with \"#{key_suffix_filter}\")...\n\n"
+      else
+        puts "Searching for objects...\n\n"
+      end
+      number_of_intelligent_tiering_object_resoration_requests_submitted = 0
+      number_of_intelligent_tiering_objects_with_restoration_in_progress = 0
+      number_of_intelligent_tiering_objects_already_available = 0
+      number_of_non_intelligent_tiering_objects_skipped = 0
+      number_of_objects_skipped_based_on_key_suffix_filter = 0
+      errors_encountered = []
+
+      auto_paginating_list_object_v2({
+        bucket: bucket_name,
+        prefix: key_prefix
+      }) do |object|
+        object_key = object.key
+        storage_class = object.storage_class
+
+        if storage_class == 'INTELLIGENT_TIERING'
+          if key_suffix_filter.present? && !object_key.end_with?(key_suffix_filter)
+            number_of_objects_skipped_based_on_key_suffix_filter += 1
+            next
+          end
+
+          begin
+            S3_CLIENT.restore_object({
+              bucket: bucket_name,
+              key: object_key,
+              # For an object in Intelligent Tiering Archive Instant storage, we just pass an empty hash here.
+              # No further configuration is needed.
+              restore_request: {}
+            }) unless dry_run
+            number_of_intelligent_tiering_object_resoration_requests_submitted += 1
+          rescue Aws::S3::Errors::ServiceError => e
+            if e.message.include?("Restore is not allowed for the object's current storage class")
+              # If we got here, that means that this object was already restored and doesn't need to be restored again
+              # because it is available.  We'll silently ignore this error.
+              number_of_intelligent_tiering_objects_already_available += 1
+            elsif e.message.include?("Object restore is already in progress")
+              # If we got here, that means that this object's restoration is already in progress and we do not need to
+              # initiate another restoration request.  We'll silently ignore this error.
+              number_of_intelligent_tiering_objects_with_restoration_in_progress += 1
+            else
+              errors_encountered << "An unexpected error occured while attempting to restore #{object_key}: #{e.message}"
+            end
+          end
+        else
+          number_of_non_intelligent_tiering_objects_skipped += 1
+        end
+      end
+
+      puts "--------------------"
+      puts "Results:"
+
+      if dry_run
+        puts "Number of intelligent tiering object restoration requests that would have been made (if this wasn't a dry run): #{number_of_intelligent_tiering_object_resoration_requests_submitted}"
+      else
+        puts "Number of intelligent tiering object restoration requests submitted: #{number_of_intelligent_tiering_object_resoration_requests_submitted}"
+        puts "Number of intelligent tiering objects with restoration in progress: #{number_of_intelligent_tiering_objects_with_restoration_in_progress}"
+        puts "Number of intelligent tiering objects already available: #{number_of_intelligent_tiering_objects_already_available}"
+      end
+      puts "Number of objects skipped based on key_suffix_filter: #{number_of_objects_skipped_based_on_key_suffix_filter}"
+      puts "Number of non intelligent tiering objects skipped: #{number_of_non_intelligent_tiering_objects_skipped}"
+      puts  "\nReminder: After restoration has been initiated, it will take 3-5 hours until the files are available for download.  "\
+            "The current time is #{Time.current}, so the files should be available after #{Time.current + 5.hours}."
+      puts  "--------------------"
+      puts "Errors: " + (errors_encountered.empty? ? 'None' : "\n#{errors_encountered.join("\n")}")
+    end
+
     desc 'Run a fixity check using a remote CheckPlease app deployment.'
     task fixity_check: :environment do
       bucket_name = ENV['bucket_name']
