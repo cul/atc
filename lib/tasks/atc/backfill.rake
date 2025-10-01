@@ -75,7 +75,7 @@ namespace :atc do
 
         if dry_run
           puts "Row #{i+1} appears to be valid.  No records were created because we are in dry_run mode."
-          break
+          next
         end
 
         # Create source object
@@ -113,6 +113,8 @@ namespace :atc do
         # Queue fixity verification job for the new AWS StoredObject
         # NOTE: We do not do this for the GCP StoredObject because we are not verifying GCP StoredObjects at this time.
         VerifyFixityJob.perform_later(aws_stored_object.id)
+
+        puts "Processed row #{i+1}."
       end
 
       puts "\nDone!"
