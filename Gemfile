@@ -26,6 +26,7 @@ gem 'importmap-rails'
 gem 'jbuilder'
 # Use mysql as a database option for Active Record
 gem 'mysql2', '~> 0.5.6'
+gem 'nokogiri', '~> 1.18', '>= 1.18.9', force_ruby_platform: true
 # Use the Puma web server for local development [https://github.com/puma/puma]
 gem 'puma', '~> 6.0'
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
