@@ -16,7 +16,7 @@ namespace :atc do
         }))
 
         S3_CLIENT.list_objects_v2(list_objects_v2_opts).contents.each do |object|
-          yield object
+          yield object, counter
         end
 
         next_continuation_token = result_object.next_continuation_token
@@ -74,7 +74,7 @@ namespace :atc do
       auto_paginating_list_object_v2({
         bucket: bucket_name,
         prefix: key_prefix
-      }) do |object|
+      }) do |object, i|
         object_key = object.key
         storage_class = object.storage_class
 
@@ -93,20 +93,26 @@ namespace :atc do
               restore_request: {}
             }) unless dry_run
             number_of_intelligent_tiering_object_resoration_requests_submitted += 1
+
+            puts "#{i}: Restore: #{object_key}"
           rescue Aws::S3::Errors::ServiceError => e
             if e.message.include?("Restore is not allowed for the object's current storage class")
               # If we got here, that means that this object was already restored and doesn't need to be restored again
               # because it is available.  We'll silently ignore this error.
               number_of_intelligent_tiering_objects_already_available += 1
+              puts "#{i}: Skip: #{object_key} (object does not need to be restored)"
             elsif e.message.include?("Object restore is already in progress")
               # If we got here, that means that this object's restoration is already in progress and we do not need to
               # initiate another restoration request.  We'll silently ignore this error.
               number_of_intelligent_tiering_objects_with_restoration_in_progress += 1
+              puts "#{i}: Skip: #{object_key} (restoration is in progress)"
             else
               errors_encountered << "An unexpected error occured while attempting to restore #{object_key}: #{e.message}"
+              puts "#{i}: Skip: #{object_key} (unexpected error, see details at end of restoration process)"
             end
           end
         else
+          puts "#{i}: Skip: #{object_key} (storage class is not Intelligent Tiering)"
           number_of_non_intelligent_tiering_objects_skipped += 1
         end
       end
@@ -123,8 +129,9 @@ namespace :atc do
       end
       puts "Number of objects skipped based on key_suffix_filter: #{number_of_objects_skipped_based_on_key_suffix_filter}"
       puts "Number of non intelligent tiering objects skipped: #{number_of_non_intelligent_tiering_objects_skipped}"
-      puts  "\nReminder: After restoration has been initiated, it will take 3-5 hours until the files are available for download.  "\
-            "The current time is #{Time.current}, so the files should be available after #{Time.current + 5.hours}."
+      puts  "\nReminder: After restoration has been initiated, it will take 3-5 hours until the files are available for download if they were in the Archive Access tier.  "\
+            "For objects in the Deep Archive Access tier, it could take up to 12 hours until the files are available for download.  "\
+            "The current time is #{Time.current}, and 12 hours from now would be #{Time.current + 12.hours}."
       puts  "--------------------"
       puts "Errors: " + (errors_encountered.empty? ? 'None' : "\n#{errors_encountered.join("\n")}")
     end
