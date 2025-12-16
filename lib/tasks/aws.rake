@@ -6,24 +6,14 @@ namespace :atc do
     # S3_CLIENT#list_objects_v2 method returns up to 1000 results per call, and returns a token that can be
     # used in subsequent calls to get the next page of results.  This method wraps that paging functionality.
     def auto_paginating_list_object_v2(list_objects_v2_opts)
-      next_continuation_token = nil
-
       counter = 0
-      loop do
-        counter += 1
-        result_object = S3_CLIENT.list_objects_v2(list_objects_v2_opts.merge({
-          continuation_token: next_continuation_token
-        }))
-
-        S3_CLIENT.list_objects_v2(list_objects_v2_opts).contents.each do |object|
+      S3_CLIENT.list_objects_v2(list_objects_v2_opts).each do |response|
+        response.contents.each do |object|
           yield object, counter
+          counter += 1
         end
-
-        next_continuation_token = result_object.next_continuation_token
-        break if next_continuation_token.nil?
       end
     end
-
 
     desc  'For the given bucket_name and key_prefix, iterates over objects and generates a list of their file extensions and counts'
     task list_file_extensions: :environment do
@@ -45,6 +35,23 @@ namespace :atc do
       extension_counts.to_a.sort_by {|pair| pair[1] }.reverse.each do |pair|
         puts "#{pair[0]}: #{pair[1]}"
       end
+    end
+
+    desc  'For the given bucket_name and key_prefix, iterates over objects and prints a list'
+    task list_objects: :environment do
+      bucket_name = ENV['bucket_name']
+      key_prefix = ENV['key_prefix']
+
+      count = 0
+      auto_paginating_list_object_v2({
+        bucket: bucket_name,
+        prefix: key_prefix
+      }) do |object, i|
+        puts "#{i} #{object.key}"
+        count += 1
+      end
+
+      puts "Total count: #{count}"
     end
 
     desc  'For the given bucket_name and key_prefix, iterates over objects in Intelligent Tiering and restores them '\
@@ -77,6 +84,7 @@ namespace :atc do
       }) do |object, i|
         object_key = object.key
         storage_class = object.storage_class
+        object_number = i + 1 # i is 0-indexed
 
         if storage_class == 'INTELLIGENT_TIERING'
           if key_suffix_filter.present? && !object_key.end_with?(key_suffix_filter)
@@ -94,25 +102,25 @@ namespace :atc do
             }) unless dry_run
             number_of_intelligent_tiering_object_resoration_requests_submitted += 1
 
-            puts "#{i}: Restore: #{object_key}"
+            puts "#{object_number}: Restore: #{object_key}"
           rescue Aws::S3::Errors::ServiceError => e
             if e.message.include?("Restore is not allowed for the object's current storage class")
               # If we got here, that means that this object was already restored and doesn't need to be restored again
               # because it is available.  We'll silently ignore this error.
               number_of_intelligent_tiering_objects_already_available += 1
-              puts "#{i}: Skip: #{object_key} (object does not need to be restored)"
+              puts "#{object_number}: Skip: #{object_key} (object does not need to be restored)"
             elsif e.message.include?("Object restore is already in progress")
               # If we got here, that means that this object's restoration is already in progress and we do not need to
               # initiate another restoration request.  We'll silently ignore this error.
               number_of_intelligent_tiering_objects_with_restoration_in_progress += 1
-              puts "#{i}: Skip: #{object_key} (restoration is in progress)"
+              puts "#{object_number}: Skip: #{object_key} (restoration is in progress)"
             else
               errors_encountered << "An unexpected error occured while attempting to restore #{object_key}: #{e.message}"
-              puts "#{i}: Skip: #{object_key} (unexpected error, see details at end of restoration process)"
+              puts "#{object_number}: Skip: #{object_key} (unexpected error, see details at end of restoration process)"
             end
           end
         else
-          puts "#{i}: Skip: #{object_key} (storage class is not Intelligent Tiering)"
+          puts "#{object_number}: Skip: #{object_key} (storage class is not Intelligent Tiering)"
           number_of_non_intelligent_tiering_objects_skipped += 1
         end
       end
