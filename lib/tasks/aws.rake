@@ -62,6 +62,16 @@ namespace :atc do
       key_suffix_filter = ENV['key_suffix_filter']
       dry_run = ENV['dry_run'] == 'true'
 
+      if bucket_name.blank?
+        puts 'Error: Please supply a bucket_name'
+        exit
+      end
+
+      if key_prefix.blank?
+        puts 'Error: Please supply a key_prefix'
+        exit
+      end
+
       puts ""
 
       puts "This is a dry run because dry_run=true has been set.  No objects will actually be restored during this run.\n\n" if dry_run
@@ -77,6 +87,9 @@ namespace :atc do
       number_of_non_intelligent_tiering_objects_skipped = 0
       number_of_objects_skipped_based_on_key_suffix_filter = 0
       errors_encountered = []
+
+      size_of_restored_content = 0
+			number_of_objects_restored = 0
 
       auto_paginating_list_object_v2({
         bucket: bucket_name,
@@ -103,6 +116,8 @@ namespace :atc do
             number_of_intelligent_tiering_object_resoration_requests_submitted += 1
 
             puts "#{object_number}: Restore: #{object_key}"
+            size_of_restored_content += object.size
+            number_of_objects_restored += 1
           rescue Aws::S3::Errors::ServiceError => e
             if e.message.include?("Restore is not allowed for the object's current storage class")
               # If we got here, that means that this object was already restored and doesn't need to be restored again
@@ -141,6 +156,9 @@ namespace :atc do
             "For objects in the Deep Archive Access tier, it could take up to 12 hours until the files are available for download.  "\
             "The current time is #{Time.current}, and 12 hours from now would be #{Time.current + 12.hours}."
       puts  "--------------------"
+
+      puts "Number of objects restored: #{number_of_objects_restored}"
+			puts "Size of restored content : #{size_of_restored_content} bytes (#{size_of_restored_content / 1.gigabyte.to_f} gigabytes)"
       puts "Errors: " + (errors_encountered.empty? ? 'None' : "\n#{errors_encountered.join("\n")}")
     end
 
