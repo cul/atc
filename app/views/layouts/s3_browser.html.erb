@@ -1,0 +1,22 @@
+<%#
+    This is the layout wrapping the S3 Browser UI React app.
+    The view file located at app/views/s3_browser/index.html.erb renders the root element for the React app to attach to,
+    and the React app's entrypoint is located at app/frontend/entrypoints/s3_browser.tsx -- which is here served
+    by Vite.
+%>
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta name="robots" content="noindex" />
+    <%= vite_client_tag %>
+    <%= vite_typescript_tag 's3_browser.tsx' %>
+    <%# <%= vite_stylesheet_tag 's3_browser.scss' %>
+
+    <%= yield :head %>
+  </head>
+
+    <body id="main-content">
+      <%= yield %>
+    </body>
+</html>

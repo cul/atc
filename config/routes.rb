@@ -10,6 +10,8 @@ Rails.application.routes.draw do
     get '/users/development/sign_in_developer', to: 'users/development#sign_in_developer' if Rails.env.development?
   end
 
+  get '/browse', to: 's3_browser_app#index'
+
   resque_web_constraint = lambda do |request|
     current_user = request.env['warden'].user
     current_user.present?

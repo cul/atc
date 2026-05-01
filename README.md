@@ -16,8 +16,14 @@ Set up config files.
 Run database migrations.
 `bundle exec rake db:migrate`
 
+Install Javascript dependencies.
+`yarn`
+
 Seed the database with necessary values for operation.
 `rails db:seed`
+
+Start the vite dev server.
+`bin/vite dev`
 
 Start the application using `rails server`.
 `rails s -p 3000`
