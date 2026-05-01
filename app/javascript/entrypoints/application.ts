@@ -1,3 +1,8 @@
+// N.B. - This entrypoint is loaded by the normal Rails application.html.erb layout.
+//        The S3 Browser React application uses the s3_browser.html.erb layout, which
+//        loads the s3_browser.tsx entrypoint file.
+
+
 // To see this message, add the following to the `<head>` section in your
 // views/layouts/application.html.erb
 //
