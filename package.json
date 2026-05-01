@@ -1,3 +1,7 @@
 {
-  "packageManager": "yarn@4.14.1"
+  "packageManager": "yarn@4.14.1",
+  "devDependencies": {
+    "vite": "^8.0.0",
+    "vite-plugin-ruby": "^5.2.0"
+  }
 }
