@@ -2,7 +2,7 @@
   "name": "app",
   "private": true,
   "version": "0.1.0",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "start:dev": "./bin/vite dev"
   },
@@ -13,6 +13,7 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.1",
     "typescript": "^5.9.3",
     "vite": "^8.0.0",
     "vite-plugin-ruby": "^5.2.0"
