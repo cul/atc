@@ -8,11 +8,16 @@
   },
   "packageManager": "yarn@4.14.1",
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
     "@types/react": "19.2.3",
+    "bootstrap": "^5.3.8",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-bootstrap": "^2.10.10",
+    "react-dom": "19.2.3",
+    "sass": "^1.66.1"
   },
   "devDependencies": {
+    "@types/bootstrap": "^5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "typescript": "^5.9.3",
