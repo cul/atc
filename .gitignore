@@ -53,3 +53,8 @@
 
 # simplecov coverage report
 /coverage
+
+# Yarn files
+.yarnrc.yml
+.yarn/*
+.pnp.*
