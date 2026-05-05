@@ -12,6 +12,11 @@ Rails.application.routes.draw do
 
   get '/browse', to: 's3_browser_app#index'
 
+  # S3 Browser API routes
+  namespace :api do
+    get '/greeting', to: 's3_browser#greeting', format: 'json'
+  end
+
   resque_web_constraint = lambda do |request|
     current_user = request.env['warden'].user
     current_user.present?
