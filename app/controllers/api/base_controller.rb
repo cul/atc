@@ -5,7 +5,7 @@ class Api::BaseController < ApplicationController
   before_action :authenticate_user!
 
   # Handle JSON parsing errors
-  rescue_from JSON::ParserError do |exception|
+  rescue_from JSON::ParserError do |_exception|
     render json: { error: 'Invalid JSON in request body' }, status: :bad_request
   end
 
