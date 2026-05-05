@@ -51,5 +51,28 @@ yarn start:dev # or bin/vite dev
 
 9. Start the application using `rails server`:
 ```
-rails s -p 3000
+bin/rails server # or rails s -p 3000
+```
+
+## Contributing and CI
+Before making a PR, you should check that all tests are passing and both linters (ESLint and rubocop) are happy. We check all of these during github actions continuous integrations.
+
+To run all of the CI actions:
+```
+  bundle exec atc:ci
+```
+
+To run tests:
+```
+  bundle exec rake atc:ci_specs
+```
+
+To run the cop:
+```
+  bundle exec rake atc:rubocop
+```
+
+To run ESLint:
+```
+  bundle exec rake atc:eslint
 ```
