@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   # S3 Browser API routes
   namespace :api do
     get '/greeting', to: 's3_browser#greeting', format: 'json'
+    get '/buckets', to: 's3_browser#buckets', format: 'json'
   end
 
   resque_web_constraint = lambda do |request|
