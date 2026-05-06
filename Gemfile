@@ -14,6 +14,7 @@ gem 'aws-crt', '~> 0.2.0'
 gem 'best_type', '~> 1.0'
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', require: false
+gem 'cancancan'
 # Add CRC32C support to the Ruby Digest module
 gem 'digest-crc', '~> 0.6.5'
 # Client library for connecting to a websocket endpoint
