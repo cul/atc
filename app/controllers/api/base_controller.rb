@@ -3,6 +3,7 @@
 class Api::BaseController < ApplicationController
   before_action :transform_json_params
   before_action :authenticate_user!
+  before_action :authorize_s3_browser_access!
 
   # Handle JSON parsing errors
   rescue_from JSON::ParserError do |_exception|
@@ -10,6 +11,10 @@ class Api::BaseController < ApplicationController
   end
 
   private
+
+  def authorize_s3_browser_access!
+    raise CanCan::AccessDenied unless can? Ability::ACCESS_S3_BROWSER_API, self
+  end
 
   # Convert incoming JSON request body keys from camelCase to snake_case
   def transform_json_params # rubocop:disable Metrics/AbcSize
