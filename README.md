@@ -54,6 +54,10 @@ yarn start:dev # or bin/vite dev
 bin/rails server # or rails s -p 3000
 ```
 
+## S3 Browser App
+The S3 browser app will be located under the `/browser` route. At that route, a React SPA will be loaded into the client.
+It requires authentication to view.
+
 ## Contributing and CI
 Before making a PR, you should check that all tests are passing and both linters (ESLint and rubocop) are happy. We check all of these during github actions continuous integrations.
 
