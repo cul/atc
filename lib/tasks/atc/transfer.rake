@@ -175,6 +175,7 @@ namespace :atc do
 
         # Check to see how many of the source directory files have AWS FixityVerification records
         # NOTE: we only do fixity verifications on AWS records at this time.
+        fixity_verification_count = 0
         grouped_status_counts = FixityVerification.where(
           'source_object_id IN (SELECT id from source_objects WHERE path LIKE ?)',
           "#{source_directory_path}%"
@@ -182,6 +183,7 @@ namespace :atc do
         puts Rainbow('FixityVerifications:').blue.bright
         FixityVerification.statuses.keys.each do |status|
           puts Rainbow("#{status}: #{grouped_status_counts[status].to_i}").blue.bright
+          fixity_verification_count += grouped_status_counts[status].to_i
         end
         puts "-> FixityVerification success count should equal the number of files in the source directory (#{Rainbow(number_of_local_files).blue.bright}) when all transfers have completed fixity verification, and there should be 0 failures.\n\n"
 
@@ -256,29 +258,76 @@ namespace :atc do
             end
           end
 
-          # If any fixity check failures were found, suggest that the user re-run a fixity check for them.
-          if grouped_status_counts&.fetch('failure', 0) > 0
-            stored_object_ids_for_failed_fixity_verifications = FixityVerification.where(
-              'status = ? AND source_object_id IN (SELECT id from source_objects WHERE path LIKE ?)',
-              FixityVerification.statuses[:failure],
+          # If there's a mismatch between fixity_verification_count and aws_stored_object_count, print info for how to fix this
+          if fixity_verification_count != aws_stored_object_count
+            stored_objects_witout_associated_fixity_verifications = StoredObject.where(
+              %Q(
+                storage_provider_id IN (SELECT id FROM storage_providers WHERE storage_type = ?)
+                AND
+                source_object_id IN (SELECT id from source_objects WHERE path LIKE ?)
+                AND
+                NOT EXISTS
+                (
+                  SELECT 1
+                  FROM fixity_verifications
+                  WHERE stored_objects.id = fixity_verifications.stored_object_id
+                )
+              ),
+              0,
               "#{source_directory_path}%"
-            ).pluck(:stored_object_id)
+            ).pluck(:id)
 
             puts Rainbow(
-                  "\nWarning: At least one fixity check was reported as a failure.  "\
-                  'In most cases, this is caused by a network issue and is not actually a sign of a failed transfer.  '\
-                  "To re-run these fixity checks, run each of these rake task commands:\n"
+                  "\nWarning: At least one StoredObject did not have a FixityVerification queued automatically.  "\
+                  "To fix this, run each of these rake task commands:\n"
             ).orange.bright
 
-            stored_object_ids_for_failed_fixity_verifications.each do |stored_object_id|
-              puts "RAILS_ENV=#{ENV['RAILS_ENV'] || 'development'} bundle exec rake atc:queue:verify_fixity stored_object_id=#{stored_object_id}"
+            stored_objects_witout_associated_fixity_verifications.each do |stored_object_id|
+              puts "RAILS_ENV=#{ENV['RAILS_ENV'] || 'development'} bundle exec rake atc:queue:verify_fixity stored_object_id=#{stored_object_id} enqueue_successor=true"
             end
+          end
 
-            puts Rainbow(
-                  "\nAfter the above commands have been run, each reported FixityVerification failure will change to a "\
-                  'pending state instead, and the verification will re-run in the background.  Large files will '\
-                  'take a while to re-verify, but you can run the status task to monitor progress.'
-            ).orange.bright
+          # If any fixity check failures were found, suggest that the user re-run a fixity check for them.
+          ['failure', 'pending'].each do |status|
+            if grouped_status_counts&.fetch(status, 0) > 0
+              stored_object_ids_for_failed_fixity_verifications = FixityVerification.where(
+                'status = ? AND source_object_id IN (SELECT id from source_objects WHERE path LIKE ?)',
+                FixityVerification.statuses[status.to_sym],
+                "#{source_directory_path}%"
+              ).pluck(:stored_object_id)
+
+              if status == 'failure'
+                puts Rainbow(
+                      "\nWarning: At least one fixity check was reported as a failure.  "\
+                      'In most cases, this is caused by a network issue and is not actually a sign of a failed transfer.  '\
+                      "To re-run these fixity checks, run each of these rake task commands:\n"
+                ).orange.bright
+              elsif status == 'pending'
+                puts Rainbow(
+                      "\nWarning: At least one fixity check is still in a pending state.  "\
+                      'If these checks have been in a pending state for a very long time, a network issue may have interrupted the check.  '\
+                      "To re-run these fixity checks, run each of these rake task commands:\n"
+                ).orange.bright
+              end
+
+              stored_object_ids_for_failed_fixity_verifications.each do |stored_object_id|
+                puts "RAILS_ENV=#{ENV['RAILS_ENV'] || 'development'} bundle exec rake atc:queue:verify_fixity stored_object_id=#{stored_object_id}"
+              end
+
+              if status == 'failure'
+                puts Rainbow(
+                      "\nAfter the above commands have been run, each reported FixityVerification failure will change to a "\
+                      'pending state instead, and the verification will re-run in the background.  Large files will '\
+                      'take a while to re-verify, but you can run the status task to monitor progress.'
+                ).orange.bright
+              elsif status == 'pending'
+                puts Rainbow(
+                      "\nAfter the above commands have been run, the pending FixityVerifications will still appear as "\
+                      'pending, but a verification will re-run in the background.  Large files will '\
+                      'take a while to re-verify, but you can run the status task to monitor progress.'
+                ).orange.bright
+              end
+            end
           end
         end
       end
