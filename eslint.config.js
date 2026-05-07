@@ -43,12 +43,4 @@ export default tseslint.config(
       'react/prop-types': 'off',
     },
   },
-  // Disable incompatible-library warnings for TanStack Table components
-  // https://github.com/facebook/react/issues/33057
-  {
-    files: ['**/table-builder.tsx', '**/project-permissions-table.tsx', '**/projects-for-target-selector.tsx'],
-    rules: {
-      'react-hooks/incompatible-library': 'off',
-    },
-  }
 );

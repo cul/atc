@@ -18,6 +18,8 @@ Rails.application.routes.draw do
     get '/buckets', to: 's3_browser#buckets', format: 'json'
   end
 
+  get '/browser', to: 's3_browser_app#index' # Temporary route for testing the S3 browser app
+
   resque_web_constraint = lambda do |request|
     current_user = request.env['warden'].user
     current_user.present?

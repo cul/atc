@@ -1,9 +1,13 @@
 import * as React from 'react';
+import { AppRouter } from './router';
+import { AppProvider } from './provider';
 
 const App = () => {
   return (
     <React.StrictMode>
-      <h1>Hello from React App!</h1>
+      <AppProvider>
+        <AppRouter />
+      </AppProvider>
     </React.StrictMode>
   )
 }
