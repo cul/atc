@@ -19,6 +19,7 @@ Rails.application.routes.draw do
   end
 
   get '/browser', to: 's3_browser_app#index' # Temporary route for testing the S3 browser app
+  get '/browser/*path', to: 's3_browser_app#index'
 
   resque_web_constraint = lambda do |request|
     current_user = request.env['warden'].user

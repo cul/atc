@@ -3,14 +3,7 @@ import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { createBrowserRouter, LoaderFunction, ActionFunction } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { Spinner } from 'react-bootstrap';
-
-function Root() {
-  return (
-    <div>
-      <p>This is the root of the React app. Currently, nothing is rendered here.</p>
-    </div>
-  );
-}
+import MainLayout from '@/components/layouts/main-layout';
 
 interface RouteModule {
   default: React.ComponentType;
@@ -34,18 +27,23 @@ const convert = (queryClient: QueryClient) => (m: RouteModule) => {
 export const createAppRouter = (queryClient: QueryClient) =>
   createBrowserRouter([
     {
-      // Component: MainLayout,
+      Component: MainLayout,
       hydrateFallbackElement: <Spinner animation="border" role="status" />,
       children: [
         {
           index: true,
-          Component: Root, // TODO: Display all buckets
-        }
+          lazy: () => import('./routes/buckets').then(convert(queryClient)),
+        },
+        {
+          path: 'bucket/:bucketName/*',
+          lazy: () =>
+            import('./routes/bucket-contents').then(convert(queryClient)),
+        },
       ],
     },
     {
-      // path: '*',
-      // lazy: () => import('./routes/not-found').then(convert(queryClient)),
+      path: '*',
+      lazy: () => import('./routes/not-found').then(convert(queryClient)),
     },
   ], {
     basename: '/browser',
