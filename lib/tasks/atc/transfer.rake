@@ -302,25 +302,27 @@ namespace :atc do
                       'In most cases, this is caused by a network issue and is not actually a sign of a failed transfer.  '\
                       "To re-run these fixity checks, run each of these rake task commands:\n"
                 ).orange.bright
-              elsif status == 'pending'
-                puts Rainbow(
-                      "\nWarning: At least one fixity check is still in a pending state.  "\
-                      'If these checks have been in a pending state for a very long time, a network issue may have interrupted the check.  '\
-                      "To re-run these fixity checks, run each of these rake task commands:\n"
-                ).orange.bright
-              end
 
-              stored_object_ids_for_failed_fixity_verifications.each do |stored_object_id|
-                puts "RAILS_ENV=#{ENV['RAILS_ENV'] || 'development'} bundle exec rake atc:queue:verify_fixity stored_object_id=#{stored_object_id}"
-              end
+                stored_object_ids_for_failed_fixity_verifications.each do |stored_object_id|
+                  puts "RAILS_ENV=#{ENV['RAILS_ENV'] || 'development'} bundle exec rake atc:queue:verify_fixity stored_object_id=#{stored_object_id}"
+                end
 
-              if status == 'failure'
                 puts Rainbow(
                       "\nAfter the above commands have been run, each reported FixityVerification failure will change to a "\
                       'pending state instead, and the verification will re-run in the background.  Large files will '\
                       'take a while to re-verify, but you can run the status task to monitor progress.'
                 ).orange.bright
               elsif status == 'pending'
+                puts Rainbow(
+                      "\nWarning: At least one fixity check is still in a pending state.  "\
+                      'If these checks have been in a pending state for a very long time, a network issue may have interrupted the check.  '\
+                      "To re-run these fixity checks, run each of these rake task commands:\n"
+                ).orange.bright
+
+                stored_object_ids_for_failed_fixity_verifications.each do |stored_object_id|
+                  puts "RAILS_ENV=#{ENV['RAILS_ENV'] || 'development'} bundle exec rake atc:queue:verify_fixity stored_object_id=#{stored_object_id} run_again=true"
+                end
+
                 puts Rainbow(
                       "\nAfter the above commands have been run, the pending FixityVerifications will still appear as "\
                       'pending, but a verification will re-run in the background.  Large files will '\

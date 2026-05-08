@@ -134,8 +134,12 @@ namespace :atc do
     desc "Queue a VerifyFixityJob. "\
           "This job verifies the fixity for a given StoredObject"
     task verify_fixity: :environment do
+      run_again = ENV['run_again'] == 'true'
       next unless with_stored_object_id_argument() do |stored_object_id|
         puts "Queued stored_object_id: #{stored_object_id}"
+        if run_again
+          FixityVerification.destroy_by(stored_object_id: stored_object_id)
+        end
         VerifyFixityJob.perform_later(stored_object_id)
       end
 
