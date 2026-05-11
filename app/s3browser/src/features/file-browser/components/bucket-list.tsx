@@ -1,9 +1,12 @@
-import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
 import { useBucketsSuspenseQuery } from '../api/get-buckets';
+import TableBuilder from '@/components/ui/table-builder/table-builder';
+import { columnDefs } from '../utils/bucket-list-column-defs';
 
 const BucketList = () => {
   const getBucketsQuery = useBucketsSuspenseQuery();
   const buckets = getBucketsQuery.data;
+  const navigate = useNavigate();
 
   if (!buckets || buckets.length === 0) {
     return <p>No buckets found.</p>;
@@ -12,27 +15,9 @@ const BucketList = () => {
   return (
     <div>
       <h1>S3 Buckets</h1>
-      {/* Temporarily use a table element instead of TanStack Table */}
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          {buckets.map((bucket) => (
-            <tr key={bucket.name}>
-              <td>
-                <Link to={`/bucket/${encodeURIComponent(bucket.name)}`}>
-                  {bucket.name}
-                </Link>
-              </td>
-              <td>{bucket.description}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* Temp test - navigate to a deeply nested folder */}
+      <button onClick={() => navigate('/buckets/bucket-2?prefix=subdirectory/nested_dir/another_dir')}>Navigate to subdirectory</button>
+      <TableBuilder data={buckets} columns={columnDefs} />
     </div>
   );
 };

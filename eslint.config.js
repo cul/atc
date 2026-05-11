@@ -8,14 +8,14 @@ export default tseslint.config(
   {
     ignores: ['node_modules/**', 'public/**', 'tmp/**', 'log/**', 'vendor/**']
   },
-    js.configs.recommended,  
-    {
-      files: ['**/*.js'],
-      // JavaScript files with browser globals to allow for console, window, etc.
-      languageOptions: {
-        globals: {
-          ...globals.browser,
-        },
+  js.configs.recommended,
+  {
+    files: ['**/*.js'],
+    // JavaScript files with browser globals to allow for console, window, etc.
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
     },
   },
   // TypeScript recommended rules
@@ -43,4 +43,12 @@ export default tseslint.config(
       'react/prop-types': 'off',
     },
   },
+  // Disable incompatible-library warnings for TanStack Table components
+  // https://github.com/facebook/react/issues/33057
+  {
+    files: ['**/table-builder.tsx'],
+    rules: {
+      'react-hooks/incompatible-library': 'off',
+    },
+  }
 );

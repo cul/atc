@@ -11,15 +11,13 @@ Rails.application.routes.draw do
   end
 
   get '/browse', to: 's3_browser_app#index'
+  get '/browse/*path', to: 's3_browser_app#index'
 
   # S3 Browser API routes
   namespace :api do
     get '/greeting', to: 's3_browser#greeting', format: 'json'
     get '/buckets', to: 's3_browser#buckets', format: 'json'
   end
-
-  get '/browser', to: 's3_browser_app#index' # Temporary route for testing the S3 browser app
-  get '/browser/*path', to: 's3_browser_app#index'
 
   resque_web_constraint = lambda do |request|
     current_user = request.env['warden'].user

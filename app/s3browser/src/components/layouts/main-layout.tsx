@@ -1,9 +1,13 @@
-import { Outlet, useParams } from 'react-router';
+import { Outlet, useParams, useSearchParams } from 'react-router';
 import Breadcrumbs from '@/features/file-browser/components/breadcrumbs';
 
 const MainLayout = () => {
-  const { bucketName, '*': prefix } = useParams();
-  
+  // const { bucketName, '*': prefix } = useParams();
+  const { bucketName } = useParams();
+  const [searchParams] = useSearchParams();
+  const prefix = searchParams.get('prefix') ?? undefined;
+  console.log('MainLayout params', { bucketName, prefix });
+
   return (
     <div>
       <Breadcrumbs bucketName={bucketName} prefix={prefix} />

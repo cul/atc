@@ -10,9 +10,33 @@ const buildSegments = (
   bucketName?: string,
   prefix?: string,
 ) => {
-  // TODO: create breadcrumb segments based on bucketName and prefix
-  // All segments should link to the appropriate route except the last one which is the current page
-  console.log('Building breadcrumb segments for', bucketName, prefix);
+  const segments = [
+    { label: 'All Buckets', to: '/' },
+  ];
+ 
+  if (!bucketName) return segments;
+ 
+  const bucketPath = `/buckets/${encodeURIComponent(bucketName)}`;
+ 
+  segments.push({
+    label: bucketName,
+    to: bucketPath,
+  });
+ 
+  if (!prefix) return segments;
+ 
+  const parts = prefix.split('/').filter(Boolean); // Remove empty parts caused by trailing slash
+  let finalPath = '';
+ 
+  for (const part of parts) {
+    finalPath += `${encodeURIComponent(part)}/`;
+    segments.push({
+      label: part,
+      to: `${bucketPath}?prefix=${finalPath}`,
+    });
+  }
+ 
+  return segments;
 };
 
 const Breadcrumbs = ({ bucketName, prefix }: BreadcrumbsProps) => {
@@ -20,11 +44,18 @@ const Breadcrumbs = ({ bucketName, prefix }: BreadcrumbsProps) => {
 
   return (
     <Breadcrumb>
-      <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/' }}>
-        Buckets
+    {segments.map((segment, index) => (
+      <Breadcrumb.Item
+        key={index}
+        linkAs={Link}
+        linkProps={{ to: segment.to }}
+        active={index === segments.length - 1}
+      >
+        {segment.label}
       </Breadcrumb.Item>
-    </Breadcrumb>
-  )
+    ))}
+  </Breadcrumb>
+  );
 };
 
 export default Breadcrumbs;

@@ -35,7 +35,7 @@ export const createAppRouter = (queryClient: QueryClient) =>
           lazy: () => import('./routes/buckets').then(convert(queryClient)),
         },
         {
-          path: 'bucket/:bucketName/*',
+          path: 'buckets/:bucketName/*',
           lazy: () =>
             import('./routes/bucket-contents').then(convert(queryClient)),
         },
@@ -46,7 +46,7 @@ export const createAppRouter = (queryClient: QueryClient) =>
       lazy: () => import('./routes/not-found').then(convert(queryClient)),
     },
   ], {
-    basename: '/browser',
+    basename: '/browse',
   });
 
 export const AppRouter = () => {
