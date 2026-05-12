@@ -14,10 +14,10 @@ Rails.application.routes.draw do
 
   # S3 Browser API routes
   namespace :api do
-    get '/greeting', to: 's3_browser#greeting', format: 'json'
     get '/buckets', to: 's3_browser#buckets', format: 'json'
     get '/bucket/:bucket/', to: 's3_browser#get_contents_at_prefix_level', format: 'json'
     get '/object/:bucket/', to: 's3_browser#get_object_details', format: 'json'
+    get '/users/_self', to: 'users#_self', format: 'json'
   end
 
   resque_web_constraint = lambda do |request|
