@@ -10,6 +10,6 @@ class S3BrowserAppController < ApplicationController
   private
 
   def authorize_s3_browser_access!
-    raise CanCan::AccessDenied unless can? Ability::ACCESS_S3_BROWSER, self
+    raise CanCan::AccessDenied unless can? Ability::ACCESS_S3_BROWSER_UI, self
   end
 end

@@ -3,8 +3,8 @@
 class Ability
   include CanCan::Ability
 
-  ACCESS_S3_BROWSER = :access_s3_browser
-  ACCESS_S3_BROWSER_API = :access_s3_browser_api
+  ACCESS_S3_BROWSER_UI = :access_s3_browser
+  ACCESS_S3_BROWSER_API_READ_METHODS = :access_s3_browser_api_read_methods
 
   def initialize(user)
     # Define abilities for the user here. For example:
@@ -31,11 +31,20 @@ class Ability
     #
     # See the wiki for details:
     # https://github.com/CanCanCommunity/cancancan/blob/develop/docs/define_check_abilities.md
+
+    #
+    # Currently, this ability file enforces 0 restrictions based on the current user
+    # In the future, we will want to restrict certain users from accessing certain
+    # APIs/endpoints, while allowing others to use those features. That will be implemented
+    # here.
+    #
     return if user.blank?
 
-    can ACCESS_S3_BROWSER, S3BrowserAppController
+    can ACCESS_S3_BROWSER_UI, S3BrowserAppController
 
-    can ACCESS_S3_BROWSER_API, Api::S3BrowserController
     # We can add more Api Controllers and restrict access based on the current user
+    # Right now, any authenticated user can access any API
+    can ACCESS_S3_BROWSER_API_READ_METHODS, Api::S3BrowserController
+    can ACCESS_S3_BROWSER_API_READ_METHODS, Api::UsersController
   end
 end

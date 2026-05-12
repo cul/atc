@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 class Api::S3BrowserController < Api::BaseController
-  # GET /hello
-  def greeting
-    render json: { greeting: 'hello!' }
-  end
+  before_action :authorize_s3_browser_api_read_access!,
+                only: %i[buckets get_contents_at_prefix_level get_object_details]
 
   def buckets
     buckets = AWS_CONFIG[:s3_browser][:buckets]
@@ -82,5 +80,9 @@ class Api::S3BrowserController < Api::BaseController
       archiveStatus: s3_object.archive_status,
       restoreStatus: s3_object.restore
     }
+  end
+
+  def authorize_s3_browser_api_read_access!
+    authorize_action_and_scope! Ability::ACCESS_S3_BROWSER_API_READ_METHODS
   end
 end
