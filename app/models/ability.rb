@@ -4,7 +4,7 @@ class Ability
   include CanCan::Ability
 
   ACCESS_S3_BROWSER_UI = :access_s3_browser
-  ACCESS_S3_BROWSER_API_READ_METHODS = :access_s3_browser_api_read_methods
+  ACCESS_API_READ_METHODS = :access_api_read_methods
 
   def initialize(user)
     # Define abilities for the user here. For example:
@@ -44,7 +44,7 @@ class Ability
 
     # We can add more Api Controllers and restrict access based on the current user
     # Right now, any authenticated user can access any API
-    can ACCESS_S3_BROWSER_API_READ_METHODS, Api::S3BrowserController
-    can ACCESS_S3_BROWSER_API_READ_METHODS, Api::UsersController
+    can ACCESS_API_READ_METHODS, Api::S3BrowserController
+    can ACCESS_API_READ_METHODS, Api::UsersController
   end
 end

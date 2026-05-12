@@ -83,6 +83,6 @@ class Api::S3BrowserController < Api::BaseController
   end
 
   def authorize_s3_browser_api_read_access!
-    authorize_action_and_scope! Ability::ACCESS_S3_BROWSER_API_READ_METHODS
+    authorize_action_and_scope! Ability::ACCESS_API_READ_METHODS
   end
 end
