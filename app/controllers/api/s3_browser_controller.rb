@@ -12,17 +12,46 @@ class Api::S3BrowserController < Api::BaseController
   end
 
   # GET /api/bucket/:bucketName/?prefix={objectPrefix}?continuation_token={continuationToken}
-  def contents_at_prefix_level
-    # check for included :continuation_token from URL params
-    # take :prefix from URL params
-    # call list_objects_v2
-    #   use :prefix
-    #   use :delimiter = '/'
-    #   use :continuation_token if present
-    # include in response:
-    #   content (objects)
-    #   commonPrefixes (folders at this level)
-    #   isTruncated (if pageable)
-    #   nextContinuationToken (for subsequent requests)
+  def get_contents_at_prefix_level # rubocop:disable Metrics/AbcSize,Metrics/MethodLength,Naming/AccessorMethodName
+    bucket = params[:bucket]
+    unless valid_bucket? bucket
+      render json: { error: 'the given bucket does not exist or is not accessible from the S3 Browser App' },
+             status: :bad_request
+      return
+    end
+    prefix = params[:prefix]
+    folders = []
+    objects = []
+
+    # TODO: handle err responses
+    s3_client.list_objects_v2({
+      bucket: bucket,
+      prefix: prefix,
+      delimiter: '/'
+    }).each do |response|
+      response.common_prefixes.each do |s3_folder|
+        folders.push(s3_folder.prefix)
+      end
+      response.contents.each do |s3_object|
+        objects.push({
+          key: s3_object.key,
+          lastModified: s3_object.last_modified,
+          size: s3_object.size,
+          storageClass: s3_object.storage_class
+        })
+      end
+    end
+
+    render json: { folders: folders, objects: objects }
+  end
+
+  private
+
+  def s3_client
+    @s3_client ||= S3_CLIENT
+  end
+
+  def valid_bucket?(bucket)
+    AWS_CONFIG[:s3_browser][:buckets].map(&:bucket).include? bucket
   end
 end
