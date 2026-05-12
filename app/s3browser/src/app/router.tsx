@@ -35,7 +35,7 @@ export const createAppRouter = (queryClient: QueryClient) =>
           lazy: () => import('./routes/buckets').then(convert(queryClient)),
         },
         {
-          path: 'buckets/:bucketName/*',
+          path: 'buckets/:bucketName',
           lazy: () =>
             import('./routes/bucket-contents').then(convert(queryClient)),
         },
