@@ -41,6 +41,8 @@ class Api::S3BrowserController < Api::BaseController
     end
 
     render json: { folders: folders, objects: objects }
+  rescue Aws::S3::Errors::ServiceError => e
+    render_aws_api_error(e)
   end
 
   # GET /api/object/:bucketName/?key={objectKey}
@@ -57,6 +59,8 @@ class Api::S3BrowserController < Api::BaseController
     })
 
     render json: object_details_json(bucket, object_key, s3_object)
+  rescue Aws::S3::Errors::ServiceError => e
+    render_aws_api_error(e)
   end
 
   private
@@ -80,6 +84,11 @@ class Api::S3BrowserController < Api::BaseController
       archiveStatus: s3_object.archive_status,
       restoreStatus: s3_object.restore
     }
+  end
+
+  def render_aws_api_error(err)
+    render json: { response_code: err.context.http_response.status_code, error_message: err.code },
+           status: err.context.http_response.status_code
   end
 
   def authorize_s3_browser_api_read_access!
