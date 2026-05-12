@@ -36,9 +36,12 @@ export const createAppRouter = (queryClient: QueryClient) =>
         },
         {
           path: 'buckets/:bucketName',
-          lazy: () =>
-            import('./routes/bucket-contents').then(convert(queryClient)),
+          lazy: () => import('./routes/bucket-contents').then(convert(queryClient)),
         },
+        {
+          path: 'object/:bucketName',
+          lazy: () => import('./routes/object-details').then(convert(queryClient)),
+        }
       ],
     },
     {

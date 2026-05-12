@@ -13,21 +13,21 @@ const buildSegments = (
   const segments = [
     { label: 'All Buckets', to: '/' },
   ];
- 
+
   if (!bucketName) return segments;
- 
+
   const bucketPath = `/buckets/${encodeURIComponent(bucketName)}`;
- 
+
   segments.push({
     label: bucketName,
     to: bucketPath,
   });
- 
+
   if (!prefix) return segments;
- 
+
   const parts = prefix.split('/').filter(Boolean); // Remove empty parts caused by trailing slash
   let finalPath = '';
- 
+
   for (const part of parts) {
     finalPath += `${encodeURIComponent(part)}/`;
     segments.push({
@@ -35,7 +35,7 @@ const buildSegments = (
       to: `${bucketPath}?prefix=${finalPath}`,
     });
   }
- 
+
   return segments;
 };
 
@@ -44,17 +44,17 @@ const Breadcrumbs = ({ bucketName, prefix }: BreadcrumbsProps) => {
 
   return (
     <Breadcrumb>
-    {segments.map((segment, index) => (
-      <Breadcrumb.Item
-        key={index}
-        linkAs={Link}
-        linkProps={{ to: segment.to }}
-        active={index === segments.length - 1}
-      >
-        {segment.label}
-      </Breadcrumb.Item>
-    ))}
-  </Breadcrumb>
+      {segments.map((segment, index) => (
+        <Breadcrumb.Item
+          key={index}
+          linkAs={Link}
+          linkProps={{ to: segment.to }}
+          active={index === segments.length - 1}
+        >
+          {segment.label}
+        </Breadcrumb.Item>
+      ))}
+    </Breadcrumb>
   );
 };
 

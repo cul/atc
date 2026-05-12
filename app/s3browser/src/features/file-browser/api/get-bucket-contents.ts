@@ -21,9 +21,8 @@ const getBucketContents = (
   // Temporarily return a mock response until we implement the backend API
   return Promise.resolve({
     folders: [
-      prefix,
-      "example/prefix/path/folder1/",
-      "example/prefix/path/folder2/",
+      "example/prefix/path/jkl/",
+      "example/prefix/path/efg/",
     ],
     objects: [
       {

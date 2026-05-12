@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useParams, useSearchParams } from 'react-router';
 import { columnDefs } from '../utils/bucket-contents-column-defs';
 import { toBucketItems } from '../utils/transform-to-bucket-items';
-import { Link, useParams, useSearchParams } from 'react-router';
-import { useBucketContentsQuery } from '@/features/file-browser/api/get-bucket-contents';
+import { useBucketContentsQuery } from '../api/get-bucket-contents';
 import TableBuilder from '@/components/ui/table-builder/table-builder';
 
 const normalizePrefix = (raw: string): string => {
@@ -14,14 +13,9 @@ const normalizePrefix = (raw: string): string => {
 const BucketContentsTable = () => {
   const { bucketName } = useParams();
   const [searchParams] = useSearchParams();
-  const bucket = bucketName as string;
   const prefix = normalizePrefix(searchParams.get('prefix') ?? '');
 
-  const bucketPath = `/bucket/${encodeURIComponent(bucket)}`;
-
-  const { data } = useBucketContentsQuery({ bucket, prefix });
-
-  console.log('BucketContents query data', data);
+  const { data } = useBucketContentsQuery({ bucket: bucketName, prefix });
 
   // Transform the split API response into a flat array for TanStack Table.
   // Reruns whenever the raw API response changes, but not on every render.
@@ -30,11 +24,15 @@ const BucketContentsTable = () => {
     return toBucketItems(data);
   }, [data]);
 
+  // Column defs depend on bucketName for building folder and file links.
+  // Recomputes only when the bucket changes.'
+  const columns = useMemo(() => columnDefs(bucketName), [bucketName]);
+
   return (
     <div>
-      Bucket contents for <strong>{bucket}</strong> with prefix <strong>{prefix}</strong>
+      Bucket contents for <strong>{bucketName}</strong> with prefix <strong>{prefix}</strong>
 
-      <TableBuilder data={items} columns={columnDefs} />
+      <TableBuilder data={items} columns={columns} />
     </div>
   );
 };
