@@ -23,7 +23,7 @@ class Api::S3BrowserController < Api::BaseController
     folders = []
     objects = []
 
-    # TODO: handle err responses
+    # TODO: handle err responses https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
     s3_client.list_objects_v2({
       bucket: bucket,
       prefix: prefix,
@@ -45,6 +45,22 @@ class Api::S3BrowserController < Api::BaseController
     render json: { folders: folders, objects: objects }
   end
 
+  # GET /api/object/:bucketName/?key={objectKey}
+  def get_object_details # rubocop:disable Naming/AccessorMethodName
+    bucket = params[:bucket]
+    object_key = params[:key]
+    object_key.sub!('/', '') if object_key.chr == '/' # remove leading '/' if present
+    object_key.gsub!(' ', '%20') # replace any spaces with %20 encoding
+
+    # TODO: handle err responses https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
+    s3_object = s3_client.head_object({
+      bucket: bucket,
+      key: object_key
+    })
+
+    render json: object_details_json(bucket, object_key, s3_object)
+  end
+
   private
 
   def s3_client
@@ -53,5 +69,18 @@ class Api::S3BrowserController < Api::BaseController
 
   def valid_bucket?(bucket)
     AWS_CONFIG[:s3_browser][:buckets].map(&:bucket).include? bucket
+  end
+
+  def object_details_json(bucket, key, s3_object)
+    {
+      bucket: bucket,
+      key: key,
+      lastModified: s3_object.last_modified,
+      size: s3_object.content_length,
+      contentType: s3_object.content_type,
+      storageClass: s3_object.storage_class,
+      archiveStatus: s3_object.archive_status,
+      restoreStatus: s3_object.restore
+    }
   end
 end
