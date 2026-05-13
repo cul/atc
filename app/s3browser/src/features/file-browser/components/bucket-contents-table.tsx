@@ -25,14 +25,18 @@ const BucketContentsTable = () => {
   }, [data]);
 
   // Column defs depend on bucketName for building folder and file links.
-  // Recomputes only when the bucket changes.'
+  // Recomputes only when the bucketName changes.
   const columns = useMemo(() => columnDefs(bucketName), [bucketName]);
 
   return (
     <div>
       Bucket contents for <strong>{bucketName}</strong> with prefix <strong>{prefix}</strong>
 
-      <TableBuilder data={items} columns={columns} />
+      <TableBuilder
+        data={items}
+        columns={columns}
+        initialSorting={[{ id: 'name', desc: false }]}
+      />
     </div>
   );
 };

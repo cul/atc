@@ -14,9 +14,6 @@ const getBucketContents = (
 
   const query = params.toString();
   const endpoint = `/buckets/${bucket}${query ? `?${query}` : ''}`;
-
-  
-  console.log('Fetching bucket contents for:', bucket, 'with prefix:', prefix);
   
   // Temporarily return a mock response until we implement the backend API
   return Promise.resolve({
@@ -26,9 +23,15 @@ const getBucketContents = (
     ],
     objects: [
       {
-        key: `${prefix}abc.txt`,
+        key: `${prefix}def.CSV`,
+        size: 1438,
+        lastModified: '2026-04-01T16:02:18.962Z',
+        storageClass: 'STANDARD',
+      },
+      {
+        key: `${prefix}abc.png`,
         size: 1234,
-        lastModified: new Date().toISOString(),
+        lastModified: '2026-04-02T16:02:18.962Z',
         storageClass: 'STANDARD',
       },
       {

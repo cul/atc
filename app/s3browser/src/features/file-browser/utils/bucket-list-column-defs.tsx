@@ -19,5 +19,6 @@ export const columnDefs = [
   columnHelper.accessor('description', {
     header: 'Description',
     cell: (info) => info.getValue(),
+    enableSorting: false
   }),
 ]

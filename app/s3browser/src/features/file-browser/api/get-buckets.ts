@@ -10,9 +10,9 @@ const getBuckets = (): Promise<Bucket[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve([
-        { name: 'bucket-1', description: 'This is bucket 1' },
-        { name: 'bucket-2', description: 'This is bucket 2' },
-        { name: 'bucket-3', description: 'This is bucket 3' },
+        { name: 'bucket-1', description: 'd' },
+        { name: 'bucket-2', description: 'aa b' },
+        { name: 'bucket-3', description: 'zzz' },
       ]);
     }, 500);
   });

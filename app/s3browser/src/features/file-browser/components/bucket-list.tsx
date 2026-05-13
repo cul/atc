@@ -17,7 +17,7 @@ const BucketList = () => {
       <h1>S3 Buckets</h1>
       {/* Temp test - navigate to a deeply nested folder */}
       <button onClick={() => navigate('/buckets/bucket-2?prefix=subdirectory/nested_dir/another_dir')}>Navigate to subdirectory</button>
-      <TableBuilder data={buckets} columns={columnDefs} />
+      <TableBuilder data={buckets} columns={columnDefs} initialSorting={[{ id: 'name', desc: false }]}/>
     </div>
   );
 };

@@ -17,6 +17,24 @@ const extractFileExtension = (fileName: string) => {
   return parts.length > 1 ? parts.pop() : 'unknown';
 }
 
+const sortByTypeAndExtension = (a: BucketItem, b: BucketItem) => {
+  if (a.type !== b.type) {
+    return a.type === 'folder' ? -1 : 1;
+  }
+
+  if (a.type === 'object' && b.type === 'object') {
+    const extensionA = extractFileExtension(a.name).toLowerCase();
+    const extensionB = extractFileExtension(b.name).toLowerCase();
+
+    const extensionComparison = extensionA.localeCompare(extensionB);
+    if (extensionComparison !== 0) {
+      return extensionComparison;
+    }
+  }
+
+  return a.name.localeCompare(b.name);
+}
+
 const formatSize = (sizeInBytes: number) => {
   const units = ['B', 'kB', 'MB', 'GB', 'TB'];
   let size = sizeInBytes;
@@ -59,17 +77,25 @@ export const columnDefs = (bucket: string) => [
     header: 'Last Modified',
     cell: (info) => {
       if (!info.getValue()) return '-';
+      console.log(info.getValue());
 
       return formatLastModified(info.getValue() as string);
     },
+    sortingFn: 'datetime',
+    sortDescFirst: false,
+    sortUndefined: 'last'
   }),
   columnHelper.accessor('type', {
     header: 'Type',
     cell: ({ row }) => row.original.type === 'folder' ? 'Folder' : extractFileExtension(row.original.name),
+    // Sorts folders first, then sorts objects by file extension
+    sortingFn: (rowA, rowB) => sortByTypeAndExtension(rowA.original, rowB.original),
   }),
   columnHelper.accessor('storageClass', {
     header: 'Storage Class',
     cell: ({ row }) => row.original.type === 'object' ? capitalizeStr(row.original.storageClass) : '-',
+    sortDescFirst: false,
+    sortUndefined: 'last'
   }),
   columnHelper.accessor('size', {
     header: 'Size',
@@ -77,5 +103,7 @@ export const columnDefs = (bucket: string) => [
       const row = info.row.original;
       return row.type === 'object' ? formatSize(info.getValue() as number) : '-';
     },
+    sortDescFirst: false,
+    sortUndefined: 'last'
   }),
 ]

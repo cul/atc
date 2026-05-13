@@ -25,6 +25,5 @@ export const toBucketItems = (response: BucketContentsResponse): BucketItem[] =>
     lastModified: obj.lastModified,
   }));
  
-  // TODO: Let TanStack Table handle initial sorting?
-  return [...folderItems, ...objectItems].sort((a, b) => a.name.localeCompare(b.name));
+  return [...folderItems, ...objectItems];
 };

@@ -1,22 +1,24 @@
 import { flexRender, Header, HeaderGroup } from '@tanstack/react-table'
-// import { ArrowUp, ArrowDown, ArrowDownUp } from 'react-bootstrap-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons'
 
 interface TableHeaderProps<T> {
   headerGroup: HeaderGroup<T>
 }
 
 function TableHeader<T>({ headerGroup }: TableHeaderProps<T>) {
-  // const renderSortingIcon = (sortDirection: 'asc' | 'desc' | null) => {
-  //   const sharedClassNames = 'ms-2 flex-shrink-0 mt-1'
+  // TODO: Make the currently active sorting state more visually distinct (more saturated color) to improve UX
+  const renderSortingIcon = (sortDirection: 'asc' | 'desc' | null) => {
+    const sharedClassNames = 'ms-2 flex-shrink-0 mt-1'
 
-  //   if (sortDirection === 'asc') {
-  //     return <ArrowUp className={sharedClassNames} size={14} />
-  //   }
-  //   if (sortDirection === 'desc') {
-  //     return <ArrowDown className={sharedClassNames} size={14} />
-  //   }
-  //   return <ArrowDownUp className={sharedClassNames} style={{ color: '#b5b5b5ff' }} size={14} />
-  // }
+    if (sortDirection === 'asc') {
+      return <FontAwesomeIcon icon={faSortUp} className={sharedClassNames} />
+    }
+    if (sortDirection === 'desc') {
+      return <FontAwesomeIcon icon={faSortDown} className={sharedClassNames} />
+    }
+    return <FontAwesomeIcon icon={faSort} className={sharedClassNames} />
+  }
 
   const createColumnHeader = (header: Header<T, unknown>) => {
     if (header.isPlaceholder) return null
@@ -29,10 +31,10 @@ function TableHeader<T>({ headerGroup }: TableHeaderProps<T>) {
         <button
           type="button"
           className={`btn ${sharedClassNames}`}
-          // onClick={header.column.getToggleSortingHandler()}
+          onClick={header.column.getToggleSortingHandler()}
         >
           {headerText}
-          {/* {renderSortingIcon(header.column.getIsSorted() || null)} */}
+          {renderSortingIcon(header.column.getIsSorted() || null)}
         </button>
       )
     }

@@ -2,7 +2,6 @@ import { Outlet, useParams, useSearchParams } from 'react-router';
 import Breadcrumbs from '@/features/file-browser/components/breadcrumbs';
 
 const MainLayout = () => {
-  // const { bucketName, '*': prefix } = useParams();
   const { bucketName } = useParams();
   const [searchParams] = useSearchParams();
   const prefix = searchParams.get('prefix') ?? undefined;
