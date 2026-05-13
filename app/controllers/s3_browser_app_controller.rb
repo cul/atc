@@ -5,7 +5,11 @@ class S3BrowserAppController < ApplicationController
   before_action :authenticate_user!
   before_action :authorize_s3_browser_access!
 
-  def index; end
+  def index
+    puts ''
+    puts 'HIT THE INDEX ACTION'
+    puts ''
+  end
 
   private
 
