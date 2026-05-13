@@ -50,6 +50,8 @@ const Breadcrumbs = ({ bucketName, prefix }: BreadcrumbsProps) => {
           linkAs={Link}
           linkProps={{ to: segment.to }}
           active={index === segments.length - 1}
+          aria-label="breadcrumb"
+          aria-current={index === segments.length - 1 ? 'page' : undefined}
         >
           {segment.label}
         </Breadcrumb.Item>

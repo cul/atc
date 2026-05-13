@@ -1,5 +1,5 @@
 export interface Bucket {
-  name: string;
+  bucket: string;
   description?: string;
 }
 

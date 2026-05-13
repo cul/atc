@@ -3,17 +3,19 @@ import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { Bucket } from '@/types/api';
 import { QueryConfig } from '@/lib/react-query';
 
-const getBuckets = (): Promise<Bucket[]> => {
-  // return api.get<Bucket[]>('/buckets'); 
+const getBuckets = async (): Promise<{ buckets: Bucket[] }> => {
+  // return api.get<{ buckets: Bucket[] }>('/buckets');
 
   // Temporary mock implementation until backend is ready
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve([
-        { name: 'bucket-1', description: 'd' },
-        { name: 'bucket-2', description: 'aa b' },
-        { name: 'bucket-3', description: 'zzz' },
-      ]);
+      resolve({
+        buckets: [
+          { bucket: 'bucket-1', description: 'd' },
+          { bucket: 'bucket-2', description: 'aa b' },
+          { bucket: 'bucket-3', description: 'zzz' },
+        ],
+      });
     }, 500);
   });
 };
