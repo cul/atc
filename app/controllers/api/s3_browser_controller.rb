@@ -1,27 +1,24 @@
 # frozen_string_literal: true
 
-class Api::S3BrowserController < Api::BaseController
-  before_action :authorize_s3_browser_api_read_access!,
-                only: %i[buckets get_contents_at_prefix_level get_object_details]
+# rubocop:disable Metrics/AbcSize,Metrics/MethodLength,Naming/AccessorMethodName
 
-  def buckets
-    buckets = AWS_CONFIG[:s3_browser][:buckets]
+class Api::S3BrowserController < Api::BaseController
+  rescue_from Exceptions::InvalidBucketError, with: :handle_invalid_bucket_error
+  before_action :authorize_s3_browser_api_read_access!,
+                only: %i[get_buckets get_contents_at_prefix_level get_object_details]
+
+  def get_buckets
     render json: { buckets: buckets }
   end
 
   # GET /api/bucket/:bucketName/?prefix={objectPrefix}?continuation_token={continuationToken}
-  def get_contents_at_prefix_level # rubocop:disable Metrics/AbcSize,Metrics/MethodLength,Naming/AccessorMethodName
+  def get_contents_at_prefix_level
     bucket = params[:bucket]
-    unless valid_bucket? bucket
-      render json: { error: 'the given bucket does not exist or is not accessible from the S3 Browser App' },
-             status: :bad_request
-      return
-    end
+    validate_bucket! bucket
     prefix = params[:prefix]
     folders = []
     objects = []
 
-    # TODO: handle err responses https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
     s3_client.list_objects_v2({
       bucket: bucket,
       prefix: prefix,
@@ -41,36 +38,42 @@ class Api::S3BrowserController < Api::BaseController
     end
 
     render json: { folders: folders, objects: objects }
-  rescue Aws::S3::Errors::ServiceError => e
+  rescue Aws::S3::Errors::ServiceError => e # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
     render_aws_api_error(e)
   end
 
   # GET /api/object/:bucketName/?key={objectKey}
   def get_object_details # rubocop:disable Naming/AccessorMethodName
     bucket = params[:bucket]
+    validate_bucket! bucket
     object_key = params[:key]
-    object_key.sub!('/', '') if object_key.chr == '/' # remove leading '/' if present
-    object_key.gsub!(' ', '%20') # replace any spaces with %20 encoding
+    # remove leading '/' if present and replace spaces with %20 encoding
+    object_key = object_key.delete_prefix('/').gsub(' ', '%20')
 
-    # TODO: handle err responses https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
     s3_object = s3_client.head_object({
       bucket: bucket,
       key: object_key
     })
 
     render json: object_details_json(bucket, object_key, s3_object)
-  rescue Aws::S3::Errors::ServiceError => e
+  rescue Aws::S3::Errors::ServiceError => e # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
     render_aws_api_error(e)
   end
 
   private
 
+  def buckets
+    @buckets ||= AWS_CONFIG[:s3_browser][:buckets]
+  end
+
   def s3_client
     @s3_client ||= S3_CLIENT
   end
 
-  def valid_bucket?(bucket)
-    AWS_CONFIG[:s3_browser][:buckets].map(&:bucket).include? bucket
+  def validate_bucket!(bucket)
+    return if buckets.map(&:bucket).include? bucket
+
+    raise Exceptions::InvalidBucketError, "invalid bucket: #{bucket}"
   end
 
   def object_details_json(bucket, key, s3_object)
@@ -87,11 +90,16 @@ class Api::S3BrowserController < Api::BaseController
   end
 
   def render_aws_api_error(err)
-    render json: { response_code: err.context.http_response.status_code, error_message: err.code },
+    render json: { response_code: err.context.http_response.status_code, error: err.code },
            status: err.context.http_response.status_code
   end
 
   def authorize_s3_browser_api_read_access!
     authorize_action_and_scope! Ability::ACCESS_API_READ_METHODS
+  end
+
+  def handle_invalid_bucket_error
+    render json: { error: 'The given bucket does not exist or is not accessible from the S3 Browser App' },
+           status: :bad_request
   end
 end
