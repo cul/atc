@@ -3,8 +3,6 @@
 # rubocop:disable Metrics/AbcSize,Metrics/MethodLength,Naming/AccessorMethodName
 
 class Api::S3BrowserController < Api::BaseController
-  rescue_from Exceptions::InvalidBucketError, with: :handle_invalid_bucket_error
-  rescue_from Aws::S3::Errors::ServiceError, with: :handle_aws_service_error
   before_action :authorize_s3_browser_api_read_access!,
                 only: %i[get_buckets get_contents_at_prefix_level get_object_details]
 
@@ -106,18 +104,7 @@ class Api::S3BrowserController < Api::BaseController
     }
   end
 
-  # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
-  def handle_aws_service_error(err)
-    render json: { response_code: err.context.http_response.status_code, error: err.code },
-           status: err.context.http_response.status_code
-  end
-
   def authorize_s3_browser_api_read_access!
     authorize_action_and_scope! Ability::ACCESS_API_READ_METHODS
-  end
-
-  def handle_invalid_bucket_error
-    render json: { error: 'The given bucket does not exist or is not accessible from the S3 Browser App' },
-           status: :bad_request
   end
 end

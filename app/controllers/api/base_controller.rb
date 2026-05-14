@@ -5,9 +5,9 @@ class Api::BaseController < ApplicationController
   before_action :authenticate_user!
 
   # Handle JSON parsing errors
-  rescue_from JSON::ParserError do |_exception|
-    render json: { error: 'Invalid JSON in request body' }, status: :bad_request
-  end
+  rescue_from JSON::ParserError, with: :handle_json_parse_error
+  rescue_from Exceptions::InvalidBucketError, with: :handle_invalid_bucket_error
+  rescue_from Aws::S3::Errors::ServiceError, with: :handle_aws_service_error
 
   private
 
@@ -31,5 +31,21 @@ class Api::BaseController < ApplicationController
     # Recursively transform all keys from camelCase to snake_case
     data.deep_transform_keys!(&:underscore)
     params.merge!(data.with_indifferent_access)
+  end
+
+  def handle_json_parse_error(error)
+    Rails.logger.error "JSON parse error: #{error.message}"
+    render json: { error: 'Invalid JSON in request body' }, status: :bad_request
+  end
+
+  # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
+  def handle_aws_service_error(err)
+    render json: { response_code: err.context.http_response.status_code, error: err.code },
+           status: err.context.http_response.status_code
+  end
+
+  def handle_invalid_bucket_error
+    render json: { error: 'The given bucket does not exist or is not accessible from the S3 Browser App' },
+           status: :bad_request
   end
 end
