@@ -114,6 +114,12 @@ describe Api::S3BrowserController, type: :request, focus: true do
           s3_client.stub_responses(:list_objects_v2, {
             contents: [
               {
+                key: 'test-prefix/',
+                last_modified: Time.zone.parse('2026-01-01'),
+                size: 0,
+                storage_class: 'STANDARD'
+              },
+              {
                 key: 'test-prefix/object1.txt',
                 last_modified: Time.zone.parse('2026-01-01'),
                 size: 2048,
@@ -138,7 +144,7 @@ describe Api::S3BrowserController, type: :request, focus: true do
           expect(response).to have_http_status(:ok)
         end
 
-        it 'has contents of the bucket at the given prefix' do
+        it 'has contents of the bucket at the given prefix and filters out parent folder' do
           expect(JSON.parse(response.body, symbolize_names: true)).to eq(expected_response)
         end
 

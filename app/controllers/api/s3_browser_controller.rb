@@ -15,8 +15,9 @@ class Api::S3BrowserController < Api::BaseController
   # GET /api/bucket/:bucketName/?prefix={objectPrefix}
   # Uses ListObjectV2 with a '/' delimiter to get contents at the given prefix level within the given bucket
   # Note:
-  #   - if no prefix query param is provided, this endpoint will return the top level contents of the bucket
-  #   - the prefix query param should end with a '/' to be properly recognized as a folder prefix. The code will
+  #   - The API returns the parent folder as part of the objects list, so we filter it out before returning the response
+  #   - If no prefix query param is provided, this endpoint will return the top level contents of the bucket
+  #   - The prefix query param should end with a '/' to be properly recognized as a folder prefix. The code will
   #     normalize any provided prefix to ensure it ends with a '/'. Conversely, it must not start with a '/'. The
   #     exception to this is a root-level search, which must be entirely empty.
   def get_contents_at_prefix_level
@@ -47,15 +48,20 @@ class Api::S3BrowserController < Api::BaseController
       end
     end
 
+    # Filter out the matching folder itself
+    objects = objects.reject do |obj|
+      obj[:key] == prefix && obj[:size].zero?
+    end
+
     render json: { folders: folders, objects: objects }
   end
 
   # GET /api/object/:bucketName/?key={objectKey}
   # Get object details with HeadObject
   # Note:
-  #   - the key should not begin with a leading '/', and it will be normalized if included
-  #   - though the documentation for the sdk warns that any spaces must be converted to '%20' in the key, doing so will
-  #     actually result in a 404. The key can be passed as-is.
+  #   - The key should not begin with a leading '/', and it will be normalized if included
+  #   - Though the documentation for the sdk warns that any spaces must be converted to '%20' in the key, doing so will
+  #     actually result in a 404. The key should be passed as-is.
   def get_object_details
     bucket = params[:bucket]
     validate_bucket! bucket
