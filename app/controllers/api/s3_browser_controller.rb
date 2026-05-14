@@ -11,11 +11,20 @@ class Api::S3BrowserController < Api::BaseController
     render json: { buckets: buckets }
   end
 
-  # GET /api/bucket/:bucketName/?prefix={objectPrefix}?continuation_token={continuationToken}
+  # GET /api/bucket/:bucketName/?prefix={objectPrefix}
+  # Uses ListObjectV2 with a '/' delimiter to get contents at the given prefix level within the given bucket
+  # Note:
+  #   - if no prefix query param is provided, this endpoint will return the top level contents of the bucket
+  #   - the prefix query param should end with a '/' to be properly recognized as a folder prefix. The code will
+  #     normalize any provided prefix to ensure it ends with a '/'. The exception to this is a root-level search,
+  #     which must be entirely empty.
   def get_contents_at_prefix_level
     bucket = params[:bucket]
     validate_bucket! bucket
     prefix = params[:prefix]
+    # normalize input
+    prefix += '/' unless prefix.end_with? '/'
+    prefix = '' if prefix == '/' # handle root bucket search case
     folders = []
     objects = []
 
@@ -43,12 +52,17 @@ class Api::S3BrowserController < Api::BaseController
   end
 
   # GET /api/object/:bucketName/?key={objectKey}
-  def get_object_details # rubocop:disable Naming/AccessorMethodName
+  # Get object details with HeadObject
+  # Note:
+  #   - the key should not begin with a leading '/', and it will be normalized if included
+  #   - though the documentation for the sdk warns that any spaces must be converted to '%20' in the key, doing so will
+  #     actually result in a 404. The key can be passed as-is.
+  def get_object_details
     bucket = params[:bucket]
     validate_bucket! bucket
     object_key = params[:key]
-    # remove leading '/' if present and replace spaces with %20 encoding
-    object_key = object_key.delete_prefix('/').gsub(' ', '%20')
+    # normalize input
+    object_key = object_key.delete_prefix('/')
 
     s3_object = s3_client.head_object({
       bucket: bucket,
