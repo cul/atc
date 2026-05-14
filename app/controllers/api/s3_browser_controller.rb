@@ -18,13 +18,13 @@ class Api::S3BrowserController < Api::BaseController
   #   - The prefix query param should end with a '/' to be properly recognized as a folder prefix. The code will
   #     normalize any provided prefix to ensure it ends with a '/'. Conversely, it must not start with a '/'. The
   #     exception to this is a root-level search, which must be entirely empty.
-  def get_contents_at_prefix_level
+  def get_contents_at_prefix_level # rubocop:disable Metrics/CyclomaticComplexity
     bucket = params[:bucket]
     validate_bucket! bucket
     prefix = params[:prefix] || ''
     # normalize input
     prefix += '/' unless prefix.end_with? '/'
-    prefix = prefix.delete_prefix('/')
+    prefix = prefix.delete_prefix('/') # unfortunate method name but we need to rm leading /. A blank prefix is OK.
     folders = []
     objects = []
 
