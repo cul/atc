@@ -37,8 +37,6 @@ function TableBuilder<T extends object>({ data, columns, initialSorting = [] }: 
     onSortingChange: setSorting,
   })
 
-  console.log('Current sorting state:', sorting);
-
   return (
     <BTable striped bordered hover responsive size="md" className="rounded-4">
       {table.getHeaderGroups().map((headerGroup) => (

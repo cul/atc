@@ -4,6 +4,8 @@ import { columnDefs } from '../utils/bucket-contents-column-defs';
 import { toBucketItems } from '../utils/transform-to-bucket-items';
 import { useBucketContentsQuery } from '../api/get-bucket-contents';
 import TableBuilder from '@/components/ui/table-builder/table-builder';
+import TableBuilderVirtualizer from '@/components/ui/table-builder/table-builder-virtualizer';
+import { makeData } from '../api/make-data';
 
 const normalizePrefix = (raw: string): string => {
   if (!raw) return '';
@@ -14,8 +16,13 @@ const BucketContentsTable = () => {
   const { bucketName } = useParams();
   const [searchParams] = useSearchParams();
   const prefix = normalizePrefix(searchParams.get('prefix') ?? '');
+  const currentDirectory = prefix ? prefix.split('/').filter(Boolean).pop() : bucketName;
 
   const { data } = useBucketContentsQuery({ bucket: bucketName, prefix });
+  console.log('Bucket contents API response:', data);
+
+  const mockData = useMemo(() => makeData(10000), []);
+
 
   // Transform the split API response into a flat array for TanStack Table.
   // Reruns whenever the raw API response changes, but not on every render.
@@ -30,13 +37,22 @@ const BucketContentsTable = () => {
 
   return (
     <div>
-      Bucket contents for <strong>{bucketName}</strong> with prefix <strong>{prefix}</strong>
+      <h4><strong>{currentDirectory}/</strong></h4>
 
-      <TableBuilder
-        data={items}
-        columns={columns}
-        initialSorting={[{ id: 'name', desc: false }]}
-      />
+      {/* Using mock data for now */}
+      {mockData.length > 400 ? (
+        <TableBuilderVirtualizer
+          data={mockData}
+          columns={columns}
+          initialSorting={[{ id: 'name', desc: false }]}
+        />
+      ) : (
+        <TableBuilder
+          data={mockData}
+          columns={columns}
+          initialSorting={[{ id: 'name', desc: false }]}
+        />
+      )}
     </div>
   );
 };

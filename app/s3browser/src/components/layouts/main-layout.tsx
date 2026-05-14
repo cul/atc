@@ -5,12 +5,13 @@ const MainLayout = () => {
   const { bucketName } = useParams();
   const [searchParams] = useSearchParams();
   const prefix = searchParams.get('prefix') ?? undefined;
-  console.log('MainLayout params', { bucketName, prefix });
 
   return (
-    <div>
+    <div className="container mx-auto p-4">
       <Breadcrumbs bucketName={bucketName} prefix={prefix} />
-      <Outlet />
+      <main>
+        <Outlet />
+      </main>
     </div>
   );
 };

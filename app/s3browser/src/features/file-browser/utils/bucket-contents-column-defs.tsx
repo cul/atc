@@ -72,16 +72,16 @@ export const columnDefs = (bucket: string) => [
         </Link>
       );
     },
+    sortingFn: 'alphanumeric',
   }),
   columnHelper.accessor('lastModified', {
     header: 'Last Modified',
     cell: (info) => {
       if (!info.getValue()) return '-';
-      console.log(info.getValue());
 
       return formatLastModified(info.getValue() as string);
     },
-    sortingFn: 'datetime',
+    sortingFn: 'datetime', // This is the slowest part of our sorting
     sortDescFirst: false,
     sortUndefined: 'last'
   }),

@@ -15,8 +15,6 @@ export const clientLoader = (queryClient: QueryClient) => async ({ params, reque
   const prefix = normalizePrefix(url.searchParams.get('prefix') ?? '');
   const query = getBucketContentsQueryOptions(bucketName, prefix);
 
-  console.log('Loading bucket contents for', bucketName, 'with prefix', prefix);
-
   queryClient.prefetchQuery(query);
 };
 

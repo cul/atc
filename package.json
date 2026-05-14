@@ -17,6 +17,7 @@
     "@tanstack/react-query": "^5.100.9",
     "@tanstack/react-query-devtools": "^5.100.9",
     "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.13.24",
     "bootstrap": "^5.3.8",
     "react": "19.2.3",
     "react-bootstrap": "^2.10.10",
@@ -27,7 +28,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@faker-js/faker": "^10.4.0",
     "@types/bootstrap": "^5",
+    "@types/faker": "^6",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
