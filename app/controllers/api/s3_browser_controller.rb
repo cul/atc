@@ -17,15 +17,15 @@ class Api::S3BrowserController < Api::BaseController
   # Note:
   #   - if no prefix query param is provided, this endpoint will return the top level contents of the bucket
   #   - the prefix query param should end with a '/' to be properly recognized as a folder prefix. The code will
-  #     normalize any provided prefix to ensure it ends with a '/'. The exception to this is a root-level search,
-  #     which must be entirely empty.
+  #     normalize any provided prefix to ensure it ends with a '/'. Conversely, it must not start with a '/'. The
+  #     exception to this is a root-level search, which must be entirely empty.
   def get_contents_at_prefix_level
     bucket = params[:bucket]
     validate_bucket! bucket
     prefix = params[:prefix]
     # normalize input
     prefix += '/' unless prefix.end_with? '/'
-    prefix = '' if prefix == '/' # handle root bucket search case
+    prefix = prefix.delete_prefix('/')
     folders = []
     objects = []
 
