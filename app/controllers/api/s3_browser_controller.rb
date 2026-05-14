@@ -4,6 +4,7 @@
 
 class Api::S3BrowserController < Api::BaseController
   rescue_from Exceptions::InvalidBucketError, with: :handle_invalid_bucket_error
+  rescue_from Aws::S3::Errors::ServiceError, with: :handle_aws_service_error
   before_action :authorize_s3_browser_api_read_access!,
                 only: %i[get_buckets get_contents_at_prefix_level get_object_details]
 
@@ -47,8 +48,6 @@ class Api::S3BrowserController < Api::BaseController
     end
 
     render json: { folders: folders, objects: objects }
-  rescue Aws::S3::Errors::ServiceError => e # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
-    render_aws_api_error(e)
   end
 
   # GET /api/object/:bucketName/?key={objectKey}
@@ -70,8 +69,6 @@ class Api::S3BrowserController < Api::BaseController
     })
 
     render json: object_details_json(bucket, object_key, s3_object)
-  rescue Aws::S3::Errors::ServiceError => e # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
-    render_aws_api_error(e)
   end
 
   private
@@ -103,7 +100,8 @@ class Api::S3BrowserController < Api::BaseController
     }
   end
 
-  def render_aws_api_error(err)
+  # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
+  def handle_aws_service_error(err)
     render json: { response_code: err.context.http_response.status_code, error: err.code },
            status: err.context.http_response.status_code
   end
