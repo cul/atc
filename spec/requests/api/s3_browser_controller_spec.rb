@@ -9,7 +9,7 @@ def read_buckets_from_config_file
 end
 
 # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/ClientStubs.html
-describe Api::S3BrowserController, type: :request, focus: true do
+describe Api::S3BrowserController, type: :request do
   include_examples 'unauthenticated user accessing authenticated API endpoint' do
     let(:http_request) { get '/api/buckets' }
     let(:user) { FactoryBot.create(:user) }
@@ -63,13 +63,15 @@ describe Api::S3BrowserController, type: :request, focus: true do
 
         it 'normalizes prefix input by ensuring it ends with a slash' do
           get "/api/bucket/#{test_bucket}/?prefix=#{test_prefix}"
-          expect(client_double).to have_received(:list_objects_v2).with({ bucket: test_bucket, prefix: "#{test_prefix}/",
+          expect(client_double).to have_received(:list_objects_v2).with({ bucket: test_bucket,
+                                                                          prefix: "#{test_prefix}/",
                                                                           delimiter: '/' })
         end
 
         it 'normalizes prefix input by removing leading slash' do
           get "/api/bucket/#{test_bucket}/?prefix=/#{test_prefix}"
-          expect(client_double).to have_received(:list_objects_v2).with({ bucket: test_bucket, prefix: "#{test_prefix}/",
+          expect(client_double).to have_received(:list_objects_v2).with({ bucket: test_bucket,
+                                                                          prefix: "#{test_prefix}/",
                                                                           delimiter: '/' })
         end
 
