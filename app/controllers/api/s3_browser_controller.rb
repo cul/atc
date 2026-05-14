@@ -21,7 +21,7 @@ class Api::S3BrowserController < Api::BaseController
   def get_contents_at_prefix_level
     bucket = params[:bucket]
     validate_bucket! bucket
-    prefix = params[:prefix]
+    prefix = params[:prefix] || ''
     # normalize input
     prefix += '/' unless prefix.end_with? '/'
     prefix = prefix.delete_prefix('/')
@@ -63,6 +63,8 @@ class Api::S3BrowserController < Api::BaseController
   def get_object_details
     bucket = params[:bucket]
     validate_bucket! bucket
+    raise Exceptions::InvalidKeyName, 'object key is required' if params[:key].blank?
+
     object_key = params[:key]
     # normalize input
     object_key = object_key.delete_prefix('/')

@@ -257,6 +257,20 @@ describe Api::S3BrowserController, type: :request do
         end
       end
 
+      context 'with a missing object key parameter' do
+        before do
+          get "/api/buckets/#{test_bucket}/object"
+        end
+
+        it 'returns bad request status' do
+          expect(response).to have_http_status(:bad_request)
+        end
+
+        it 'returns an error message in the response body' do
+          expect(JSON.parse(response.body)).to include('error')
+        end
+      end
+
       context 'with invalid bucket' do
         before do
           get '/api/object/invalid-bucket/?key=test-object-key'
