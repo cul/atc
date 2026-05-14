@@ -24,7 +24,7 @@ describe Api::S3BrowserController, type: :request do
   let(:test_s3_error) do
     Aws::S3::Errors::ServiceError.new(test_s3_error_context, 'Test error')
   end
-  let(:test_bucket) { read_buckets_from_config_file.first.bucket }
+  let(:test_bucket) { read_buckets_from_config_file.first[:name] }
 
   before do
     sign_in FactoryBot.create(:user)

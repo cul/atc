@@ -86,7 +86,7 @@ class Api::S3BrowserController < Api::BaseController
   end
 
   def validate_bucket!(bucket)
-    return if buckets.map(&:bucket).include? bucket
+    return if buckets.map(&:name).include? bucket
 
     raise Exceptions::InvalidBucketError, "invalid bucket: #{bucket}"
   end
