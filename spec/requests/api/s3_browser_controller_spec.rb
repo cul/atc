@@ -62,27 +62,27 @@ describe Api::S3BrowserController, type: :request do
         end
 
         it 'normalizes prefix input by ensuring it ends with a slash' do
-          get "/api/bucket/#{test_bucket}/?prefix=#{test_prefix}"
+          get "/api/buckets/#{test_bucket}/list?prefix=#{test_prefix}"
           expect(client_double).to have_received(:list_objects_v2).with({ bucket: test_bucket,
                                                                           prefix: "#{test_prefix}/",
                                                                           delimiter: '/' })
         end
 
         it 'normalizes prefix input by removing leading slash' do
-          get "/api/bucket/#{test_bucket}/?prefix=/#{test_prefix}"
+          get "/api/buckets/#{test_bucket}/list?prefix=/#{test_prefix}"
           expect(client_double).to have_received(:list_objects_v2).with({ bucket: test_bucket,
                                                                           prefix: "#{test_prefix}/",
                                                                           delimiter: '/' })
         end
 
         it 'allows prefix input to be empty for root-level search' do
-          get "/api/bucket/#{test_bucket}/?prefix="
+          get "/api/buckets/#{test_bucket}/list?prefix="
           expect(client_double).to have_received(:list_objects_v2).with({ bucket: test_bucket, prefix: '',
                                                                           delimiter: '/' })
         end
 
         it 'allows prefix to be / for root-level search and normalizes it to empty string' do
-          get "/api/bucket/#{test_bucket}/?prefix=/"
+          get "/api/buckets/#{test_bucket}/list?prefix=/"
           expect(client_double).to have_received(:list_objects_v2).with({ bucket: test_bucket, prefix: '',
                                                                           delimiter: '/' })
         end
@@ -139,7 +139,7 @@ describe Api::S3BrowserController, type: :request do
               { prefix: 'test-prefix/subdir2/' }
             ]
           })
-          get "/api/bucket/#{test_bucket}/?prefix=#{test_prefix}"
+          get "/api/buckets/#{test_bucket}/list?prefix=#{test_prefix}"
         end
 
         it 'returns OK status' do
@@ -153,7 +153,7 @@ describe Api::S3BrowserController, type: :request do
         context 'when S3 client raises an error' do
           before do
             allow(s3_client).to receive(:list_objects_v2).and_raise(test_s3_error)
-            get "/api/bucket/#{test_bucket}/?prefix=#{test_prefix}"
+            get "/api/buckets/#{test_bucket}/list?prefix=#{test_prefix}"
           end
 
           it 'returns expected error status' do
@@ -169,7 +169,7 @@ describe Api::S3BrowserController, type: :request do
 
     context 'with invalid bucket' do
       before do
-        get '/api/bucket/invalid-bucket/?prefix=test-prefix/'
+        get '/api/buckets/invalid-bucket/list?prefix=test-prefix/'
       end
 
       it 'returns bad request status' do
@@ -201,7 +201,7 @@ describe Api::S3BrowserController, type: :request do
         end
 
         it 'normalizes object key input by removing leading slash' do
-          get "/api/object/#{test_bucket}/?key=/#{test_key}"
+          get "/api/buckets/#{test_bucket}/object?key=/#{test_key}"
           expect(client_double).to have_received(:head_object).with({ bucket: test_bucket, key: test_key })
         end
       end
@@ -230,7 +230,7 @@ describe Api::S3BrowserController, type: :request do
             storage_class: 'STANDARD',
             content_type: 'text/plain'
           })
-          get "/api/object/#{test_bucket}/?key=#{test_object_key}"
+          get "/api/buckets/#{test_bucket}/object?key=#{test_object_key}"
         end
 
         it 'returns OK status' do
@@ -244,7 +244,7 @@ describe Api::S3BrowserController, type: :request do
         context 'when S3 client raises an error' do
           before do
             allow(s3_client).to receive(:head_object).and_raise(test_s3_error)
-            get "/api/object/#{test_bucket}/?key=#{test_object_key}"
+            get "/api/buckets/#{test_bucket}/object?key=#{test_object_key}"
           end
 
           it 'returns expected error status' do
@@ -273,7 +273,7 @@ describe Api::S3BrowserController, type: :request do
 
       context 'with invalid bucket' do
         before do
-          get '/api/object/invalid-bucket/?key=test-object-key'
+          get '/api/buckets/invalid-bucket/object?key=test-object-key'
         end
 
         it 'returns bad request status' do

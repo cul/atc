@@ -10,7 +10,7 @@ class Api::S3BrowserController < Api::BaseController
     render json: { buckets: buckets }
   end
 
-  # GET /api/bucket/:bucketName/?prefix={objectPrefix}
+  # GET /api/buckets/:bucket/list?prefix={objectPrefix}
   # Uses ListObjectV2 with a '/' delimiter to get contents at the given prefix level within the given bucket
   # Note:
   #   - The API returns the parent folder as part of the objects list, so we filter it out before returning the response
@@ -54,7 +54,7 @@ class Api::S3BrowserController < Api::BaseController
     render json: { folders: folders, objects: objects }
   end
 
-  # GET /api/object/:bucketName/?key={objectKey}
+  # GET /api/buckets/:bucket/object?key={objectKey}
   # Get object details with HeadObject
   # Note:
   #   - The key should not begin with a leading '/', and it will be normalized if included
