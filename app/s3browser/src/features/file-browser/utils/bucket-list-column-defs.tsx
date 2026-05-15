@@ -5,14 +5,14 @@ import { Bucket } from '@/types/api'
 const columnHelper = createColumnHelper<Bucket>()
 
 export const columnDefs = [
-  columnHelper.accessor('bucket', {
+  columnHelper.accessor('name', {
     header: 'Name',
     cell: ({ row }) => (
       <Link
-        to={{ pathname: `/buckets/${encodeURIComponent(row.original.bucket)}` }}
+        to={{ pathname: `/buckets/${encodeURIComponent(row.original.name)}` }}
         className="link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
       >
-        <span>{row.original.bucket}</span>
+        <span>{row.original.name}</span>
       </Link>
     )
   }),

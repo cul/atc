@@ -1,6 +1,6 @@
 export interface Bucket {
-  bucket: string;
-  description?: string;
+  name: string;
+  description: string;
 }
 
 export interface S3Object {
@@ -8,14 +8,12 @@ export interface S3Object {
   size: number;
   lastModified: string;
   storageClass: string;
-  etag?: string;
 }
 
 export interface S3Prefix {
   prefix: string;
 }
 
-// Temp
 export interface BucketContentsResponse {
   objects: S3Object[];
   folders: string[];

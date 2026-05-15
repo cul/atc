@@ -11,7 +11,7 @@ const buildSegments = (
   prefix?: string,
 ) => {
   const segments = [
-    { label: 'All Buckets', to: '/' },
+    { label: 'All Buckets', to: '/buckets' },
   ];
 
   if (!bucketName) return segments;

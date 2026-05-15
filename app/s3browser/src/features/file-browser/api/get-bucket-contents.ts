@@ -13,37 +13,9 @@ const getBucketContents = (
   }
 
   const query = params.toString();
-  const endpoint = `/buckets/${bucket}${query ? `?${query}` : ''}`;
-  
-  // Temporarily return a mock response until we implement the backend API
-  return Promise.resolve({
-    folders: [
-      "example/prefix/path/jkl/",
-      "example/prefix/path/efg/",
-    ],
-    objects: [
-      {
-        key: `${prefix}def.CSV`,
-        size: 1438,
-        lastModified: '2026-04-01T16:02:18.962Z',
-        storageClass: 'STANDARD',
-      },
-      {
-        key: `${prefix}abc.png`,
-        size: 1234,
-        lastModified: '2026-04-02T16:02:18.962Z',
-        storageClass: 'STANDARD',
-      },
-      {
-        key: `${prefix}xyz.txt`,
-        size: 5678,
-        lastModified: new Date().toISOString(),
-        storageClass: 'INTELLIGENT_TIERING'
-      },
-    ],
-  });
+  const endpoint = `/buckets/${bucket}/list${query ? `?${query}` : ''}`;
 
-  // return api.get<BucketContentsResponse>(endpoint);
+  return api.get<BucketContentsResponse>(endpoint);
 };
 
 type UseBucketContentsOptions = {

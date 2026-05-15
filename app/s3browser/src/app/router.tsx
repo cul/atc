@@ -27,18 +27,28 @@ const convert = (queryClient: QueryClient) => (m: RouteModule) => {
 export const createAppRouter = (queryClient: QueryClient) =>
   createBrowserRouter([
     {
-      Component: MainLayout,
       hydrateFallbackElement: <Spinner animation="border" role="status" />,
       children: [
         {
           index: true,
-          lazy: () => import('./routes/buckets').then(convert(queryClient)),
+          Component: () => <div>This is the root of the React app.</div>,
         },
         {
-          path: 'buckets/:bucketName',
-          lazy: () => import('./routes/bucket-contents').then(convert(queryClient)),
+          Component: MainLayout,
+          path: 'buckets',
+          children: [
+            {
+              index: true,
+              lazy: () => import('./routes/buckets').then(convert(queryClient)),
+            },
+            {
+              path: ':bucketName',
+              lazy: () => import('./routes/bucket-contents').then(convert(queryClient)),
+            },
+          ],
         },
         {
+          // * This route will be changed later to be nested under the bucket route
           path: 'object/:bucketName',
           lazy: () => import('./routes/object-details').then(convert(queryClient)),
         }
