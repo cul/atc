@@ -4,6 +4,7 @@ import { columnDefs } from '../utils/bucket-contents-column-defs';
 import { toBucketItems } from '../utils/transform-to-bucket-items';
 import { useBucketContentsQuery } from '../api/get-bucket-contents';
 import TableBuilder from '@/components/ui/table-builder/table-builder';
+import { usePagination } from '../hooks/use-pagination'
 
 const normalizePrefix = (raw: string): string => {
   if (!raw) return '';
@@ -17,6 +18,7 @@ const BucketContentsTable = () => {
   const currentDirectory = prefix ? prefix.split('/').filter(Boolean).pop() : bucketName;
 
   const { data } = useBucketContentsQuery({ bucket: bucketName, prefix });
+  const { pagination, onPaginationChange} = usePagination();
 
   // Transform the split API response into a flat array for TanStack Table.
   // Reruns whenever the raw API response changes, but not on every render.
@@ -37,6 +39,8 @@ const BucketContentsTable = () => {
         data={items}
         columns={columns}
         initialSorting={[{ id: 'name', desc: false }]}
+        pagination={pagination}
+        onPaginationChange={onPaginationChange}
       />
     </div>
   );
