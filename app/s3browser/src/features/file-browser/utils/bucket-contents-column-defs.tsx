@@ -1,14 +1,9 @@
 import { Link } from 'react-router'
 import { createColumnHelper } from '@tanstack/react-table'
 import { BucketItem } from '@/types/api'
-import { capitalizeStr, formatSize } from './format-utils';
+import { capitalizeStr, extractFileExtension, formatSize, formatLastModified } from './format-utils';
 
 const columnHelper = createColumnHelper<BucketItem>()
-
-const extractFileExtension = (fileName: string) => {
-  const parts = fileName.split('.');
-  return parts.length > 1 ? parts.pop() : 'unknown';
-}
 
 const sortByTypeAndExtension = (a: BucketItem, b: BucketItem) => {
   if (a.type !== b.type) {
@@ -27,14 +22,6 @@ const sortByTypeAndExtension = (a: BucketItem, b: BucketItem) => {
 
   return a.name.localeCompare(b.name);
 }
-
-const formatLastModified = (dateString: string): string => {
-  const date = new Date(dateString);
-  const pad = (n: number) => n.toString().padStart(2, '0');
-
-  return `${date.toLocaleString('en-US', { month: 'long' })} ${date.getDate()}, ${date.getFullYear()}, ` +
-    `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-};
 
 export const columnDefs = (bucket: string) => [
   columnHelper.accessor('name', {
