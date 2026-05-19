@@ -100,7 +100,7 @@ class Api::S3BrowserController < Api::BaseController
       lastModified: s3_object.last_modified,
       size: s3_object.content_length,
       contentType: s3_object.content_type,
-      storageClass: s3_object.storage_class,
+      storageClass: s3_object.storage_class || 'STANDARD', # s3 api returns nil for standard storage class
       archiveStatus: s3_object.archive_status,
       restoreStatus: s3_object.restore
     }
