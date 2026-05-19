@@ -45,13 +45,13 @@ export const createAppRouter = (queryClient: QueryClient) =>
               path: ':bucketName',
               lazy: () => import('./routes/bucket-contents').then(convert(queryClient)),
             },
+            {
+              // * This route will be changed later to be nested under the bucket route
+              path: ':bucketName/object-details',
+              lazy: () => import('./routes/object-details').then(convert(queryClient)),
+            }
           ],
         },
-        {
-          // * This route will be changed later to be nested under the bucket route
-          path: 'object/:bucketName',
-          lazy: () => import('./routes/object-details').then(convert(queryClient)),
-        }
       ],
     },
     {

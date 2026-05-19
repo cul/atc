@@ -1,6 +1,7 @@
+import { LoaderFunctionArgs, useParams } from 'react-router';
 import { QueryClient } from '@tanstack/react-query';
-import { getObjectDetailsQueryOptions } from '@/features/file-browser/api/get-object-details';
-import { LoaderFunctionArgs } from 'react-router';
+import { getObjectDetailsQueryOptions, useObjectDetailsSuspenseQuery } from '@/features/file-browser/api/get-object-details';
+import ObjectDetailDisplay from '@/features/file-browser/components/object-detail-display';
 
 export const clientLoader = (queryClient: QueryClient) => async ({ params, request }: LoaderFunctionArgs) => {
   const bucketName = params.bucketName as string;
@@ -12,7 +13,13 @@ export const clientLoader = (queryClient: QueryClient) => async ({ params, reque
 };
 
 const ObjectDetailsRoute = () => {
-  return <div>Object Details</div>;
+  const params = useParams();
+  const bucketName = params.bucketName as string;
+  const url = new URL(window.location.href);
+  const key = url.searchParams.get('prefix') ?? '';
+  const query = useObjectDetailsSuspenseQuery({ bucket: bucketName, key });
+
+  return <ObjectDetailDisplay objectDetails={query.data} />;
 };
 
 export default ObjectDetailsRoute;

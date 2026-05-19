@@ -1,12 +1,12 @@
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
-import { BucketContentsResponse } from '@/types/api';
+import { ObjectDetails } from '@/types/api';
 import { api } from '@/lib/api-client';
 import { QueryConfig } from '@/lib/react-query';
 
 const getObjectDetails = (
   bucket: string,
   key: string,
-): Promise<BucketContentsResponse> => {
+): Promise<ObjectDetails> => {
   const params = new URLSearchParams();
   if (key) {
     params.set('key', key);
@@ -15,7 +15,7 @@ const getObjectDetails = (
   const query = params.toString();
   const endpoint = `/buckets/${bucket}/object${query ? `?${query}` : ''}`;
 
-  return api.get<BucketContentsResponse>(endpoint);
+  return api.get<ObjectDetails>(endpoint);
 };
 
 type UseObjectDetailsOptions = {
