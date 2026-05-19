@@ -46,7 +46,7 @@ function TableHeader<T>({ headerGroup }: TableHeaderProps<T>) {
     <thead>
       <tr key={headerGroup.id}>
         {headerGroup.headers.map((header) => (
-          <th key={header.id}>
+          <th key={header.id} className={`${header.column.getIsSorted() && 'bg-primary bg-opacity-25'}`}>
             {createColumnHeader(header)}
           </th>
         ))}

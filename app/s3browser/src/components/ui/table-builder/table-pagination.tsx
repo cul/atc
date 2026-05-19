@@ -32,6 +32,9 @@ function TablePagination<T>({ table }: TablePaginationProps<T>) {
         onClick={() => table.lastPage()}
         disabled={!table.getCanNextPage()}
       />
+      <div className="d-flex align-items-center p-2">
+        Showing {table.getPaginationRowModel().rows.length} {pageCount > 1 && `of ${table.getFilteredRowModel().rows.length}`} items
+      </div>
     </Pagination>
   )
 }
