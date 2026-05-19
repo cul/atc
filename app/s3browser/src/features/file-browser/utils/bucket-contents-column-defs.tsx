@@ -45,7 +45,7 @@ const formatSize = (sizeInBytes: number) => {
     unitIndex++;
   }
 
-  return `${size.toFixed(2)} ${units[unitIndex]}`;
+  return unitIndex === 0 ? `${size} ${units[unitIndex]}` : `${size.toFixed(2)} ${units[unitIndex]}`;
 }
 
 const formatLastModified = (dateString: string): string => {
