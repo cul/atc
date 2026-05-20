@@ -12,8 +12,8 @@ import {
 } from '@tanstack/react-table'
 import { Table as BTable } from 'react-bootstrap'
 import TableHeader from './table-header'
-import TableRow from './table-row'
 import TablePagination from './table-pagination'
+import TableBody from './table-body'
 
 interface TableBuilderProps<T> {
   data: T[]
@@ -80,31 +80,11 @@ function TableBuilder<T extends object>({
             key={headerGroup.id}
             headerGroup={headerGroup} />
         ))}
-        <tbody>
-          {/* TODO: Extract into its own component */}
-          {/* Renders table skeleton rows when loading */}
-          {isLoading ? (
-            Array.from({ length: 20 }).map((_el, i) => (
-              <tr key={`skeleton-${i}`}>
-                {columns.map((_col, colIdx) => (
-                  <td key={colIdx} className="placeholder-glow" aria-hidden="true">
-                    <span className="placeholder col-8" />
-                  </td>
-                ))}
-              </tr>
-            ))
-          ) : table.getRowModel().rows.length === 0 ? (
-            <tr>
-              <td colSpan={columns.length} className="text-center py-3">
-                No entries found.
-              </td>
-            </tr>
-          ) : (
-            table.getRowModel().rows.map((row) => (
-              <TableRow row={row} key={row.id} />
-            ))
-          )}
-        </tbody>
+        <TableBody
+          table={table}
+          columns={columns}
+          isLoading={isLoading}
+        />
       </BTable>
     </>
   )
