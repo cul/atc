@@ -15,6 +15,8 @@ export const clientLoader = (queryClient: QueryClient) => async ({ params, reque
   const prefix = normalizePrefix(url.searchParams.get('prefix') ?? '');
   const query = getBucketContentsQueryOptions(bucketName, prefix);
 
+  // Our API returns results in ~1-2 seconds for large buckets, so we don't want to 
+  // await this and block the UI. Instead, we let the component handle the loading state.
   queryClient.prefetchQuery(query);
 };
 

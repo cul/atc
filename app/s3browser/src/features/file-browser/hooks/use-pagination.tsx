@@ -20,6 +20,11 @@ export const usePagination = () => {
     const newState =
       typeof updater === "function" ? updater(pagination) : updater;
 
+    // Don't set the URL if the page hasn't actually changed.
+    // This prevents TanStack Table's autoResetPageIndex from
+    // pushing empty history entries on every data load.
+    if (newState.pageIndex === pageIndex) return;
+
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
       // Store 1-based page in URL; don't include the param on page 1 for a cleaner URL
@@ -29,7 +34,7 @@ export const usePagination = () => {
         next.set("page", (newState.pageIndex + 1).toString());
       }
       return next;
-    });
+    }, { replace: true });
   };
 
   return { pagination, onPaginationChange };

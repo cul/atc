@@ -22,6 +22,7 @@ interface TableBuilderProps<T> {
   pageSize?: number,
   pagination?: PaginationState;
   onPaginationChange?: (updater: Updater<PaginationState>) => void;
+  isLoading?: boolean;
 }
 
 const DEFAULT_PAGE_SIZE = 50;
@@ -35,7 +36,8 @@ function TableBuilder<T extends object>({
   initialSorting = [],
   pageSize = DEFAULT_PAGE_SIZE,
   pagination,
-  onPaginationChange
+  onPaginationChange,
+  isLoading
 }: TableBuilderProps<T>) {
   // You can disable sorting specific columns or specify custom sorting functions in the column definitions
   // Docs: https://tanstack.com/table/latest/docs/api/features/sorting#column-def-options
@@ -79,16 +81,29 @@ function TableBuilder<T extends object>({
             headerGroup={headerGroup} />
         ))}
         <tbody>
-          {table.getRowModel().rows.length === 0 && (
+          {/* TODO: Extract into its own component */}
+          {/* Renders table skeleton rows when loading */}
+          {isLoading ? (
+            Array.from({ length: 20 }).map((_el, i) => (
+              <tr key={`skeleton-${i}`}>
+                {columns.map((_col, colIdx) => (
+                  <td key={colIdx} className="placeholder-glow" aria-hidden="true">
+                    <span className="placeholder col-8" />
+                  </td>
+                ))}
+              </tr>
+            ))
+          ) : table.getRowModel().rows.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className="text-center py-3">
                 No entries found.
               </td>
             </tr>
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <TableRow row={row} key={row.id} />
+            ))
           )}
-          {table.getRowModel().rows.map((row) => (
-            <TableRow row={row} key={row.id} />
-          ))}
         </tbody>
       </BTable>
     </>
