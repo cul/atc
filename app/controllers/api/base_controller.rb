@@ -36,13 +36,17 @@ class Api::BaseController < ApplicationController
 
   def handle_json_parse_error(error)
     Rails.logger.error "JSON parse error: #{error.message}"
-    render json: { error: 'Invalid JSON in request body' }, status: :bad_request
+    render json: { error: 'Invalid JSON in request body' },
+           status: :bad_request
   end
 
   # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
   def handle_aws_service_error(err)
-    render json: { response_code: err.context.http_response.status_code, error: err.code },
-           status: err.context.http_response.status_code
+    Rails.logger.error "AWS Error - AWS responded with HTTP code: #{err.context.http_response.status_code}."\
+      " AWS Error code: #{err.code}." \
+      " AWS Error message: '#{err.message}'"
+    render json: { error: 'There was an error communicating with Amazon Web Services. Check the ATC logs for details' },
+           status: :service_unavailable
   end
 
   def handle_invalid_bucket_error
