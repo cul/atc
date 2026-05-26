@@ -1,11 +1,37 @@
-import { FC, PropsWithChildren, Suspense, useState } from 'react';
+import { FC, PropsWithChildren, ReactNode, Suspense, useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ErrorBoundary } from 'react-error-boundary';
 import Spinner from 'react-bootstrap/Spinner';
 
 import { MainErrorFallback } from '@/components/errors/main';
+import { Notifications } from '@/components/ui/notifications/notifications';
 import { queryConfig } from '@/lib/react-query';
+import { useCurrentUser } from '@/lib/auth';
+
+function AuthLoader({ children }: { children: ReactNode }) {
+  const { data: user, isLoading } = useCurrentUser();
+
+  console.log('AuthLoader - user:', user, 'isLoading:', isLoading);
+
+  // Side effects like modifying window.location should be done in useEffect
+  useEffect(() => {
+    // Added as a safeguard, but Rails should only render React app if user is authenticated
+    if (!isLoading && !user) {
+      window.location.href = '/';
+    }
+  }, [user, isLoading]);
+
+  if (isLoading) {
+    return <div>Loading user...</div>;
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  return <>{children}</>;
+}
 
 export const AppProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const [queryClient] = useState(
@@ -26,7 +52,8 @@ export const AppProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
       <ErrorBoundary FallbackComponent={MainErrorFallback}>
         <QueryClientProvider client={queryClient}>
           {import.meta.env.DEV && <ReactQueryDevtools />}
-          {children}
+          <Notifications />
+          <AuthLoader>{children}</AuthLoader>
         </QueryClientProvider>
       </ErrorBoundary>
     </Suspense>

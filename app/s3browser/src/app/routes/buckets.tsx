@@ -9,7 +9,12 @@ export const clientLoader = (queryClient: QueryClient) => async () => {
 };
 
 const BucketsRoute = () => {
-  return <BucketList />;
+  return (
+    <>
+      <title>S3 Buckets</title>
+      <BucketList />
+    </>
+  );
 };
 
 export default BucketsRoute;

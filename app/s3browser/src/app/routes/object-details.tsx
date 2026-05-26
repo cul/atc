@@ -19,7 +19,12 @@ const ObjectDetailsRoute = () => {
   const key = searchParams.get('prefix') ?? '';
   const query = useObjectDetailsSuspenseQuery({ bucket: bucketName, key });
 
-  return <ObjectDetailDisplay objectDetails={query.data} />;
+  return (
+    <>
+      <title>{`Object Details - ${key}`}</title>
+      <ObjectDetailDisplay objectDetails={query.data} />
+    </>
+  );
 };
 
 export default ObjectDetailsRoute;
