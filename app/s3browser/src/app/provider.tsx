@@ -12,8 +12,6 @@ import { useCurrentUser } from '@/lib/auth';
 function AuthLoader({ children }: { children: ReactNode }) {
   const { data: user, isLoading } = useCurrentUser();
 
-  console.log('AuthLoader - user:', user, 'isLoading:', isLoading);
-
   // Side effects like modifying window.location should be done in useEffect
   useEffect(() => {
     // Added as a safeguard, but Rails should only render React app if user is authenticated
