@@ -46,3 +46,14 @@ export type BucketItem =
     lastModified: string;
     storageClass: string;
   };
+
+export type User = {
+  uid: string;
+  email: string;
+};
+
+// Temp: this could change later
+export type ErrorData = {
+  error: string; // error message
+  code?: string; // AWS error code, if applicable (e.g. "NoSuchBucket")
+};

@@ -1,5 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
-import { LoaderFunctionArgs } from 'react-router';
+import { LoaderFunctionArgs, useParams } from 'react-router';
 import { getBucketContentsQueryOptions } from '@/features/file-browser/api/get-bucket-contents';
 import BucketContentsTable from '@/features/file-browser/components/bucket-contents-table';
 
@@ -21,7 +21,15 @@ export const clientLoader = (queryClient: QueryClient) => async ({ params, reque
 };
 
 const BucketContentsRoute = () => {
-  return <BucketContentsTable />;
+  const params = useParams();
+  const bucketName = params.bucketName as string;
+
+  return (
+    <>
+      <title>{`Bucket ${bucketName} contents`}</title>
+      <BucketContentsTable />
+    </>
+  );
 };
 
 export default BucketContentsRoute;

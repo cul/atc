@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
-import { createBrowserRouter, LoaderFunction, ActionFunction } from 'react-router';
+import { createBrowserRouter, LoaderFunction, ActionFunction, Route } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { Spinner } from 'react-bootstrap';
 import MainLayout from '@/components/layouts/main-layout';
+import { RouteErrorFallback } from '@/components/errors/route-error';
 
 interface RouteModule {
   default: React.ComponentType;
@@ -28,6 +29,7 @@ export const createAppRouter = (queryClient: QueryClient) =>
   createBrowserRouter([
     {
       hydrateFallbackElement: <Spinner animation="border" role="status" />,
+      errorElement: <RouteErrorFallback />,
       children: [
         {
           index: true,
@@ -48,7 +50,9 @@ export const createAppRouter = (queryClient: QueryClient) =>
             {
               path: ':bucketName/object-details',
               lazy: () => import('./routes/object-details').then(convert(queryClient)),
-            }
+              // This route uses useSuspenseQuery, so we want to ensure any errors are caught by the route error boundary
+              errorElement: <RouteErrorFallback errorMessage="Error loading object details. Please try again." />,
+            },
           ],
         },
       ],
