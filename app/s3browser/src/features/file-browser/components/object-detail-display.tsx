@@ -54,7 +54,7 @@ const ObjectDetailDisplay = ({ objectDetails }: ObjectDetailDisplayProps) => {
       </section>
 
       <section className="border rounded p-3">
-        <h5 className="mb-3">Storage Class</h5>
+        <h5 className="mb-3">Storage Details</h5>
 
         <dl className="mb-0">
           <ObjectDetailField
@@ -75,7 +75,7 @@ const ObjectDetailDisplay = ({ objectDetails }: ObjectDetailDisplayProps) => {
               />
               <ObjectDetailField
                 label="Restoration status"
-                value={restoreStatus ? capitalizeStr(restoreStatus) : 'N/A'}
+                value={restoreStatus ? capitalizeStr(restoreStatus) : 'No restoration currently in progress'}
               />
             </>
           )}
