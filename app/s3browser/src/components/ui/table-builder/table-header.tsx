@@ -7,7 +7,6 @@ interface TableHeaderProps<T> {
 }
 
 function TableHeader<T>({ headerGroup }: TableHeaderProps<T>) {
-  // TODO: Make the currently active sorting state more visually distinct (more saturated color) to improve UX
   const renderSortingIcon = (sortDirection: 'asc' | 'desc' | null) => {
     const sharedClassNames = 'ms-2 flex-shrink-0 mt-1'
 

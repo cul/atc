@@ -46,7 +46,7 @@ export default tseslint.config(
   // Disable incompatible-library warnings for TanStack Table components
   // https://github.com/facebook/react/issues/33057
   {
-    files: ['**/table-builder.tsx', '**/table-builder-virtualizer.tsx'],
+    files: ['**/table-builder.tsx'],
     rules: {
       'react-hooks/incompatible-library': 'off',
     },

@@ -47,7 +47,7 @@ export const Notification = ({
       key={id}
       onClose={() => onDismiss(id)}
       className={`bg-${variant}-subtle border-${variant}`}
-      autohide={type !== "error"} // error toasts require manual dismissal
+      autohide
       delay={5000}
     >
       <Toast.Header

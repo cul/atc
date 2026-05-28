@@ -52,8 +52,6 @@ export type User = {
   email: string;
 };
 
-// Temp: this could change later
 export type ErrorData = {
-  error: string; // error message
-  code?: string; // AWS error code, if applicable (e.g. "NoSuchBucket")
+  error: string;
 };

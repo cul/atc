@@ -1,13 +1,10 @@
 import { useNotifications } from '@/stores/notifications-store';
 import { ErrorData } from '@/types/api';
+import { ApiError } from './api-error';
+
+export { ApiError };
 
 const BASE_URL = '/api';
-
-// ? Maybe we should rely on the backend to provide more user-friendly error messages
-const AWS_ERROR_MESSAGES: Record<string, string> = {
-  AccessDenied:
-    'You do not have permission to access this resource. The AWS credentials may have been rotated.',
-};
 
 const isErrorData = (data: unknown): data is ErrorData =>
   typeof data === 'object' &&
@@ -15,21 +12,55 @@ const isErrorData = (data: unknown): data is ErrorData =>
   'error' in data &&
   typeof (data as Record<string, unknown>).error === 'string';
 
-const notifyError = (status: number, raw: unknown) => {
-  const data = isErrorData(raw) ? raw : null;
-  const code = data?.code;
-  const error = data?.error ?? 'An unexpected error occurred.';
+// Attempt to parse the response body as JSON
+const parseErrorBody = async (
+  response: Response,
+): Promise<ErrorData | null> => {
+  try {
+    const json: unknown = await response.json();
+    return isErrorData(json) ? json : null;
+  } catch {
+    return null;
+  }
+};
+
+// Decide whether a toast should be shown for this particular failure.
+// This is more flexible than a simple `silent` boolean because it allows for suppressing toasts
+// for expected failure cases.
+const shouldSilence = (
+  silent: boolean | number[] | undefined,
+  status: number,
+): boolean => {
+  if (silent === true) return true;
+  if (Array.isArray(silent)) return silent.includes(status);
+
+  return false;
+};
+
+const notifyError = (status: number, data: ErrorData | null) => {
+  const message = data?.error ?? 'An unexpected error occurred.';
 
   useNotifications.getState().addNotification({
     type: 'error',
-    title: code ? `AWS ${status} Error: ${code})` : `${status} Error`,
-    message: code ? (AWS_ERROR_MESSAGES[code] ?? error) : error,
+    title: `${status} Error`,
+    message,
   });
 };
 
-type RequestOptions = RequestInit & { silent?: boolean };
+type RequestOptions = RequestInit & {
+  /**
+    Controls whether error toasts are shown.
+     - true - never show a toast
+     - number[] - suppress toasts for these HTTP status codes only, eg. `[404, 500]`
+     - undefined - always show a toast on failure (default)
+    */
+  silent?: boolean | number[];
+};
 
-async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+async function request<T>(
+  endpoint: string,
+  options: RequestOptions = {},
+): Promise<T> {
   const { silent, ...fetchOptions } = options;
 
   const response = await fetch(`${BASE_URL}${endpoint}`, {
@@ -43,11 +74,14 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => null);
-    if (!silent) notifyError(response.status, errorData);
+    const errorData = await parseErrorBody(response);
+
+    if (!shouldSilence(silent, response.status)) {
+      notifyError(response.status, errorData);
+    }
 
     // Throw the parsed error data so React Query can access it
-    throw new Error(response.statusText || `HTTP ${response.status}`);
+    throw new ApiError(response.status, response.statusText, errorData);
   }
 
   return response.json();
