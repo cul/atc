@@ -63,7 +63,7 @@ class Api::S3BrowserController < Api::BaseController
   def get_object_details
     bucket = params[:bucket]
     validate_bucket! bucket
-    raise Exceptions::InvalidKeyName, 'object key is required' if params[:key].blank?
+    raise Atc::Exceptions::InvalidKeyName, 'object key is required' if params[:key].blank?
 
     object_key = params[:key]
     # normalize input
@@ -90,7 +90,7 @@ class Api::S3BrowserController < Api::BaseController
   def validate_bucket!(bucket)
     return if buckets.map(&:name).include? bucket
 
-    raise Exceptions::InvalidBucketError, "invalid bucket: #{bucket}"
+    raise Atc::Exceptions::InvalidBucketError, "invalid bucket: #{bucket}"
   end
 
   def object_details_json(bucket, key, s3_object)

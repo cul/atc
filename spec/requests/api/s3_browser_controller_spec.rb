@@ -153,11 +153,14 @@ describe Api::S3BrowserController, type: :request do
         context 'when S3 client raises an error' do
           before do
             allow(s3_client).to receive(:list_objects_v2).and_raise(test_s3_error)
+            # allow(test_s3_error).to receive(:code).and_return('TestError')
+            # allow(test_s3_error).to receive(:message).and_return('Test error message')
+
             get "/api/buckets/#{test_bucket}/list?prefix=#{test_prefix}"
           end
 
           it 'returns expected error status' do
-            expect(response).to have_http_status(:internal_server_error)
+            expect(response).to have_http_status(:service_unavailable)
           end
 
           it 'returns the error message in the response body' do
@@ -248,7 +251,7 @@ describe Api::S3BrowserController, type: :request do
           end
 
           it 'returns expected error status' do
-            expect(response).to have_http_status(:internal_server_error)
+            expect(response).to have_http_status(:service_unavailable)
           end
 
           it 'returns the error message in the response body' do

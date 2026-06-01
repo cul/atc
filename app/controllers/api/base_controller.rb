@@ -6,8 +6,8 @@ class Api::BaseController < ApplicationController
 
   # Handle JSON parsing errors
   rescue_from JSON::ParserError, with: :handle_json_parse_error
-  rescue_from Exceptions::InvalidBucketError, with: :handle_invalid_bucket_error
-  rescue_from Exceptions::InvalidKeyName, with: :handle_invalid_key_name_error
+  rescue_from Atc::Exceptions::InvalidBucketError, with: :handle_invalid_bucket_error
+  rescue_from Atc::Exceptions::InvalidKeyName, with: :handle_invalid_key_name_error
   rescue_from Aws::S3::Errors::ServiceError, with: :handle_aws_service_error
 
   private
@@ -42,7 +42,7 @@ class Api::BaseController < ApplicationController
 
   # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
   def handle_aws_service_error(error)
-    Rails.logger.error "AWS Error - AWS responded with HTTP code: #{err.context.http_response.status_code}."\
+    Rails.logger.error "AWS Error - AWS responded with HTTP code: #{error.context.http_response.status_code}."\
       " AWS Error code: #{error.code}." \
       " AWS Error message: '#{error.message}'"
     render json: { error: 'There was an error communicating with Amazon Web Services. Check the ATC logs for details' },
