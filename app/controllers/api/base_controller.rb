@@ -41,10 +41,10 @@ class Api::BaseController < ApplicationController
   end
 
   # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
-  def handle_aws_service_error(err)
+  def handle_aws_service_error(error)
     Rails.logger.error "AWS Error - AWS responded with HTTP code: #{err.context.http_response.status_code}."\
-      " AWS Error code: #{err.code}." \
-      " AWS Error message: '#{err.message}'"
+      " AWS Error code: #{error.code}." \
+      " AWS Error message: '#{error.message}'"
     render json: { error: 'There was an error communicating with Amazon Web Services. Check the ATC logs for details' },
            status: :service_unavailable
   end
