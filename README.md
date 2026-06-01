@@ -39,17 +39,20 @@ yarn
 > [!Note]
 > See [yarn documentation](https://yarnpkg.com/getting-started/editor-sdks#vscode) for more details or instructions if using a different IDE
 
-7. Seed the database with necessary values for operation:
+7. Set up your terminal environment to use your AWS credentials for connecting to s3 by following [these instructions](https://columbiauniversitylibraries.atlassian.net/wiki/spaces/LDPD/pages/1331101700/Using+AWS+Session+Credentials+in+ATC).
+ - You may need to comment out the code in `app/initializers/aws.rb` that read credentials from the config file. 
+
+8. Seed the database with necessary values for operation:
 ```
 rails db:seed
 ```
 
-8. Start the vite dev server:
+9. Start the vite dev server:
 ```
 yarn start:dev # or bin/vite dev
 ```
 
-9. Start the application using `rails server`:
+10. Start the application using `rails server`:
 ```
 bin/rails server # or rails s -p 3000
 ```
