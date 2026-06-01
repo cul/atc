@@ -5,11 +5,7 @@ import { toBucketItems } from '../utils/transform-to-bucket-items';
 import { useBucketContentsQuery } from '../api/get-bucket-contents';
 import TableBuilder from '@/components/ui/table-builder/table-builder';
 import { usePagination } from '../hooks/use-pagination'
-
-const normalizePrefix = (raw: string): string => {
-  if (!raw) return '';
-  return raw.endsWith('/') ? raw : `${raw}/`;
-};
+import { normalizePrefix } from '../utils/format-utils';
 
 const BucketContentsTable = () => {
   const { bucketName } = useParams();

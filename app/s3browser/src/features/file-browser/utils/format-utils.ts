@@ -1,3 +1,9 @@
+// Prefix has to end with '/' for S3 ListObjectsV2 to treat it as a folder
+const normalizePrefix = (raw: string): string => {
+  if (!raw) return '';
+  return raw.endsWith('/') ? raw : `${raw}/`;
+};
+
 const formatSize = (sizeInBytes: number) => {
   const units = ['B', 'kB', 'MB', 'GB', 'TB'];
   let size = sizeInBytes;
@@ -37,4 +43,4 @@ const extractFileExtension = (fileName: string) => {
   return parts.length > 1 ? parts.pop() : 'unknown';
 }
 
-export { formatSize, capitalizeStr, extractName, formatLastModified, extractFileExtension };
+export { formatSize, capitalizeStr, extractName, formatLastModified, extractFileExtension, normalizePrefix };
