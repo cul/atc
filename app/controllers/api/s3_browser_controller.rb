@@ -46,7 +46,7 @@ class Api::S3BrowserController < Api::BaseController
       end
     end
 
-    # Filter out the matching folder itself
+    # Filter out the matching folder itself, if a 0-byte folder object exists for it
     objects = objects.reject do |obj|
       obj[:key] == prefix && obj[:size].zero?
     end
