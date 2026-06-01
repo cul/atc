@@ -19,6 +19,16 @@ export interface BucketContentsResponse {
   folders: string[];
 }
 
+export type ObjectDetails = {
+  key: string;
+  bucket: string;
+  size: number;
+  contentType: string;
+  lastModified: string;
+  storageClass: string;
+  archiveStatus: string | null;
+  restoreStatus: string | null;
+};
 
 // A row type for the bucket contents table.
 // Each item is either a folder or an object, distinguished by the `type` field.
@@ -36,3 +46,12 @@ export type BucketItem =
     lastModified: string;
     storageClass: string;
   };
+
+export type User = {
+  uid: string;
+  email: string;
+};
+
+export type ErrorData = {
+  error: string;
+};

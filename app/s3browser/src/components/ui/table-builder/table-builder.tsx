@@ -8,17 +8,21 @@ import {
   SortingState,
   getPaginationRowModel,
   PaginationState,
+  Updater,
 } from '@tanstack/react-table'
 import { Table as BTable } from 'react-bootstrap'
 import TableHeader from './table-header'
-import TableRow from './table-row'
 import TablePagination from './table-pagination'
+import TableBody from './table-body'
 
 interface TableBuilderProps<T> {
   data: T[]
   columns: ColumnDef<T>[]
   initialSorting?: SortingState,
-  pageSize?: number
+  pageSize?: number,
+  pagination?: PaginationState;
+  onPaginationChange?: (updater: Updater<PaginationState>) => void;
+  isLoading?: boolean;
 }
 
 const DEFAULT_PAGE_SIZE = 50;
@@ -26,14 +30,29 @@ const DEFAULT_PAGE_SIZE = 50;
 // This is a generic table component that can be reused across different data types
 // When using this component, ensure you specify how to render each column in the column definitions
 // Docs: https://tanstack.com/table/latest/docs/guide/column-defs
-function TableBuilder<T extends object>({ data, columns, initialSorting = [], pageSize = DEFAULT_PAGE_SIZE }: TableBuilderProps<T>) {
+function TableBuilder<T extends object>({
+  data,
+  columns,
+  initialSorting = [],
+  pageSize = DEFAULT_PAGE_SIZE,
+  pagination,
+  onPaginationChange,
+  isLoading
+}: TableBuilderProps<T>) {
   // You can disable sorting specific columns or specify custom sorting functions in the column definitions
   // Docs: https://tanstack.com/table/latest/docs/api/features/sorting#column-def-options
   const [sorting, setSorting] = useState<SortingState>(initialSorting)
-  const [pagination, setPagination] = useState<PaginationState>({
+  const [internalPagination, setInternalPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize,
   })
+
+  // Determine if pagination is controlled externally (via props) or internally (via component state)
+  const isPaginationControlled = pagination !== undefined && onPaginationChange !== undefined;
+  const effectivePagination = isPaginationControlled ? pagination : internalPagination;
+  const effectiveOnPaginationChange = isPaginationControlled
+    ? onPaginationChange
+    : setInternalPagination
 
   const table = useReactTable<T>({
     data,
@@ -41,11 +60,11 @@ function TableBuilder<T extends object>({ data, columns, initialSorting = [], pa
     getCoreRowModel: getCoreRowModel(),
     state: {
       sorting,
-      pagination
+      pagination: effectivePagination
     },
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
-    onPaginationChange: setPagination,
+    onPaginationChange: effectiveOnPaginationChange,
     getPaginationRowModel: getPaginationRowModel(),
   })
 
@@ -61,18 +80,11 @@ function TableBuilder<T extends object>({ data, columns, initialSorting = [], pa
             key={headerGroup.id}
             headerGroup={headerGroup} />
         ))}
-        <tbody>
-          {table.getRowModel().rows.length === 0 && (
-            <tr>
-              <td colSpan={columns.length} className="text-center py-3">
-                No entries found.
-              </td>
-            </tr>
-          )}
-          {table.getRowModel().rows.map((row) => (
-            <TableRow row={row} key={row.id} />
-          ))}
-        </tbody>
+        <TableBody
+          table={table}
+          columns={columns}
+          isLoading={isLoading}
+        />
       </BTable>
     </>
   )

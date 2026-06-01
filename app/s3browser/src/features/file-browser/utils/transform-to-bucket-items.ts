@@ -1,11 +1,6 @@
 
 import { BucketContentsResponse, BucketItem } from '@/types/api';
-
-const extractName = (fullPath: string): string => {
-  const trimmed = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
-  const lastSlash = trimmed.lastIndexOf('/');
-  return lastSlash === -1 ? trimmed : trimmed.slice(lastSlash + 1);
-};
+import { extractName } from './format-utils';
 
 // This function transforms the raw API response for bucket contents into a format suitable for the table component.
 // The API currently returns separate lists for folders and objects, but the table expects a single list of items.

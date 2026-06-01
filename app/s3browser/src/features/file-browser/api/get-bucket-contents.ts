@@ -31,7 +31,6 @@ export const getBucketContentsQueryOptions = (bucket: string, prefix: string) =>
   });
 };
 
-
 export const useBucketContentsQuery = ({ bucket, prefix, queryConfig }: UseBucketContentsOptions) => {
   return useQuery({
     ...getBucketContentsQueryOptions(bucket, prefix),

@@ -18,7 +18,7 @@ const BucketList = () => {
       <TableBuilder
         data={buckets}
         columns={columnDefs as ColumnDef<Bucket>[]}
-        initialSorting={[{ id: 'bucket', desc: false }]}
+        initialSorting={[{ id: 'name', desc: false }]}
       />
     </div>
   );

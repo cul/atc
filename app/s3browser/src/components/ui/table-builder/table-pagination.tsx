@@ -9,6 +9,8 @@ interface TablePaginationProps<T> {
 function TablePagination<T>({ table }: TablePaginationProps<T>) {
   const { pageIndex } = table.getState().pagination
   const pageCount = table.getPageCount()
+  const startRow = pageIndex * table.getState().pagination.pageSize + 1
+  const endRow = Math.min((pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length)
 
   return (
     <Pagination className="mt-2">
@@ -33,7 +35,7 @@ function TablePagination<T>({ table }: TablePaginationProps<T>) {
         disabled={!table.getCanNextPage()}
       />
       <div className="d-flex align-items-center p-2">
-        Showing {table.getPaginationRowModel().rows.length} {pageCount > 1 && `of ${table.getFilteredRowModel().rows.length}`} items
+        Showing {startRow}-{endRow} of {table.getFilteredRowModel().rows.length}
       </div>
     </Pagination>
   )

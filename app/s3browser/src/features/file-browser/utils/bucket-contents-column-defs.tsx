@@ -1,21 +1,9 @@
 import { Link } from 'react-router'
 import { createColumnHelper } from '@tanstack/react-table'
 import { BucketItem } from '@/types/api'
+import { capitalizeStr, extractFileExtension, formatSize, formatLastModified } from './format-utils';
 
 const columnHelper = createColumnHelper<BucketItem>()
-
-// TODO: These formatting functions could be moved to a shared utils file if we need them elsewhere in the app.
-const capitalizeStr = (str: string) => {
-  return str.toLowerCase()
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
-const extractFileExtension = (fileName: string) => {
-  const parts = fileName.split('.');
-  return parts.length > 1 ? parts.pop() : 'unknown';
-}
 
 const sortByTypeAndExtension = (a: BucketItem, b: BucketItem) => {
   if (a.type !== b.type) {
@@ -35,33 +23,13 @@ const sortByTypeAndExtension = (a: BucketItem, b: BucketItem) => {
   return a.name.localeCompare(b.name);
 }
 
-const formatSize = (sizeInBytes: number) => {
-  const units = ['B', 'kB', 'MB', 'GB', 'TB'];
-  let size = sizeInBytes;
-  let unitIndex = 0;
-
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024;
-    unitIndex++;
-  }
-
-  return unitIndex === 0 ? `${size} ${units[unitIndex]}` : `${size.toFixed(2)} ${units[unitIndex]}`;
-}
-
-const formatLastModified = (dateString: string): string => {
-  const date = new Date(dateString);
-  const pad = (n: number) => n.toString().padStart(2, '0');
-
-  return `${date.toLocaleString('en-US', { month: 'long' })} ${date.getDate()}, ${date.getFullYear()}, ` +
-    `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-};
-
 export const columnDefs = (bucket: string) => [
   columnHelper.accessor('name', {
     header: 'Name',
     cell: ({ row }) => {
-      const pathWithBucket = `${bucket}?prefix=${encodeURIComponent(row.original.fullPath)}`;
-      const url = row.original.type === 'folder' ? `/buckets/${pathWithBucket}` : `/object/${pathWithBucket}`;
+      const bucketPath = `/buckets/${bucket}`;
+      const prefix = row.original.fullPath ? `?prefix=${encodeURIComponent(row.original.fullPath)}` : '';
+      const url = row.original.type === 'folder' ? `${bucketPath}${prefix}` : `${bucketPath}/object-details${prefix}`;
 
       return (
         <Link
