@@ -10,7 +10,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './app/frontend/src')
+      '@': path.resolve(__dirname, './app/s3browser/src')
     }
   }
 })

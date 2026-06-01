@@ -303,6 +303,48 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@faker-js/faker@npm:^10.4.0":
+  version: 10.4.0
+  resolution: "@faker-js/faker@npm:10.4.0"
+  checksum: 10c0/29f15e46f91757d654f6f42ac8313ac4aebb6591e2ebae7fdd8d36d5017490327ea67be37cff06d18303db54abf468524bcc7e4b1de53be4eb884c1f71d571c1
+  languageName: node
+  linkType: hard
+
+"@fortawesome/fontawesome-common-types@npm:7.2.0":
+  version: 7.2.0
+  resolution: "@fortawesome/fontawesome-common-types@npm:7.2.0"
+  checksum: 10c0/991ca1390c078d973e92034cf7dbae2fc3aa50cd7ff322b7b23e4c54ec84dae12979bada9a782bdaea11a1577ae74d802aa651c590f41d2e1b1126c17e6cd413
+  languageName: node
+  linkType: hard
+
+"@fortawesome/fontawesome-svg-core@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@fortawesome/fontawesome-svg-core@npm:7.2.0"
+  dependencies:
+    "@fortawesome/fontawesome-common-types": "npm:7.2.0"
+  checksum: 10c0/5c6655b030254804999eb87b96111cdcc42c0789e6e9ea13bc1e37d5ebf9fb982c79a618b68272cc59c23c4e1abf73d487e747a17a61499eac5f9f528fc54ad4
+  languageName: node
+  linkType: hard
+
+"@fortawesome/free-solid-svg-icons@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@fortawesome/free-solid-svg-icons@npm:7.2.0"
+  dependencies:
+    "@fortawesome/fontawesome-common-types": "npm:7.2.0"
+  checksum: 10c0/922ffe0f53b3cebcf36a4a6872958e7d6a0fbaa5c5c73cddbdea9301181fe8625331a0bf8aa09ca54c4d284805473e38d0eb9f06da05546f1914cec2c062343f
+  languageName: node
+  linkType: hard
+
+"@fortawesome/react-fontawesome@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "@fortawesome/react-fontawesome@npm:3.3.1"
+  peerDependencies:
+    "@fortawesome/fontawesome-svg-core": ~6 || ~7
+    react: ^18.0.0 || ^19.0.0
+  checksum: 10c0/aaa4d907418829367177dc1a34c3446377582ec0127ba1c510b29927059557ecf49eec2fed5d737002bec1e5360a57607909aac1b616c7f4039e3b0f9732c98c
+  languageName: node
+  linkType: hard
+
 "@humanfs/core@npm:^0.19.2":
   version: 0.19.2
   resolution: "@humanfs/core@npm:0.19.2"
@@ -790,6 +832,81 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:5.100.9":
+  version: 5.100.9
+  resolution: "@tanstack/query-core@npm:5.100.9"
+  checksum: 10c0/119bcfa78f416562d64d6584c9354a0f6eec030818a1010428d4fbe8a8599075b3e45cacca09b166726aea9a159b09c5d24a5a0f55581f43cda007a48b5b4414
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-devtools@npm:5.100.9":
+  version: 5.100.9
+  resolution: "@tanstack/query-devtools@npm:5.100.9"
+  checksum: 10c0/6b74744b642f4fdf23d9787798022391a19992f9897c7cb6eace7195a48cda9227f7886c6f03719ebc7ae2c17054a2c724f960d07dab76a117f45905f49c5277
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query-devtools@npm:^5.100.9":
+  version: 5.100.9
+  resolution: "@tanstack/react-query-devtools@npm:5.100.9"
+  dependencies:
+    "@tanstack/query-devtools": "npm:5.100.9"
+  peerDependencies:
+    "@tanstack/react-query": ^5.100.9
+    react: ^18 || ^19
+  checksum: 10c0/d7baa06ae5f11a3bb2511bf35f643cb446ff932daa7d541c10b55096b82bf214c2b490d447c07138b648011f72de9ab7de03caaeaf4d33caa416815bb963b924
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.100.9":
+  version: 5.100.9
+  resolution: "@tanstack/react-query@npm:5.100.9"
+  dependencies:
+    "@tanstack/query-core": "npm:5.100.9"
+  peerDependencies:
+    react: ^18 || ^19
+  checksum: 10c0/7e9af3334f6eada6fd0e030d19d77f62a2809d91a991caec68811e1e86aef9c93b8cb8fecfcf7efd9517fb1148f0df60fc4103d44cdd38accba991e70b6bb138
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-table@npm:^8.21.3":
+  version: 8.21.3
+  resolution: "@tanstack/react-table@npm:8.21.3"
+  dependencies:
+    "@tanstack/table-core": "npm:8.21.3"
+  peerDependencies:
+    react: ">=16.8"
+    react-dom: ">=16.8"
+  checksum: 10c0/85d1d0fcb690ecc011f68a5a61c96f82142e31a0270dcf9cbc699a6f36715b1653fe6ff1518302a6d08b7093351fc4cabefd055a7db3cd8ac01e068956b0f944
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-virtual@npm:^3.13.24":
+  version: 3.13.24
+  resolution: "@tanstack/react-virtual@npm:3.13.24"
+  dependencies:
+    "@tanstack/virtual-core": "npm:3.14.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/f409b2bb67965a513b75a1403e622c0b86c88c67419f757c79f670615979e38dc7ad5569a02c924741697df3d4301a0f45208fd4b9f935a5d58dd83e1db5622a
+  languageName: node
+  linkType: hard
+
+"@tanstack/table-core@npm:8.21.3":
+  version: 8.21.3
+  resolution: "@tanstack/table-core@npm:8.21.3"
+  checksum: 10c0/40e3560e6d55e07cc047024aa7f83bd47a9323d21920d4adabba8071fd2d21230c48460b26cedf392588f8265b9edc133abb1b0d6d0adf4dae0970032900a8c9
+  languageName: node
+  linkType: hard
+
+"@tanstack/virtual-core@npm:3.14.0":
+  version: 3.14.0
+  resolution: "@tanstack/virtual-core@npm:3.14.0"
+  checksum: 10c0/9e07e7f74f5e02dfc47b358f7b5089e680d8b14b9c5b90e9497be6f57c76ca98d185fbe5008795b89919346bfc3676ebe1c61b34980eefe6674c88ec6ff4b136
+  languageName: node
+  linkType: hard
+
 "@tybys/wasm-util@npm:^0.10.1":
   version: 0.10.1
   resolution: "@tybys/wasm-util@npm:0.10.1"
@@ -815,10 +932,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/faker@npm:^6":
+  version: 6.6.8
+  resolution: "@types/faker@npm:6.6.8"
+  dependencies:
+    faker: "npm:*"
+  checksum: 10c0/afd46dfb4c425b109acf5b09d3e15e9dea88a8da794c2090ae51dd7895e11015a69251bdb155117d518704189966eb15a556df4056e225a0ca7ffd15c658dded
+  languageName: node
+  linkType: hard
+
 "@types/json-schema@npm:^7.0.15":
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
   checksum: 10c0/a996a745e6c5d60292f36731dd41341339d4eeed8180bb09226e5c8d23759067692b1d88e5d91d72ee83dfc00d3aca8e7bd43ea120516c17922cbcb7c3e252db
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^25.6.0":
+  version: 25.6.0
+  resolution: "@types/node@npm:25.6.0"
+  dependencies:
+    undici-types: "npm:~7.19.0"
+  checksum: 10c0/d2d2015630ff098a201407f55f5077a20270ae4f465c739b40865cd9933b91b9c5d2b85568eadaf3db0801b91e267333ca7eb39f007428b173d1cdab4b339ac5
   languageName: node
   linkType: hard
 
@@ -847,16 +982,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:19.2.3":
-  version: 19.2.3
-  resolution: "@types/react@npm:19.2.3"
-  dependencies:
-    csstype: "npm:^3.0.2"
-  checksum: 10c0/12db8df36b9a0c8f7a602d0684e53731a43da4519f963fa3d1f4d4cac10b3bd31f2c838be74fe111174fff631e80b8e3d645fdfed477eb0632ab972241d05d67
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:>=16.9.11":
+"@types/react@npm:>=16.9.11, @types/react@npm:^19.2.14":
   version: 19.2.14
   resolution: "@types/react@npm:19.2.14"
   dependencies:
@@ -1076,9 +1202,19 @@ __metadata:
   resolution: "app@workspace:."
   dependencies:
     "@eslint/js": "npm:^9.39.2"
+    "@faker-js/faker": "npm:^10.4.0"
+    "@fortawesome/fontawesome-svg-core": "npm:^7.2.0"
+    "@fortawesome/free-solid-svg-icons": "npm:^7.2.0"
+    "@fortawesome/react-fontawesome": "npm:^3.3.1"
     "@popperjs/core": "npm:^2.11.8"
+    "@tanstack/react-query": "npm:^5.100.9"
+    "@tanstack/react-query-devtools": "npm:^5.100.9"
+    "@tanstack/react-table": "npm:^8.21.3"
+    "@tanstack/react-virtual": "npm:^3.13.24"
     "@types/bootstrap": "npm:^5"
-    "@types/react": "npm:19.2.3"
+    "@types/faker": "npm:^6"
+    "@types/node": "npm:^25.6.0"
+    "@types/react": "npm:^19.2.14"
     "@types/react-dom": "npm:^19.2.3"
     "@vitejs/plugin-react": "npm:^6.0.1"
     bootstrap: "npm:^5.3.8"
@@ -1089,11 +1225,14 @@ __metadata:
     react: "npm:19.2.3"
     react-bootstrap: "npm:^2.10.10"
     react-dom: "npm:19.2.3"
+    react-error-boundary: "npm:^6.1.1"
+    react-router: "npm:^7.15.0"
     sass: "npm:^1.66.1"
     typescript: "npm:^5.9.3"
     typescript-eslint: "npm:^8.53.1"
     vite: "npm:^8.0.0"
     vite-plugin-ruby: "npm:^5.2.0"
+    zustand: "npm:^5.0.13"
   languageName: unknown
   linkType: soft
 
@@ -1407,6 +1546,13 @@ __metadata:
   version: 2.0.0
   resolution: "convert-source-map@npm:2.0.0"
   checksum: 10c0/8f2f7a27a1a011cc6cc88cc4da2d7d0cfa5ee0369508baae3d98c260bb3ac520691464e5bbe4ae7cdf09860c1d69ecc6f70c63c6e7c7f7e3f18ec08484dc7d9b
+  languageName: node
+  linkType: hard
+
+"cookie@npm:^1.0.1":
+  version: 1.1.1
+  resolution: "cookie@npm:1.1.1"
+  checksum: 10c0/79c4ddc0fcad9c4f045f826f42edf54bcc921a29586a4558b0898277fa89fb47be95bc384c2253f493af7b29500c830da28341274527328f18eba9f58afa112c
   languageName: node
   linkType: hard
 
@@ -1885,6 +2031,13 @@ __metadata:
   version: 3.1.3
   resolution: "exponential-backoff@npm:3.1.3"
   checksum: 10c0/77e3ae682b7b1f4972f563c6dbcd2b0d54ac679e62d5d32f3e5085feba20483cf28bd505543f520e287a56d4d55a28d7874299941faf637e779a1aa5994d1267
+  languageName: node
+  linkType: hard
+
+"faker@npm:*":
+  version: 6.6.6
+  resolution: "faker@npm:6.6.6"
+  checksum: 10c0/21f6a57adc921ffb61e5ff767024a699a414047264ff4bbb080bd4994ec5a8061e1828aae9a4be812f6f356f1b6fd082bc2d54df7c37163b943a421a8f7f7079
   languageName: node
   linkType: hard
 
@@ -3161,6 +3314,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-error-boundary@npm:^6.1.1":
+  version: 6.1.1
+  resolution: "react-error-boundary@npm:6.1.1"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+  checksum: 10c0/4c72112bd930629e73015515804f95e375f9d83bea07cbc0557eb44752c8e8fc57ce141126b8eed2d9301d3bd1e030ce1f59d0e71f70fc0d10a29b31ec2cf2c5
+  languageName: node
+  linkType: hard
+
 "react-is@npm:^16.13.1, react-is@npm:^16.3.2":
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
@@ -3172,6 +3334,22 @@ __metadata:
   version: 3.0.4
   resolution: "react-lifecycles-compat@npm:3.0.4"
   checksum: 10c0/1d0df3c85af79df720524780f00c064d53a9dd1899d785eddb7264b378026979acbddb58a4b7e06e7d0d12aa1494fd5754562ee55d32907b15601068dae82c27
+  languageName: node
+  linkType: hard
+
+"react-router@npm:^7.15.0":
+  version: 7.15.0
+  resolution: "react-router@npm:7.15.0"
+  dependencies:
+    cookie: "npm:^1.0.1"
+    set-cookie-parser: "npm:^2.6.0"
+  peerDependencies:
+    react: ">=18"
+    react-dom: ">=18"
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+  checksum: 10c0/ce27ff25a0a53afec7f24385be89b779efd9f04d84c5b90c6a8f3fbbac28fc2f8c5f1bb26aff0588d41a225482365997082808f9e098c565435fad09426de114
   languageName: node
   linkType: hard
 
@@ -3420,6 +3598,13 @@ __metadata:
   bin:
     semver: bin/semver.js
   checksum: 10c0/5215ad0234e2845d4ea5bb9d836d42b03499546ddafb12075566899fc617f68794bb6f146076b6881d755de17d6c6cc73372555879ec7dce2c2feee947866ad2
+  languageName: node
+  linkType: hard
+
+"set-cookie-parser@npm:^2.6.0":
+  version: 2.7.2
+  resolution: "set-cookie-parser@npm:2.7.2"
+  checksum: 10c0/4381a9eb7ee951dfe393fe7aacf76b9a3b4e93a684d2162ab35594fa4053cc82a4d7d7582bf397718012c9adcf839b8cd8f57c6c42901ea9effe33c752da4a45
   languageName: node
   linkType: hard
 
@@ -3804,6 +3989,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"undici-types@npm:~7.19.0":
+  version: 7.19.2
+  resolution: "undici-types@npm:7.19.2"
+  checksum: 10c0/7159f10546f9f6c47d36776bb1bbf8671e87c1e587a6fee84ae1f111ae8de4f914efa8ca0dfcd224f4f4a9dfc3f6028f627ccb5ddaccf82d7fd54671b89fac3e
+  languageName: node
+  linkType: hard
+
 "undici@npm:^6.25.0":
   version: 6.25.0
   resolution: "undici@npm:6.25.0"
@@ -4045,5 +4237,26 @@ __metadata:
   version: 4.4.1
   resolution: "zod@npm:4.4.1"
   checksum: 10c0/55714c4bea81f7851ac46bf9edfde7c63ed6677a6cc8971ed3a526a079de3ffbe2bd56160327d22e070f72854fc4485b98ab7373255b6b69d64d9067caec864e
+  languageName: node
+  linkType: hard
+
+"zustand@npm:^5.0.13":
+  version: 5.0.13
+  resolution: "zustand@npm:5.0.13"
+  peerDependencies:
+    "@types/react": ">=18.0.0"
+    immer: ">=9.0.6"
+    react: ">=18.0.0"
+    use-sync-external-store: ">=1.2.0"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    immer:
+      optional: true
+    react:
+      optional: true
+    use-sync-external-store:
+      optional: true
+  checksum: 10c0/e4e76af1c324c797e3cc6ef094cb15c5884ca6713697140c2be292b2c612f5445fa21d222671b97797a4376154cac14a140f05728f0ac17b4b9e10f45e0ff29e
   languageName: node
   linkType: hard

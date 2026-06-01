@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   end
 
   get '/browse', to: 's3_browser_app#index'
+  get '/browse/*path', to: 's3_browser_app#index'
 
   # S3 Browser API routes
   namespace :api do
