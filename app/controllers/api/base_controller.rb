@@ -3,17 +3,17 @@
 class Api::BaseController < ApplicationController
   before_action :transform_json_params
   before_action :authenticate_user!
-  before_action :authorize_s3_browser_access!
 
   # Handle JSON parsing errors
-  rescue_from JSON::ParserError do |_exception|
-    render json: { error: 'Invalid JSON in request body' }, status: :bad_request
-  end
+  rescue_from JSON::ParserError, with: :handle_json_parse_error
+  rescue_from Atc::Exceptions::InvalidBucketError, with: :handle_invalid_bucket_error
+  rescue_from Atc::Exceptions::InvalidKeyName, with: :handle_invalid_key_name_error
+  rescue_from Aws::S3::Errors::ServiceError, with: :handle_aws_service_error
 
   private
 
-  def authorize_s3_browser_access!
-    raise CanCan::AccessDenied unless can? Ability::ACCESS_S3_BROWSER_API, self
+  def authorize_action_and_scope!(action, scope = self)
+    raise CanCan::AccessDenied unless can? action, scope
   end
 
   # Convert incoming JSON request body keys from camelCase to snake_case
@@ -32,5 +32,30 @@ class Api::BaseController < ApplicationController
     # Recursively transform all keys from camelCase to snake_case
     data.deep_transform_keys!(&:underscore)
     params.merge!(data.with_indifferent_access)
+  end
+
+  def handle_json_parse_error(error)
+    Rails.logger.error "JSON parse error: #{error.message}"
+    render json: { error: 'Invalid JSON in request body' },
+           status: :bad_request
+  end
+
+  # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Errors.html
+  def handle_aws_service_error(error)
+    Rails.logger.error "AWS Error - AWS responded with HTTP code: #{error.context.http_response.status_code}."\
+      " AWS Error code: #{error.code}." \
+      " AWS Error message: '#{error.message}'"
+    render json: { error: 'There was an error communicating with Amazon Web Services. Check the ATC logs for details' },
+           status: :service_unavailable
+  end
+
+  def handle_invalid_bucket_error
+    render json: { error: 'The given bucket does not exist or is not accessible from the S3 Browser App' },
+           status: :bad_request
+  end
+
+  def handle_invalid_key_name_error(error)
+    render json: { error: error.message },
+           status: :bad_request
   end
 end
