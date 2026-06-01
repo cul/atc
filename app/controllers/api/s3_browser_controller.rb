@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/AbcSize,Metrics/MethodLength,Naming/AccessorMethodName
+# rubocop:disable Metrics/AbcSize,Metrics/MethodLength
 
 class Api::S3BrowserController < Api::BaseController
   before_action :authorize_s3_browser_api_read_access!,
-                only: %i[get_buckets get_contents_at_prefix_level get_object_details]
+                only: %i[index_buckets list object]
 
-  def get_buckets
+  def index_buckets
     render json: { buckets: buckets }
   end
 
@@ -18,10 +18,10 @@ class Api::S3BrowserController < Api::BaseController
   #   - The prefix query param should end with a '/' to be properly recognized as a folder prefix. The code will
   #     normalize any provided prefix to ensure it ends with a '/'. Conversely, it must not start with a '/'. The
   #     exception to this is a root-level search, which must be entirely empty.
-  def get_contents_at_prefix_level # rubocop:disable Metrics/CyclomaticComplexity
-    bucket = params[:bucket]
+  def list # rubocop:disable Metrics/CyclomaticComplexity
+    bucket = list_params[:bucket]
     validate_bucket! bucket
-    prefix = params[:prefix] || ''
+    prefix = list_params[:prefix] || ''
     # normalize input
     prefix += '/' unless prefix.end_with? '/'
     prefix = prefix.delete_prefix('/') # unfortunate method name but we need to rm leading /. A blank prefix is OK.
@@ -60,12 +60,11 @@ class Api::S3BrowserController < Api::BaseController
   #   - The key should not begin with a leading '/', and it will be normalized if included
   #   - Though the documentation for the sdk warns that any spaces must be converted to '%20' in the key, doing so will
   #     actually result in a 404. The key should be passed as-is.
-  def get_object_details
-    bucket = params[:bucket]
+  def object
+    bucket = object_params[:bucket]
     validate_bucket! bucket
-    raise Atc::Exceptions::InvalidKeyName, 'object key is required' if params[:key].blank?
 
-    object_key = params[:key]
+    object_key = object_params[:key]
     # normalize input
     object_key = object_key.delete_prefix('/')
 
@@ -78,6 +77,15 @@ class Api::S3BrowserController < Api::BaseController
   end
 
   private
+
+  def list_params
+    params.permit(:bucket, :prefix)
+  end
+
+  def object_params
+    params.require(:key)
+    params.permit(:bucket, :key)
+  end
 
   def buckets
     @buckets ||= AWS_CONFIG[:s3_browser][:buckets]

@@ -14,9 +14,9 @@ Rails.application.routes.draw do
 
   # S3 Browser API routes
   namespace :api do
-    get '/buckets', to: 's3_browser#get_buckets', format: 'json'
-    get '/buckets/:bucket/list', to: 's3_browser#get_contents_at_prefix_level', format: 'json'
-    get '/buckets/:bucket/object', to: 's3_browser#get_object_details', format: 'json'
+    get '/buckets', to: 's3_browser#index_buckets', format: 'json'
+    get '/buckets/:bucket/list', to: 's3_browser#list', format: 'json'
+    get '/buckets/:bucket/object', to: 's3_browser#object', format: 'json'
     get '/users/_self', to: 'users#_self', format: 'json'
   end
 

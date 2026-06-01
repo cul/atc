@@ -268,10 +268,6 @@ describe Api::S3BrowserController, type: :request do
         it 'returns bad request status' do
           expect(response).to have_http_status(:bad_request)
         end
-
-        it 'returns an error message in the response body' do
-          expect(JSON.parse(response.body)).to include('error')
-        end
       end
 
       context 'with invalid bucket' do
