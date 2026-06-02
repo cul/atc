@@ -1,6 +1,6 @@
 {
   "all": {
-    "sourceCodeDir": "app/javascript",
+    "sourceCodeDir": "app/s3browser",
     "watchAdditionalPaths": []
   },
   "development": {
