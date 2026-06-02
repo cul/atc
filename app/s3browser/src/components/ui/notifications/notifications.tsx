@@ -6,7 +6,7 @@ export const Notifications = () => {
   const { notifications, dismissNotification } = useNotifications();
 
   return (
-    <ToastContainer position="top-end" className="p-3">
+    <ToastContainer className="p-3 top-15 end-0">
       {notifications.map((notification) => (
         <Notification
           key={notification.id}
