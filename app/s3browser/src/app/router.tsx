@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
-import { createBrowserRouter, LoaderFunction, ActionFunction } from 'react-router';
+import { createBrowserRouter, LoaderFunction, ActionFunction, redirect } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { Spinner } from 'react-bootstrap';
 import MainLayout from '@/components/layouts/main-layout';
@@ -33,37 +33,44 @@ export const createAppRouter = (queryClient: QueryClient) =>
       children: [
         {
           index: true,
-          Component: () => <div>This is the root of the React app.</div>,
+          loader: () => redirect('/browse/buckets'),
         },
         {
-          Component: MainLayout,
-          path: 'buckets',
+          path: 'browse',
           children: [
             {
               index: true,
-              lazy: () => import('./routes/buckets').then(convert(queryClient)),
+              loader: () => redirect('/browse/buckets'),
             },
             {
-              path: ':bucketName',
-              lazy: () => import('./routes/bucket-contents').then(convert(queryClient)),
-            },
-            {
-              path: ':bucketName/object-details',
-              lazy: () => import('./routes/object-details').then(convert(queryClient)),
-              // This route uses useSuspenseQuery, so we want to ensure any errors are caught by the route error boundary
-              errorElement: <RouteErrorFallback errorMessage="Error loading object details. Please try again." />,
+              Component: MainLayout,
+              path: 'buckets',
+              children: [
+                {
+                  index: true,
+                  lazy: () => import('./routes/buckets').then(convert(queryClient)),
+                },
+                {
+                  path: ':bucketName',
+                  lazy: () => import('./routes/bucket-contents').then(convert(queryClient)),
+                },
+                {
+                  path: ':bucketName/object-details',
+                  lazy: () => import('./routes/object-details').then(convert(queryClient)),
+                  // This route uses useSuspenseQuery, so we want to ensure any errors are caught by the route error boundary
+                  errorElement: <RouteErrorFallback errorMessage="Error loading object details. Please try again." />,
+                },
+              ],
             },
           ],
         },
+        {
+          path: '*',
+          lazy: () => import('./routes/not-found').then(convert(queryClient)),
+        },
       ],
     },
-    {
-      path: '*',
-      lazy: () => import('./routes/not-found').then(convert(queryClient)),
-    },
-  ], {
-    basename: '/browse',
-  });
+  ]);
 
 export const AppRouter = () => {
   const queryClient = useQueryClient();

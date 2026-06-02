@@ -9,7 +9,7 @@ export const columnDefs = [
     header: 'Name',
     cell: ({ row }) => (
       <Link
-        to={{ pathname: `/buckets/${encodeURIComponent(row.original.name)}` }}
+        to={{ pathname: `${encodeURIComponent(row.original.name)}` }}
         className="link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
       >
         <span>{row.original.name}</span>
