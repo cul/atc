@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
-class S3BrowserAppController < ApplicationController
+class UiController < ApplicationController
   layout 's3_browser'
-  before_action :authenticate_user!
   before_action :authorize_s3_browser_access!
 
-  def index; end
+  def home; end
 
   private
 

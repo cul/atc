@@ -17,6 +17,18 @@
 
     <%= yield :head %>
   </head>
+  <nav class="d-flex py-2 px-5 bg-primary bg-opacity-25 justify-content-end">
+    <% if user_signed_in? %>
+      <% # The sign out route uses a DELETE method to prevent CSRF attacks. %>
+      <p>
+        <%= form_with(url: destroy_user_session_path, method: "delete") do |form| %>
+          <%= form.submit "Sign out" %>
+        <% end %>
+      </p>
+    <% else %>
+      <p><%= link_to 'Sign in', user_session_path %></p>
+    <% end %>
+  </nav>
 
     <body id="main-content">
       <%= yield %>

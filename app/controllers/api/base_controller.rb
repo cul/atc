@@ -2,7 +2,6 @@
 
 class Api::BaseController < ApplicationController
   before_action :transform_json_params
-  before_action :authenticate_user!
 
   # Handle JSON parsing errors
   rescue_from JSON::ParserError, with: :handle_json_parse_error

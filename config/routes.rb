@@ -10,9 +10,6 @@ Rails.application.routes.draw do
     get '/users/development/sign_in_developer', to: 'users/development#sign_in_developer' if Rails.env.development?
   end
 
-  get '/browse', to: 's3_browser_app#index'
-  get '/browse/*path', to: 's3_browser_app#index'
-
   # S3 Browser API routes
   namespace :api do
     get '/buckets', to: 's3_browser#index_buckets', format: 'json'
@@ -35,5 +32,8 @@ Rails.application.routes.draw do
   get 'up' => 'rails/health#show', as: :rails_health_check
 
   # Defines the root path route ("/")
-  root 'pages#home'
+  root 'ui#home'
+
+  # All other routes should be handled by the react application
+  get '*path', to: 'ui#home'
 end

@@ -40,7 +40,7 @@ class Ability
     #
     return if user.blank?
 
-    can ACCESS_S3_BROWSER_UI, S3BrowserAppController
+    can ACCESS_S3_BROWSER_UI, UiController
 
     # We can add more Api Controllers and restrict access based on the current user
     # Right now, any authenticated user can access any API
