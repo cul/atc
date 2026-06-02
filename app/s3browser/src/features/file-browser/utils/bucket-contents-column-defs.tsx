@@ -27,7 +27,7 @@ export const columnDefs = (bucket: string) => [
   columnHelper.accessor('name', {
     header: 'Name',
     cell: ({ row }) => {
-      const bucketPath = `/buckets/${bucket}`;
+      const bucketPath = `/browse/buckets/${bucket}`;
       const prefix = row.original.fullPath ? `?prefix=${encodeURIComponent(row.original.fullPath)}` : '';
       const url = row.original.type === 'folder' ? `${bucketPath}${prefix}` : `${bucketPath}/object-details${prefix}`;
 

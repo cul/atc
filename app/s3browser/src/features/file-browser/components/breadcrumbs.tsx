@@ -10,13 +10,14 @@ const buildSegments = (
   bucketName?: string,
   prefix?: string,
 ) => {
+  const allBucketsPath = '/browse/buckets';
   const segments = [
-    { label: 'All Buckets', to: '/buckets' },
+    { label: 'All Buckets', to: allBucketsPath },
   ];
 
   if (!bucketName) return segments;
 
-  const bucketPath = `/buckets/${encodeURIComponent(bucketName)}`;
+  const bucketPath = `${allBucketsPath}/${encodeURIComponent(bucketName)}`;
 
   segments.push({
     label: bucketName,
