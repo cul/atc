@@ -2,10 +2,10 @@
 
 require 'rails_helper'
 
-describe S3BrowserAppController, type: :request do
+describe UiController, type: :request do
   describe 'index' do
     before do
-      get '/browse'
+      get '/'
     end
 
     context 'as unauthenticated user' do
@@ -23,7 +23,7 @@ describe S3BrowserAppController, type: :request do
 
       before do
         sign_in user
-        get '/browse'
+        get '/'
       end
 
       it 'responds with OK status' do
