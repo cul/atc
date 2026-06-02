@@ -23,7 +23,7 @@
         <% # The sign out route uses a DELETE method to prevent CSRF attacks. %>
         <p>
           <%= form_with(url: destroy_user_session_path, method: "delete") do |form| %>
-            <%= form.submit "Sign out" %>
+            <%= form.submit "Sign out", class: "btn btn-light btn-sm" %>
           <% end %>
         </p>
       <% else %>
