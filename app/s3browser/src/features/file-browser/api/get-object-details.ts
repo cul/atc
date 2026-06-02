@@ -3,10 +3,7 @@ import { ObjectDetails } from '@/types/api';
 import { api } from '@/lib/api-client';
 import { QueryConfig } from '@/lib/react-query';
 
-const getObjectDetails = (
-  bucket: string,
-  key: string,
-): Promise<ObjectDetails> => {
+const getObjectDetails = (bucket: string, key: string): Promise<ObjectDetails> => {
   const params = new URLSearchParams();
   if (key) {
     params.set('key', key);
@@ -31,8 +28,11 @@ export const getObjectDetailsQueryOptions = (bucket: string, key: string) => {
   });
 };
 
-
-export const useObjectDetailsSuspenseQuery = ({ bucket, key, queryConfig }: UseObjectDetailsOptions) => {
+export const useObjectDetailsSuspenseQuery = ({
+  bucket,
+  key,
+  queryConfig,
+}: UseObjectDetailsOptions) => {
   return useSuspenseQuery({
     ...getObjectDetailsQueryOptions(bucket, key),
     ...queryConfig,

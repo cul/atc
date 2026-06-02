@@ -1,8 +1,8 @@
-import { Link } from 'react-router'
-import { createColumnHelper } from '@tanstack/react-table'
-import { Bucket } from '@/types/api'
+import { Link } from 'react-router';
+import { createColumnHelper } from '@tanstack/react-table';
+import { Bucket } from '@/types/api';
 
-const columnHelper = createColumnHelper<Bucket>()
+const columnHelper = createColumnHelper<Bucket>();
 
 export const columnDefs = [
   columnHelper.accessor('name', {
@@ -14,11 +14,11 @@ export const columnDefs = [
       >
         <span>{row.original.name}</span>
       </Link>
-    )
+    ),
   }),
   columnHelper.accessor('description', {
     header: 'Description',
     cell: (info) => info.getValue(),
-    enableSorting: false
+    enableSorting: false,
   }),
-]
+];

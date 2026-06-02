@@ -1,29 +1,29 @@
-import { flexRender, Header, HeaderGroup } from '@tanstack/react-table'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons'
+import { flexRender, Header, HeaderGroup } from '@tanstack/react-table';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 
 interface TableHeaderProps<T> {
-  headerGroup: HeaderGroup<T>
+  headerGroup: HeaderGroup<T>;
 }
 
 function TableHeader<T>({ headerGroup }: TableHeaderProps<T>) {
   const renderSortingIcon = (sortDirection: 'asc' | 'desc' | null) => {
-    const sharedClassNames = 'ms-2 flex-shrink-0 mt-1'
+    const sharedClassNames = 'ms-2 flex-shrink-0 mt-1';
 
     if (sortDirection === 'asc') {
-      return <FontAwesomeIcon icon={faSortUp} className={sharedClassNames} />
+      return <FontAwesomeIcon icon={faSortUp} className={sharedClassNames} />;
     }
     if (sortDirection === 'desc') {
-      return <FontAwesomeIcon icon={faSortDown} className={sharedClassNames} />
+      return <FontAwesomeIcon icon={faSortDown} className={sharedClassNames} />;
     }
-    return <FontAwesomeIcon icon={faSort} className={sharedClassNames} />
-  }
+    return <FontAwesomeIcon icon={faSort} className={sharedClassNames} />;
+  };
 
   const createColumnHeader = (header: Header<T, unknown>) => {
-    if (header.isPlaceholder) return null
+    if (header.isPlaceholder) return null;
 
-    const sharedClassNames = 'fw-semibold d-inline-flex m-0 p-0 align-items-start text-start'
-    const headerText = flexRender(header.column.columnDef.header, header.getContext())
+    const sharedClassNames = 'fw-semibold d-inline-flex m-0 p-0 align-items-start text-start';
+    const headerText = flexRender(header.column.columnDef.header, header.getContext());
 
     if (header.column.getCanSort()) {
       return (
@@ -35,23 +35,26 @@ function TableHeader<T>({ headerGroup }: TableHeaderProps<T>) {
           {headerText}
           {renderSortingIcon(header.column.getIsSorted() || null)}
         </button>
-      )
+      );
     }
 
-    return <div className={sharedClassNames}>{headerText}</div>
-  }
+    return <div className={sharedClassNames}>{headerText}</div>;
+  };
 
   return (
     <thead>
       <tr key={headerGroup.id}>
         {headerGroup.headers.map((header) => (
-          <th key={header.id} className={`${header.column.getIsSorted() && 'bg-primary bg-opacity-25'}`}>
+          <th
+            key={header.id}
+            className={`${header.column.getIsSorted() && 'bg-primary bg-opacity-25'}`}
+          >
             {createColumnHeader(header)}
           </th>
         ))}
       </tr>
     </thead>
-  )
+  );
 }
 
 export default TableHeader;

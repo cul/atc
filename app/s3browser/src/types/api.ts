@@ -34,18 +34,18 @@ export type ObjectDetails = {
 // Each item is either a folder or an object, distinguished by the `type` field.
 export type BucketItem =
   | {
-    type: 'folder';
-    name: string;
-    fullPath: string;
-  }
+      type: 'folder';
+      name: string;
+      fullPath: string;
+    }
   | {
-    type: 'object';
-    name: string;
-    fullPath: string;
-    size: number;
-    lastModified: string;
-    storageClass: string;
-  };
+      type: 'object';
+      name: string;
+      fullPath: string;
+      size: number;
+      lastModified: string;
+      storageClass: string;
+    };
 
 export type User = {
   uid: string;

@@ -1,18 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api-client";
-import { User } from "@/types/api";
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/api-client';
+import { User } from '@/types/api';
 
-export const AUTH_QUERY_KEY = ["authenticated-user"];
+export const AUTH_QUERY_KEY = ['authenticated-user'];
 
 async function getCurrentUser(): Promise<User | null> {
   try {
-    return api.get<User | null>("/users/_self", {
+    return api.get<User | null>('/users/_self', {
       // Unauthenticated users will be redirected to login page,
       // so we can treat this as a non-error case and avoid showing a toast notification.
       silent: true,
     });
   } catch (error) {
-    console.error("Error fetching current user:", error);
+    console.error('Error fetching current user:', error);
     return null;
   }
 }

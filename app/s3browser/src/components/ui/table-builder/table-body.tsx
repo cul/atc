@@ -1,18 +1,14 @@
-import { ColumnDef, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, useReactTable } from '@tanstack/react-table';
 import Spinner from 'react-bootstrap/Spinner';
-import TableRow from './table-row'
+import TableRow from './table-row';
 
 type TableBodyProps<T> = {
   table: ReturnType<typeof useReactTable<T>>;
   columns: ColumnDef<T>[];
   isLoading?: boolean;
-}
+};
 
-const TableBody = <T extends object>({
-  table,
-  columns,
-  isLoading,
-}: TableBodyProps<T>) => {
+const TableBody = <T extends object>({ table, columns, isLoading }: TableBodyProps<T>) => {
   if (isLoading) {
     return (
       <tbody>

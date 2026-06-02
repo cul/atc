@@ -1,4 +1,4 @@
-import { ErrorData } from "@/types/api";
+import { ErrorData } from '@/types/api';
 
 /**
  Structured error class for API responses outside the 2xx range.
@@ -14,7 +14,7 @@ export class ApiError extends Error {
     public data: ErrorData | null,
   ) {
     super((data?.error ?? statusText) || `HTTP ${status}`);
-    this.name = "ApiError";
+    this.name = 'ApiError';
   }
 
   get isServerError(): boolean {

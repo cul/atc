@@ -6,14 +6,9 @@ interface BreadcrumbsProps {
   prefix?: string;
 }
 
-const buildSegments = (
-  bucketName?: string,
-  prefix?: string,
-) => {
+const buildSegments = (bucketName?: string, prefix?: string) => {
   const allBucketsPath = '/browse/buckets';
-  const segments = [
-    { label: 'All Buckets', to: allBucketsPath },
-  ];
+  const segments = [{ label: 'All Buckets', to: allBucketsPath }];
 
   if (!bucketName) return segments;
 
