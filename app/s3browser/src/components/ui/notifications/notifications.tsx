@@ -1,6 +1,6 @@
-import { ToastContainer } from "react-bootstrap";
-import { useNotifications } from "@/stores/notifications-store";
-import { Notification } from "./notification";
+import { ToastContainer } from 'react-bootstrap';
+import { useNotifications } from '@/stores/notifications-store';
+import { Notification } from './notification';
 
 export const Notifications = () => {
   const { notifications, dismissNotification } = useNotifications();
@@ -16,4 +16,4 @@ export const Notifications = () => {
       ))}
     </ToastContainer>
   );
-}
+};

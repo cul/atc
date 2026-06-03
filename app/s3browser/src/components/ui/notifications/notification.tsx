@@ -1,22 +1,16 @@
-import { Toast } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCircleCheck,
-  faCircleXmark,
-} from "@fortawesome/free-solid-svg-icons";
-import {
-  faTriangleExclamation,
-  faCircleInfo
-} from "@fortawesome/free-solid-svg-icons";
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { Toast } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCircleCheck, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+import { faTriangleExclamation, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 
-type NotificationType = "success" | "error" | "warning" | "info";
+type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
 const VARIANT_MAP: Record<NotificationType, string> = {
-  success: "success",
-  error: "danger",
-  warning: "warning",
-  info: "info",
+  success: 'success',
+  error: 'danger',
+  warning: 'warning',
+  info: 'info',
 };
 
 const ICON_MAP: Record<NotificationType, IconDefinition> = {
@@ -50,18 +44,11 @@ export const Notification = ({
       autohide
       delay={5000}
     >
-      <Toast.Header
-        className={`bg-transparent border-${variant} border-opacity-25`}
-      >
-        <FontAwesomeIcon
-          icon={ICON_MAP[type]}
-          className={`me-2 text-${variant}-emphasis`}
-        />
+      <Toast.Header className={`bg-transparent border-${variant} border-opacity-25`}>
+        <FontAwesomeIcon icon={ICON_MAP[type]} className={`me-2 text-${variant}-emphasis`} />
         <strong className={`me-auto text-${variant}-emphasis`}>{title}</strong>
       </Toast.Header>
-      {message && (
-        <Toast.Body className="text-body-secondary">{message}</Toast.Body>
-      )}
+      {message && <Toast.Body className="text-body-secondary">{message}</Toast.Body>}
     </Toast>
   );
 };

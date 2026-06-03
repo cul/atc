@@ -4,7 +4,7 @@ import { columnDefs } from '../utils/bucket-contents-column-defs';
 import { toBucketItems } from '../utils/transform-to-bucket-items';
 import { useBucketContentsQuery } from '../api/get-bucket-contents';
 import TableBuilder from '@/components/ui/table-builder/table-builder';
-import { usePagination } from '../hooks/use-pagination'
+import { usePagination } from '../hooks/use-pagination';
 import { normalizePrefix } from '../utils/format-utils';
 
 const BucketContentsTable = () => {
@@ -32,7 +32,9 @@ const BucketContentsTable = () => {
 
   return (
     <div>
-      <h4><strong>{currentDirectory}/</strong></h4>
+      <h4>
+        <strong>{currentDirectory}/</strong>
+      </h4>
 
       <TableBuilder
         data={items}

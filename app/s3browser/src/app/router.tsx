@@ -58,7 +58,9 @@ export const createAppRouter = (queryClient: QueryClient) =>
                   path: ':bucketName/object-details',
                   lazy: () => import('./routes/object-details').then(convert(queryClient)),
                   // This route uses useSuspenseQuery, so we want to ensure any errors are caught by the route error boundary
-                  errorElement: <RouteErrorFallback errorMessage="Error loading object details. Please try again." />,
+                  errorElement: (
+                    <RouteErrorFallback errorMessage="Error loading object details. Please try again." />
+                  ),
                 },
               ],
             },

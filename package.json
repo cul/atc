@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "start:dev": "./bin/vite dev",
-    "lint": "eslint app/s3browser",
-    "lint:fix": "eslint app/s3browser --fix"
+    "lint": "eslint app/s3browser app/javascript/entrypoints",
+    "lint:fix": "eslint app/s3browser app/javascript/entrypoints --fix",
+    "format": "prettier --write app/s3browser app/javascript/entrypoints",
+    "format:check": "prettier --check app/s3browser app/javascript/entrypoints"
   },
   "packageManager": "yarn@4.14.1",
   "dependencies": {
@@ -37,9 +39,11 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^17.6.0",
+    "prettier": "3.8.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.53.1",
     "vite": "^8.0.0",

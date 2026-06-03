@@ -3,10 +3,7 @@ import { BucketContentsResponse } from '@/types/api';
 import { api } from '@/lib/api-client';
 import { QueryConfig } from '@/lib/react-query';
 
-const getBucketContents = (
-  bucket: string,
-  prefix: string,
-): Promise<BucketContentsResponse> => {
+const getBucketContents = (bucket: string, prefix: string): Promise<BucketContentsResponse> => {
   const params = new URLSearchParams();
   if (prefix) {
     params.set('prefix', prefix);
@@ -31,7 +28,11 @@ export const getBucketContentsQueryOptions = (bucket: string, prefix: string) =>
   });
 };
 
-export const useBucketContentsQuery = ({ bucket, prefix, queryConfig }: UseBucketContentsOptions) => {
+export const useBucketContentsQuery = ({
+  bucket,
+  prefix,
+  queryConfig,
+}: UseBucketContentsOptions) => {
   return useQuery({
     ...getBucketContentsQueryOptions(bucket, prefix),
     ...queryConfig,

@@ -13,9 +13,7 @@ const isErrorData = (data: unknown): data is ErrorData =>
   typeof (data as Record<string, unknown>).error === 'string';
 
 // Attempt to parse the response body as JSON
-const parseErrorBody = async (
-  response: Response,
-): Promise<ErrorData | null> => {
+const parseErrorBody = async (response: Response): Promise<ErrorData | null> => {
   try {
     const json: unknown = await response.json();
     return isErrorData(json) ? json : null;
@@ -27,10 +25,7 @@ const parseErrorBody = async (
 // Decide whether a toast should be shown for this particular failure.
 // This is more flexible than a simple `silent` boolean because it allows for suppressing toasts
 // for expected failure cases.
-const shouldSilence = (
-  silent: boolean | number[] | undefined,
-  status: number,
-): boolean => {
+const shouldSilence = (silent: boolean | number[] | undefined, status: number): boolean => {
   if (silent === true) return true;
   if (Array.isArray(silent)) return silent.includes(status);
 
@@ -57,17 +52,14 @@ type RequestOptions = RequestInit & {
   silent?: boolean | number[];
 };
 
-async function request<T>(
-  endpoint: string,
-  options: RequestOptions = {},
-): Promise<T> {
+async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
   const { silent, ...fetchOptions } = options;
 
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...fetchOptions,
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...fetchOptions?.headers,
     },
     credentials: 'include',

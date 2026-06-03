@@ -56,4 +56,4 @@ export const AppProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
       </ErrorBoundary>
     </Suspense>
   );
-}
+};

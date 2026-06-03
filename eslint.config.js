@@ -3,10 +3,11 @@ import tseslint from 'typescript-eslint';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
+import prettierConfig from 'eslint-config-prettier';
 
 export default tseslint.config(
   {
-    ignores: ['node_modules/**', 'public/**', 'tmp/**', 'log/**', 'vendor/**']
+    ignores: ['node_modules/**', 'public/**', 'tmp/**', 'log/**', 'vendor/**'],
   },
   js.configs.recommended,
   {
@@ -50,5 +51,7 @@ export default tseslint.config(
     rules: {
       'react-hooks/incompatible-library': 'off',
     },
-  }
+  },
+  // Disable formatting rules that conflict with Prettier
+  prettierConfig,
 );

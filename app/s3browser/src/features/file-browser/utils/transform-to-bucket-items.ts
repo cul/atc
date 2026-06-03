@@ -1,4 +1,3 @@
-
 import { BucketContentsResponse, BucketItem } from '@/types/api';
 import { extractName } from './format-utils';
 
@@ -10,7 +9,7 @@ export const toBucketItems = (response: BucketContentsResponse): BucketItem[] =>
     name: extractName(prefix),
     fullPath: prefix,
   }));
- 
+
   const objectItems: BucketItem[] = response.objects.map((obj) => ({
     type: 'object',
     name: extractName(obj.key),
@@ -19,6 +18,6 @@ export const toBucketItems = (response: BucketContentsResponse): BucketItem[] =>
     storageClass: obj.storageClass,
     lastModified: obj.lastModified,
   }));
- 
+
   return [...folderItems, ...objectItems];
 };
