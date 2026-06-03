@@ -31,12 +31,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./app/s3browser/src/*"
+        "app/javascript/src/*"
       ]
     }
   },
   "include": [
     "./app/javascript/entrypoints",
-    "./app/s3browser/src"
+    "app/javascript/src"
   ],
 }

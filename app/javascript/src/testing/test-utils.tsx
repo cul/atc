@@ -10,7 +10,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createMemoryRouter } from 'react-router';
 import { Notifications } from '@/components/ui/notifications/notifications';
 
-export { buildBucket } from './data-generators';
+export {
+  buildBucket,
+  buildObjectDetails,
+  buildS3Object,
+  buildBucketContents,
+} from './data-generators';
 export { mockApi } from './mock-api';
 
 const createTestQueryClient = () =>

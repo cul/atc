@@ -8,13 +8,12 @@ export default defineConfig({
   plugins: [RubyPlugin(), ReactPlugin()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './app/s3browser/src'),
+      '@': path.resolve(__dirname, './app/javascript/src'),
     },
   },
   test: {
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/testing/setup.ts',
-    root: './app/s3browser',
   },
 });
