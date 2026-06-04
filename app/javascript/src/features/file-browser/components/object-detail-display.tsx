@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ObjectDetails } from '@/types/api';
+import { useParams, useSearchParams } from 'react-router';
 import {
   formatSize,
   formatLastModified,
@@ -7,6 +7,7 @@ import {
   extractName,
   extractFileExtension,
 } from '../utils/format-utils';
+import { useObjectDetailsSuspenseQuery } from '../api/get-object-details';
 import ObjectDetailField from './object-detail-field';
 
 const displayRetrievalTime = (archiveStatus: string | null) => {
@@ -25,15 +26,19 @@ const displayAccessTierLabel = (archiveStatus: string | null) =>
     ? capitalizeStr(archiveStatus)
     : 'Frequent Access, Infrequent Access, or Archive Instant Access tier';
 
-type ObjectDetailDisplayProps = {
-  objectDetails: ObjectDetails;
-};
+const ObjectDetailDisplay = () => {
+  const params = useParams();
+  const bucketName = params.bucketName as string;
+  const [searchParams] = useSearchParams();
+  const key = searchParams.get('prefix') ?? '';
 
-const ObjectDetailDisplay = ({ objectDetails }: ObjectDetailDisplayProps) => {
-  const { key, size, lastModified, storageClass, archiveStatus, restoreStatus } = objectDetails;
+  const query = useObjectDetailsSuspenseQuery({ bucket: bucketName, key });
+  const objectDetails = query.data;
+
+  const { size, lastModified, storageClass, archiveStatus, restoreStatus } = objectDetails;
 
   const isNonStandard = storageClass !== 'STANDARD';
-  const fileName = useMemo(() => extractName(key), [key]);
+  const fileName = useMemo(() => extractName(objectDetails.key), [objectDetails.key]);
 
   return (
     <div className="pt-2">
