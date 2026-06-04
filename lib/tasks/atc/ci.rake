@@ -20,7 +20,7 @@ namespace :atc do
   task ci_nocop: ['atc:setup:config_files', :environment, 'atc:ci_specs']
 
   desc 'CI build with Rubocop validation'
-  task ci: ['atc:setup:config_files', :environment, 'atc:rubocop', 'atc:eslint', 'atc:prettier', 'atc:ci_specs']
+  task ci: ['atc:setup:config_files', :environment, 'atc:rubocop', 'atc:eslint', 'atc:prettier', 'atc:vitest', 'atc:ci_specs']
 
   desc 'CI build just running specs'
   task ci_specs: :environment do
@@ -63,6 +63,15 @@ namespace :atc do
     success = system('yarn format:check')
     unless success
       puts 'Prettier found formatting issues. Run `yarn format` to fix.'
+      exit 1
+    end
+  end
+
+  desc 'Run frontend tests'
+  task :vitest do
+    success = system('yarn test --run')
+    unless success
+      puts 'Frontend tests failed.'
       exit 1
     end
   end
