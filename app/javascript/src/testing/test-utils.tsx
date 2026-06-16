@@ -49,9 +49,10 @@ export const renderApp = async (
   const queryClient = createTestQueryClient();
   const routePath = path ?? url; // defaults to url — only pass path for parameterized routes
 
+  const isRoot = url === '/';
   const router = createMemoryRouter([{ path: routePath, element: ui }], {
-    initialEntries: url ? ['/', url] : ['/'],
-    initialIndex: url ? 1 : 0,
+    initialEntries: isRoot ? ['/'] : ['/', url],
+    initialIndex: isRoot ? 0 : 1,
   });
 
   return rtlRender(
