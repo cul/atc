@@ -25,7 +25,7 @@ interface TableBuilderProps<T> {
   isLoading?: boolean;
 }
 
-const DEFAULT_PAGE_SIZE = 50;
+export const DEFAULT_PAGE_SIZE = 50;
 
 // This is a generic table component that can be reused across different data types
 // When using this component, ensure you specify how to render each column in the column definitions
@@ -66,12 +66,14 @@ function TableBuilder<T extends object>({
     onSortingChange: setSorting,
     onPaginationChange: effectiveOnPaginationChange,
     getPaginationRowModel: getPaginationRowModel(),
+    // Prevent setting pageIndex to 0 on data changes when pagination
+    // is controlled externally (eg. via URL)
+    autoResetPageIndex: !isPaginationControlled,
   });
 
   return (
     <>
       {/* TODO: Keep this always above the fold */}
-      {/* ? Don't render pagination if there's only one page */}
       <TablePagination table={table} />
 
       <BTable striped bordered hover responsive size="md" className="rounded-4">

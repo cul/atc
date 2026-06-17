@@ -22,6 +22,12 @@ export const buildS3Object = (overrides?: Partial<S3Object>): S3Object => ({
   ...overrides,
 });
 
+// Build an array of S3 objects with sequentially numbered names (object-000.txt, object-001.txt, etc.)
+export const buildS3Objects = (count: number): S3Object[] =>
+  Array.from({ length: count }, (_, i) =>
+    buildS3Object({ key: `object-${String(i).padStart(3, '0')}.txt` }),
+  );
+
 // Build a full bucket-contents API response
 export const buildBucketContents = (
   overrides?: Partial<BucketContentsResponse>,

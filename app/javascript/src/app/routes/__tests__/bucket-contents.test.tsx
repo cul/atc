@@ -2,12 +2,14 @@ import { describe, it, expect } from 'vitest';
 import {
   buildBucketContents,
   buildS3Object,
+  buildS3Objects,
   mockApi,
   renderApp,
   screen,
   within,
   waitForElementToBeRemoved,
   userEvent,
+  renderAppWithRouter,
 } from '@/testing/test-utils';
 import BucketContentsTable from '@/features/file-browser/components/bucket-contents-table';
 
@@ -203,6 +205,115 @@ describe('BucketContentsRoute', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Size' }));
 
       expect(getNameOrder()).toEqual(['small.txt', 'big.txt', 'folder']);
+    });
+  });
+
+  describe('paginating bucket contents', () => {
+    const PAGE_SIZE = 3;
+
+    const renderPaginatedAndWait = async (url = '/browse/buckets/my-bucket') => {
+      const result = await renderAppWithRouter(<BucketContentsTable pageSize={PAGE_SIZE} />, {
+        url,
+        path: '/browse/buckets/:bucketName',
+      });
+      await waitForElementToBeRemoved(() => screen.queryByRole('status'));
+      return result;
+    };
+
+    // Bootstrap's pagination buttons
+    const nav = {
+      first: /^first$/i,
+      previous: /^previous$/i,
+      next: /^next$/i,
+      last: /^last$/i,
+    };
+
+    it('advances to the next page when the next arrow is clicked', async () => {
+      mockApi(
+        'get',
+        '/buckets/my-bucket/list',
+        buildBucketContents({ objects: buildS3Objects(10) }),
+      );
+
+      const { router } = await renderPaginatedAndWait();
+
+      expect(screen.getByText('object-000.txt')).toBeInTheDocument();
+      expect(screen.queryByText('object-003.txt')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button', { name: nav.next }));
+
+      expect(await screen.findByText('object-003.txt')).toBeInTheDocument();
+      expect(screen.queryByText('object-000.txt')).not.toBeInTheDocument();
+      expect(router.state.location.search).toBe('?page=2');
+    });
+
+    it('returns to the previous page when the previous arrow is clicked', async () => {
+      mockApi(
+        'get',
+        '/buckets/my-bucket/list',
+        buildBucketContents({ objects: buildS3Objects(10) }),
+      );
+
+      const { router } = await renderPaginatedAndWait('/browse/buckets/my-bucket?page=2');
+
+      expect(screen.getByText('object-003.txt')).toBeInTheDocument();
+      expect(screen.queryByText('object-000.txt')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button', { name: nav.previous }));
+
+      expect(await screen.findByText('object-000.txt')).toBeInTheDocument();
+      expect(screen.queryByText('object-003.txt')).not.toBeInTheDocument();
+      expect(router.state.location.search).toBe('');
+    });
+
+    it('disables the navigation arrows when there is only one page', async () => {
+      mockApi(
+        'get',
+        '/buckets/my-bucket/list',
+        buildBucketContents({ objects: buildS3Objects(2) }),
+      );
+
+      await renderPaginatedAndWait();
+
+      // Bootstrap renders a disabled pagination control as a plain <span>
+      // (no buttons) so we check if buttons are absent rather than disabled
+      expect(screen.queryByRole('button', { name: nav.first })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: nav.previous })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: nav.next })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: nav.last })).not.toBeInTheDocument();
+    });
+
+    it('jumps to the last and first pages with the double-arrow buttons', async () => {
+      mockApi(
+        'get',
+        '/buckets/my-bucket/list',
+        buildBucketContents({ objects: buildS3Objects(10) }),
+      );
+
+      await renderPaginatedAndWait();
+
+      // Last page holds the final object only
+      await userEvent.click(screen.getByRole('button', { name: nav.last }));
+      expect(await screen.findByText('object-009.txt')).toBeInTheDocument();
+      expect(screen.queryByText('object-000.txt')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button', { name: nav.first }));
+      expect(await screen.findByText('object-000.txt')).toBeInTheDocument();
+      expect(screen.queryByText('object-009.txt')).not.toBeInTheDocument();
+    });
+
+    it('lands on the requested page when navigating directly to ?page=4', async () => {
+      mockApi(
+        'get',
+        '/buckets/my-bucket/list',
+        buildBucketContents({ objects: buildS3Objects(10) }),
+      );
+
+      const { router } = await renderPaginatedAndWait('/browse/buckets/my-bucket?page=4');
+
+      expect(screen.getByText('object-009.txt')).toBeInTheDocument();
+      expect(screen.queryByText('object-000.txt')).not.toBeInTheDocument();
+      expect(router.state.location.search).toBe('?page=4');
     });
   });
 });
