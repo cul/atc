@@ -14,6 +14,7 @@ export {
   buildBucket,
   buildObjectDetails,
   buildS3Object,
+  buildS3Objects,
   buildBucketContents,
 } from './data-generators';
 export { mockApi } from './mock-api';
@@ -28,17 +29,13 @@ const createTestQueryClient = () =>
     },
   });
 
-/*
-  renderApp - renders a component inside a QueryClient + MemoryRouter
-*/
-
 interface RenderAppOptions {
   url?: string;
   path?: string;
   [key: string]: unknown;
 }
 
-export const renderApp = async (
+const buildRoutedRender = (
   ui: React.ReactElement,
   {
     url = '/', // simulated browser location to navigate to (e.g. '/users/janedoe/edit')
@@ -55,13 +52,30 @@ export const renderApp = async (
     initialIndex: isRoot ? 0 : 1,
   });
 
-  return rtlRender(
+  const result = rtlRender(
     <QueryClientProvider client={queryClient}>
       <Notifications />
       <RouterProvider router={router} />
     </QueryClientProvider>,
     renderOptions,
   );
+
+  return { result, router };
+};
+
+// Default helper - renders a component inside a QueryClient + MemoryRouter
+export const renderApp = async (ui: React.ReactElement, options: RenderAppOptions = {}) => {
+  const { result } = buildRoutedRender(ui, options);
+  return result;
+};
+
+// App + router - use for testing URLs (eg. navigation logic that modifies `?page=N` param).
+export const renderAppWithRouter = async (
+  ui: React.ReactElement,
+  options: RenderAppOptions = {},
+) => {
+  const { result, router } = buildRoutedRender(ui, options);
+  return { ...result, router };
 };
 
 export * from '@testing-library/react';
