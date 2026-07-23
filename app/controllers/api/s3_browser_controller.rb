@@ -3,8 +3,8 @@
 # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
 
 class Api::S3BrowserController < Api::BaseController
-  before_action :authorize_s3_browser_api_read_access!,
-                only: %i[index_buckets list object]
+  # before_action :authorize_s3_browser_api_read_access!,
+  #               only: %i[index_buckets list object]
 
   def index_buckets
     render json: { buckets: buckets }
@@ -52,6 +52,84 @@ class Api::S3BrowserController < Api::BaseController
     end
 
     render json: { folders: folders, objects: objects }
+  end
+
+  # TODO: Move into resque job to export to CSV
+  # Should accept:
+  # - bucket
+  # - list of keys (files)
+  # - list of prefixes (folders)
+  def export_to_csv_final
+    bucket = params[:bucket]
+    validate_bucket!(bucket)
+
+    # Normalize the keys and prefixes
+    keys = Array(params[:files]).map { |k| k.to_s.delete_prefix('/') }
+    prefixes = Array(params[:directories]).map do |dir|
+      dir = dir.to_s.delete_prefix('/')
+      dir.end_with?('/') ? dir : "#{dir}/"
+    end
+
+    all_objects = collect_objects(bucket, keys, prefixes)
+    render json: { files: all_objects }
+
+    # TODO: Transform the objects into a CSV format
+    # rows = all_objects.map { |obj| build_row(bucket, obj) }
+    # render json: { files: rows }
+  end
+
+  def collect_objects(bucket, keys, prefixes)
+    objects = []
+
+    # Get all objects under the given prefixes (folders)
+    prefixes.each do |prefix|
+      list_prefix(bucket, prefix) do |obj|
+        objects << obj
+      end
+    end
+
+    # Keys represent specific files so we need to get their metadata using head_object
+    if keys.any?
+      # puts "Processing keys: #{keys.inspect}"
+      keys.each { |key| objects << head_meta(bucket, key) }
+      # puts "Objects after processing keys: #{objects.inspect}"
+    end
+
+    # TODO: At this point, some of the objects will already have the archive_status and restore_status
+    # values (via the keys path)
+    # Refactor so that we don't duplicate the head_object calls.
+    objects.each { |obj| modify_with_storage_data(bucket, obj) }
+    objects
+  end
+
+  def modify_with_storage_data(bucket, obj)
+    h = s3_client.head_object(bucket: bucket, key: obj[:key])
+    # puts "HeadObject for #{obj[:key]}: #{h.inspect}"
+    obj[:archive_status] = h.archive_status
+    obj[:restore]        = h.restore
+  end
+
+  def head_meta(bucket, key)
+    h = s3_client.head_object(bucket: bucket, key: key)
+    { key: key, size: h.content_length, last_modified: h.last_modified,
+      storage_class: h.storage_class, archive_status: h.archive_status, restore: h.restore }
+  end
+
+  # Like list but without delimeter
+  def list_prefix(bucket, prefix)
+    s3_client.list_objects_v2(bucket: bucket, prefix: prefix).each do |page|
+      page.contents.each do |obj|
+        next if obj.key.end_with?('/') # 0-byte folder markers, not files
+
+        # NOTE: This object includes restore_status but that value is always nil, unless we include "optional_object_attributes"
+        # in the request. Since we need to retrieve addition information using head_object anyway, we retrieve
+        # the restore_status there instead of this method.
+        puts "#{obj.inspect}"
+
+        yield(key: obj.key, size: obj.size, last_modified: obj.last_modified,
+              storage_class: obj.storage_class, archive_status: nil, restore: nil)
+      end
+    end
   end
 
   # GET /api/buckets/:bucket/object?key={objectKey}
