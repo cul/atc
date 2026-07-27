@@ -16,6 +16,8 @@ Rails.application.routes.draw do
     get '/buckets/:bucket/list', to: 's3_browser#list', format: 'json'
     get '/buckets/:bucket/object', to: 's3_browser#object', format: 'json'
     get '/users/_self', to: 'users#_self', format: 'json'
+    post '/csv_exports', to: 's3_browser#queue_csv_export_job', format: 'json'
+    # Currently returns a flat list of objects
     get '/test_export', to: 's3_browser#export_to_csv_final', format: 'json'
   end
 

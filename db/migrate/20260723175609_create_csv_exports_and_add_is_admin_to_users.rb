@@ -3,7 +3,10 @@ class CreateCsvExportsAndAddIsAdminToUsers < ActiveRecord::Migration[7.1]
     create_table :csv_exports do |t|
       t.string :path_to_csv_file, null: false
       t.references :user, null: false, foreign_key: true
-
+      t.integer :status, null: false, default: 0
+      t.text :export_errors
+      t.text :export_paths
+      
       t.timestamps null: false
     end
 

@@ -22,6 +22,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_23_175609) do
   create_table "csv_exports", force: :cascade do |t|
     t.string "path_to_csv_file", null: false
     t.integer "user_id", null: false
+    t.integer "status", default: 0, null: false
+    t.text "export_errors"
+    t.text "export_paths"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_csv_exports_on_user_id"

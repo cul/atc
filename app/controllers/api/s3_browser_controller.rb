@@ -5,6 +5,7 @@
 class Api::S3BrowserController < Api::BaseController
   # before_action :authorize_s3_browser_api_read_access!,
   #               only: %i[index_buckets list object]
+  skip_before_action :verify_authenticity_token
 
   def index_buckets
     render json: { buckets: buckets }
@@ -52,6 +53,30 @@ class Api::S3BrowserController < Api::BaseController
     end
 
     render json: { folders: folders, objects: objects }
+  end
+
+  # POST /api/csv_exports
+  # Validates the requested buckets, records the export request and enqueues the
+  # background job. Responds 202 with the new record's id so the client can later
+  # redirect to the CSV detail page.
+  # A single request may span multiple buckets (one `selections` entry per bucket).
+  def queue_csv_export_job
+    selections = build_selections(csv_export_params)
+    puts "Selections!!! for CSV export: #{selections.inspect}"
+    selections.each { |selection| validate_bucket!(selection[:bucket]) }
+
+    user_test = User.find_by(id: 1)
+
+    csv_export = CsvExport.create!(
+      path_to_csv_file: "#{SecureRandom.uuid}.csv", # temp
+      export_paths: selections.to_json,
+      user: user_test,
+      status: :pending
+    )
+
+    PrepareCsvExportJob.perform_later(csv_export.id)
+
+    render json: { id: csv_export.id }, status: :accepted
   end
 
   # TODO: Move into resque job to export to CSV
@@ -163,6 +188,26 @@ class Api::S3BrowserController < Api::BaseController
   def object_params
     params.require(:key)
     params.permit(:bucket, :key)
+  end
+
+  def csv_export_params
+    params.permit(selections: [:bucket, { files: [], directories: [] }])
+  end
+
+  # Normalizes the per-bucket selection payload into
+  # [{ bucket:, keys: [...], prefixes: [...] }, ...]
+  def build_selections(permitted)
+    puts "In build_selections with permitted: #{permitted.inspect}"
+    Array(permitted[:selections]).map do |selection|
+      {
+        bucket: selection[:bucket],
+        keys: Array(selection[:files]).map { |key| key.to_s.delete_prefix('/') },
+        prefixes: Array(selection[:directories]).map do |dir|
+          dir = dir.to_s.delete_prefix('/')
+          dir.end_with?('/') ? dir : "#{dir}/"
+        end
+      }
+    end
   end
 
   def buckets

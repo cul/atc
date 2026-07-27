@@ -5,4 +5,5 @@ module Atc::Queues
   PREPARE_TRANSFER = :prepare_transfer
   PERFORM_TRANSFER = :perform_transfer
   VERIFY_FIXITY    = :verify_fixity
+  CSV_EXPORT       = :csv_export
 end
