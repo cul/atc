@@ -6,10 +6,10 @@ require 'csv'
 class PrepareCsvExportJob < ApplicationJob
   queue_as Atc::Queues::CSV_EXPORT
 
-  # CSV_HEADERS = [
-  #   'S3 URI', 'File name', 'Modification date',
-  #   'Storage tier', 'Size', 'Size in bytes', 'Restore in progress'
-  # ].freeze
+  CSV_HEADERS = [
+    'S3 URI', 'File name', 'Modification date',
+    'Storage tier', 'Size', 'Size in bytes', 'Restore in progress'
+  ].freeze
 
   def perform(csv_export_id)
     csv_export = CsvExport.find(csv_export_id)
@@ -21,7 +21,8 @@ class PrepareCsvExportJob < ApplicationJob
     objects = collect_objects(selections)
 
     # TODO: Write CSV
-    # write_csv(csv_export_path, objects)
+    csv_export_path = Rails.root.join('tmp', 'csv_exports', csv_export.path_to_csv_file)
+    write_csv(csv_export_path, objects)
 
     csv_export.update!(status: :success)
   rescue StandardError => e
@@ -83,9 +84,58 @@ class PrepareCsvExportJob < ApplicationJob
         # the restore_status there instead of this method.
         puts "#{obj.inspect}"
 
-        yield(key: obj.key, size: obj.size, last_modified: obj.last_modified,
+        yield(bucket: bucket, key: obj.key, size: obj.size, last_modified: obj.last_modified,
               storage_class: obj.storage_class, archive_status: nil, restore: nil)
       end
     end
+  end
+
+  def head_meta(bucket, key)
+    h = s3_client.head_object(bucket: bucket, key: key)
+    { bucket: bucket, key: key, size: h.content_length, last_modified: h.last_modified,
+      storage_class: h.storage_class, archive_status: h.archive_status, restore: h.restore }
+  end
+
+  def write_csv(path, objects)
+    puts "Writing CSV to #{path} with #{objects.size} objects"
+
+    CSV.open(path, 'w') do |csv|
+      csv << CSV_HEADERS
+      objects.each { |obj| csv << build_row(obj) }
+    end
+  end
+
+  def build_row(obj)
+    row = [
+      "s3://#{obj[:bucket]}/#{obj[:key]}",
+      File.basename(obj[:key]),
+      obj[:last_modified],
+      storage_tier(obj),
+      ActiveSupport::NumberHelper.number_to_human_size(obj[:size]),
+      obj[:size],
+      restore_in_progress?(obj[:restore])
+    ]
+    puts "Row for object #{obj[:key]}: #{row.inspect}"
+
+    row
+  end
+
+  # TODO: Rewrite, probably using switch
+  def storage_tier(obj)
+    'STANDARD' if obj[:storage_class].nil?
+
+    return unless obj[:storage_class] == 'INTELLIGENT_TIERING'
+
+    if obj[:archive_status] == 'ARCHIVE_ACCESS'
+      'Intelligent Tiering (Archive Access)'
+    elsif obj[:archive_status] == 'DEEP_ARCHIVE_ACCESS'
+      'Intelligent Tiering (Deep Archive Access)'
+    else
+      'Intelligent Tiering (Frequent Access, Infrequent Access, or Archive Instant Access tier)'
+    end
+  end
+
+  def restore_in_progress?(restore)
+    restore&.include?('ongoing-request="true"') || false
   end
 end

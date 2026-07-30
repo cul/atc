@@ -32,7 +32,7 @@ append  :linked_files,
         'config/resque.yml'
 
 # Default value for linked_dirs is []
-append :linked_dirs, 'log', 'tmp/pids'
+append :linked_dirs, 'log', 'tmp/pids', 'tmp/csv_exports'
 
 set :passenger_restart_with_touch, true
 

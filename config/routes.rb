@@ -17,8 +17,8 @@ Rails.application.routes.draw do
     get '/buckets/:bucket/object', to: 's3_browser#object', format: 'json'
     get '/users/_self', to: 'users#_self', format: 'json'
     post '/csv_exports', to: 's3_browser#queue_csv_export_job', format: 'json'
-    # Currently returns a flat list of objects
-    get '/test_export', to: 's3_browser#export_to_csv_final', format: 'json'
+    get '/csv_exports/:id', to: 's3_browser#show_csv_export', format: 'json'
+    get '/csv_exports', to: 's3_browser#index_csv_exports', format: 'json'
   end
 
   resque_web_constraint = lambda do |request|

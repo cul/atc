@@ -79,84 +79,6 @@ class Api::S3BrowserController < Api::BaseController
     render json: { id: csv_export.id }, status: :accepted
   end
 
-  # TODO: Move into resque job to export to CSV
-  # Should accept:
-  # - bucket
-  # - list of keys (files)
-  # - list of prefixes (folders)
-  def export_to_csv_final
-    bucket = params[:bucket]
-    validate_bucket!(bucket)
-
-    # Normalize the keys and prefixes
-    keys = Array(params[:files]).map { |k| k.to_s.delete_prefix('/') }
-    prefixes = Array(params[:directories]).map do |dir|
-      dir = dir.to_s.delete_prefix('/')
-      dir.end_with?('/') ? dir : "#{dir}/"
-    end
-
-    all_objects = collect_objects(bucket, keys, prefixes)
-    render json: { files: all_objects }
-
-    # TODO: Transform the objects into a CSV format
-    # rows = all_objects.map { |obj| build_row(bucket, obj) }
-    # render json: { files: rows }
-  end
-
-  def collect_objects(bucket, keys, prefixes)
-    objects = []
-
-    # Get all objects under the given prefixes (folders)
-    prefixes.each do |prefix|
-      list_prefix(bucket, prefix) do |obj|
-        objects << obj
-      end
-    end
-
-    # Keys represent specific files so we need to get their metadata using head_object
-    if keys.any?
-      # puts "Processing keys: #{keys.inspect}"
-      keys.each { |key| objects << head_meta(bucket, key) }
-      # puts "Objects after processing keys: #{objects.inspect}"
-    end
-
-    # TODO: At this point, some of the objects will already have the archive_status and restore_status
-    # values (via the keys path)
-    # Refactor so that we don't duplicate the head_object calls.
-    objects.each { |obj| modify_with_storage_data(bucket, obj) }
-    objects
-  end
-
-  def modify_with_storage_data(bucket, obj)
-    h = s3_client.head_object(bucket: bucket, key: obj[:key])
-    # puts "HeadObject for #{obj[:key]}: #{h.inspect}"
-    obj[:archive_status] = h.archive_status
-    obj[:restore]        = h.restore
-  end
-
-  def head_meta(bucket, key)
-    h = s3_client.head_object(bucket: bucket, key: key)
-    { key: key, size: h.content_length, last_modified: h.last_modified,
-      storage_class: h.storage_class, archive_status: h.archive_status, restore: h.restore }
-  end
-
-  # Like list but without delimeter
-  def list_prefix(bucket, prefix)
-    s3_client.list_objects_v2(bucket: bucket, prefix: prefix).each do |page|
-      page.contents.each do |obj|
-        next if obj.key.end_with?('/') # 0-byte folder markers, not files
-
-        # NOTE: This object includes restore_status but that value is always nil, unless we include "optional_object_attributes"
-        # in the request. Since we need to retrieve addition information using head_object anyway, we retrieve
-        # the restore_status there instead of this method.
-        puts "#{obj.inspect}"
-
-        yield(key: obj.key, size: obj.size, last_modified: obj.last_modified,
-              storage_class: obj.storage_class, archive_status: nil, restore: nil)
-      end
-    end
-  end
-
   # GET /api/buckets/:bucket/object?key={objectKey}
   # Get object details with HeadObject
   # Note:
@@ -177,6 +99,19 @@ class Api::S3BrowserController < Api::BaseController
     })
 
     render json: object_details_json(bucket, object_key, s3_object)
+  end
+
+  # Add pagination
+  def index_csv_exports
+    csv_exports = CsvExport.where(user_id: 1).order(updated_at: :desc)
+    render json: csv_exports.map { |csv_export| csv_export_summary_json(csv_export) }
+  end
+
+  # TODO: Verify that the user has access to the requested CSV export.
+  # Add a method to camelize the response keys
+  def show_csv_export
+    csv_export = CsvExport.find(params[:id])
+    render json: csv_export_detail_json(csv_export)
   end
 
   private
@@ -234,6 +169,26 @@ class Api::S3BrowserController < Api::BaseController
       storageClass: s3_object.storage_class || 'STANDARD', # s3 api returns nil for standard storage class
       archiveStatus: s3_object.archive_status,
       restoreStatus: s3_object.restore
+    }
+  end
+
+  def csv_export_detail_json(csv_export)
+    {
+      id: csv_export.id,
+      export_paths: JSON.parse(csv_export.export_paths), # do we want to limit the number of paths returned here?
+      status: csv_export.status,
+      updated_at: csv_export.updated_at
+    }
+  end
+
+  def csv_export_summary_json(csv_export)
+    {
+      id: csv_export.id,
+      status: csv_export.status,
+      export_paths: JSON.parse(csv_export.export_paths),
+      export_errors: csv_export.export_errors,
+      path_to_csv_file: csv_export.path_to_csv_file,
+      updated_at: csv_export.updated_at
     }
   end
 

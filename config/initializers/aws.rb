@@ -6,13 +6,17 @@ S3_CLIENT = Aws::S3::Client.new(
   region: AWS_CONFIG[:aws_region],
   credentials: Aws::Credentials.new(
     AWS_CONFIG[:aws_access_key_id],
-    AWS_CONFIG[:aws_secret_access_key]
+    AWS_CONFIG[:aws_secret_access_key],
+    AWS_CONFIG[:aws_session_token]
   )
 )
 
 # Setting this here to satisfy expectation for standalone call to
 # Aws::S3::MultipartFileUploader#compute_default_part_size.
 ENV['AWS_REGION'] = AWS_CONFIG[:aws_region]
+
+# TODO: Validate that the CSV export directory exists and is writable
+puts "CSV export directory: #{AWS_CONFIG[:s3_browser][:csv_exports_directory]}"
 
 def validate_aws_config!
   # No validations at the moment
