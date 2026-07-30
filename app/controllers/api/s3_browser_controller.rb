@@ -3,9 +3,8 @@
 # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
 
 class Api::S3BrowserController < Api::BaseController
-  # before_action :authorize_s3_browser_api_read_access!,
-  #               only: %i[index_buckets list object]
-  skip_before_action :verify_authenticity_token
+  before_action :authorize_s3_browser_api_read_access!,
+                only: %i[index_buckets list object]
 
   def index_buckets
     render json: { buckets: buckets }
@@ -62,15 +61,12 @@ class Api::S3BrowserController < Api::BaseController
   # A single request may span multiple buckets (one `selections` entry per bucket).
   def queue_csv_export_job
     selections = build_selections(csv_export_params)
-    puts "Selections!!! for CSV export: #{selections.inspect}"
     selections.each { |selection| validate_bucket!(selection[:bucket]) }
-
-    user_test = User.find_by(id: 1)
 
     csv_export = CsvExport.create!(
       path_to_csv_file: "#{SecureRandom.uuid}.csv", # temp
       export_paths: selections.to_json,
-      user: user_test,
+      user: current_user,
       status: :pending
     )
 
@@ -101,16 +97,24 @@ class Api::S3BrowserController < Api::BaseController
     render json: object_details_json(bucket, object_key, s3_object)
   end
 
-  # Add pagination
   def index_csv_exports
-    csv_exports = CsvExport.where(user_id: 1).order(updated_at: :desc)
-    render json: csv_exports.map { |csv_export| csv_export_summary_json(csv_export) }
+    authorize! :index, CsvExport
+
+    csv_exports = CsvExport.accessible_by(current_ability)
+                           .order(updated_at: :desc)
+                           .page(params[:page])
+                           .per(20)
+
+    render json: {
+      csvExports: csv_exports.map { |csv_export| csv_export_summary_json(csv_export) },
+      pagination: pagination_data(csv_exports)
+    }
   end
 
-  # TODO: Verify that the user has access to the requested CSV export.
-  # Add a method to camelize the response keys
+  # TODO: Add a method to camelize the response keys
   def show_csv_export
     csv_export = CsvExport.find(params[:id])
+    authorize! :show, csv_export
     render json: csv_export_detail_json(csv_export)
   end
 
@@ -132,7 +136,6 @@ class Api::S3BrowserController < Api::BaseController
   # Normalizes the per-bucket selection payload into
   # [{ bucket:, keys: [...], prefixes: [...] }, ...]
   def build_selections(permitted)
-    puts "In build_selections with permitted: #{permitted.inspect}"
     Array(permitted[:selections]).map do |selection|
       {
         bucket: selection[:bucket],
@@ -189,6 +192,15 @@ class Api::S3BrowserController < Api::BaseController
       export_errors: csv_export.export_errors,
       path_to_csv_file: csv_export.path_to_csv_file,
       updated_at: csv_export.updated_at
+    }
+  end
+
+  def pagination_data(scope)
+    {
+      current_page: scope.current_page,
+      per_page: scope.limit_value,
+      total_pages: scope.total_pages,
+      total_count: scope.total_count
     }
   end
 

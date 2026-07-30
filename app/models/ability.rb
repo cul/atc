@@ -46,5 +46,12 @@ class Ability
     # Right now, any authenticated user can access any API
     can ACCESS_API_READ_METHODS, Api::S3BrowserController
     can ACCESS_API_READ_METHODS, Api::UsersController
+
+    if user.admin?
+      can :manage, CsvExport
+    else
+      # Includes index and show actions
+      can :read, CsvExport, user_id: user.id
+    end
   end
 end

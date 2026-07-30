@@ -15,11 +15,15 @@ S3_CLIENT = Aws::S3::Client.new(
 # Aws::S3::MultipartFileUploader#compute_default_part_size.
 ENV['AWS_REGION'] = AWS_CONFIG[:aws_region]
 
-# TODO: Validate that the CSV export directory exists and is writable
-puts "CSV export directory: #{AWS_CONFIG[:s3_browser][:csv_exports_directory]}"
-
 def validate_aws_config!
-  # No validations at the moment
+  csv_exports_directory = AWS_CONFIG[:s3_browser][:csv_exports_directory]
+
+  if csv_exports_directory.blank?
+    logger.error('CSV export directory is not configured in aws.yml')
+    raise 'CSV export directory is not configured in aws.yml'
+  end
+
+  FileUtils.mkdir_p(csv_exports_directory)
 end
 
 validate_aws_config!

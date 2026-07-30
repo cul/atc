@@ -79,10 +79,10 @@ class PrepareCsvExportJob < ApplicationJob
       page.contents.each do |obj|
         next if obj.key.end_with?('/') # 0-byte folder markers, not files
 
-        # NOTE: This object includes restore_status but that value is always nil, unless we include "optional_object_attributes"
-        # in the request. Since we need to retrieve addition information using head_object anyway, we retrieve
-        # the restore_status there instead of this method.
-        puts "#{obj.inspect}"
+        # NOTE: This object includes restore_status but that value is always nil, unless we include
+        # "optional_object_attributes" in the request. Since we need to retrieve addition information using
+        # head_object anyway, we retrieve the restore_status there instead of this method.
+        puts obj.inspect
 
         yield(bucket: bucket, key: obj.key, size: obj.size, last_modified: obj.last_modified,
               storage_class: obj.storage_class, archive_status: nil, restore: nil)

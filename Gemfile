@@ -23,6 +23,8 @@ gem 'faye-websocket', '~> 0.11.3'
 gem 'google-cloud-storage', '~> 1.49'
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem 'jbuilder'
+# Pagination
+gem 'kaminari'
 # Use mysql as a database option for Active Record
 gem 'mysql2', '~> 0.5.6'
 gem 'nokogiri', '~> 1.18', '>= 1.18.9', force_ruby_platform: true

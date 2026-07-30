@@ -5,4 +5,8 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :validatable,
          :omniauthable, omniauth_providers: [:cas]
+
+  def admin?
+    is_admin
+  end
 end
