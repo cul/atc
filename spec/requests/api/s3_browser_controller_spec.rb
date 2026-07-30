@@ -153,8 +153,6 @@ describe Api::S3BrowserController, type: :request do
         context 'when S3 client raises an error' do
           before do
             allow(s3_client).to receive(:list_objects_v2).and_raise(test_s3_error)
-            # allow(test_s3_error).to receive(:code).and_return('TestError')
-            # allow(test_s3_error).to receive(:message).and_return('Test error message')
 
             get "/api/buckets/#{test_bucket}/list?prefix=#{test_prefix}"
           end

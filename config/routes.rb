@@ -11,14 +11,14 @@ Rails.application.routes.draw do
   end
 
   # S3 Browser API routes
-  namespace :api do
-    get '/buckets', to: 's3_browser#index_buckets', format: 'json'
-    get '/buckets/:bucket/list', to: 's3_browser#list', format: 'json'
-    get '/buckets/:bucket/object', to: 's3_browser#object', format: 'json'
-    get '/users/_self', to: 'users#_self', format: 'json'
-    post '/csv_exports', to: 's3_browser#queue_csv_export_job', format: 'json'
-    get '/csv_exports/:id', to: 's3_browser#show_csv_export', format: 'json'
-    get '/csv_exports', to: 's3_browser#index_csv_exports', format: 'json'
+  namespace :api, defaults: { format: :json } do
+    get '/buckets', to: 's3_browser#index_buckets'
+    get '/buckets/:bucket/list', to: 's3_browser#list'
+    get '/buckets/:bucket/object', to: 's3_browser#object'
+    get '/users/_self', to: 'users#_self'
+    post '/csv_exports', to: 's3_browser#queue_csv_export_job'
+    get '/csv_exports/:id', to: 's3_browser#show_csv_export'
+    get '/csv_exports', to: 's3_browser#index_csv_exports'
   end
 
   resque_web_constraint = lambda do |request|

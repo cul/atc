@@ -15,6 +15,6 @@ module Atc::Exceptions
   class MissingAipChecksums < DirectoryLoadError; end
 
   # API errors
-  class InvalidBucketError < StandardError; end
-  class InvalidKeyName < StandardError; end
+  class InvalidBucketError < AtcError; end
+  class InvalidKeyName < AtcError; end
 end
