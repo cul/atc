@@ -53,3 +53,20 @@
 
 # simplecov coverage report
 /coverage
+
+# Yarn files
+.yarnrc.yml
+.yarn/*
+# We can allow this or we can exclude it to keep our repo smaller; if we ignore it, then
+# a bit more initial set up will be required when people clone the repo. Allowing it for now.
+# See: https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
+!.yarn/sdks
+.pnp.*
+
+# Vite Ruby
+/public/vite*
+node_modules
+# Vite uses dotenv and suggests to ignore local-only env files. See
+# https://vitejs.dev/guide/env-and-mode.html#env-files
+*.local
+

@@ -14,14 +14,13 @@ gem 'aws-crt', '~> 0.2.0'
 gem 'best_type', '~> 1.0'
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', require: false
+gem 'cancancan'
 # Add CRC32C support to the Ruby Digest module
 gem 'digest-crc', '~> 0.6.5'
 # Client library for connecting to a websocket endpoint
 gem 'faye-websocket', '~> 0.11.3'
 # Google Cloud Storage SDK
 gem 'google-cloud-storage', '~> 1.49'
-# Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
-gem 'importmap-rails'
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem 'jbuilder'
 # Use mysql as a database option for Active Record
@@ -45,8 +44,6 @@ gem 'retriable', '~> 3.1'
 # We need to pin to 3.x because 4.x introduces a conflict.
 # The line below can be removed if resque ever stops requiring sinatra.
 gem 'sinatra', '~> 3.0'
-# The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
-gem 'sprockets-rails'
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem 'stimulus-rails'
 # Unicode to ASCII transliteration [https://rubygems.org/gems/stringex/]
@@ -108,3 +105,5 @@ group :test do
   gem 'rspec-rails'
   gem 'selenium-webdriver'
 end
+
+gem 'vite_rails', '~> 3.10'

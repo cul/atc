@@ -10,6 +10,14 @@ Rails.application.routes.draw do
     get '/users/development/sign_in_developer', to: 'users/development#sign_in_developer' if Rails.env.development?
   end
 
+  # S3 Browser API routes
+  namespace :api, defaults: { format: :json } do
+    get '/buckets', to: 's3_browser#index_buckets'
+    get '/buckets/:bucket/list', to: 's3_browser#list'
+    get '/buckets/:bucket/object', to: 's3_browser#object'
+    get '/users/_self', to: 'users#_self'
+  end
+
   resque_web_constraint = lambda do |request|
     current_user = request.env['warden'].user
     current_user.present?
@@ -24,5 +32,8 @@ Rails.application.routes.draw do
   get 'up' => 'rails/health#show', as: :rails_health_check
 
   # Defines the root path route ("/")
-  root 'pages#home'
+  root 'ui#home'
+
+  # All other routes should be handled by the react application
+  get '*path', to: 'ui#home'
 end

@@ -20,7 +20,7 @@ namespace :atc do
   task ci_nocop: ['atc:setup:config_files', :environment, 'atc:ci_specs']
 
   desc 'CI build with Rubocop validation'
-  task ci: ['atc:setup:config_files', :environment, 'atc:rubocop', 'atc:ci_specs']
+  task ci: ['atc:setup:config_files', :environment, 'atc:rubocop', 'atc:eslint', 'atc:prettier', 'atc:vitest', 'atc:ci_specs']
 
   desc 'CI build just running specs'
   task ci_specs: :environment do
@@ -46,6 +46,34 @@ namespace :atc do
     # so we can still display the run time even when a system exception comes up.
     # This exception triggers an exit call with the original error code sent out by rspec failure.
     raise rspec_system_exit_failure_exception unless rspec_system_exit_failure_exception.nil?
+  end
+
+  desc 'Run ESLint on S3 Browser Application code'
+  task :eslint do
+    success = system('yarn lint')
+
+    unless success
+      puts 'ESLint found errors. Fix before committing.'
+      exit 1
+    end
+  end
+
+  desc 'Run Prettier formatting check on frontend code'
+  task :prettier do
+    success = system('yarn format:check')
+    unless success
+      puts 'Prettier found formatting issues. Run `yarn format` to fix.'
+      exit 1
+    end
+  end
+
+  desc 'Run frontend tests'
+  task :vitest do
+    success = system('yarn test --run')
+    unless success
+      puts 'Frontend tests failed.'
+      exit 1
+    end
   end
 
 rescue LoadError => e

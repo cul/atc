@@ -1,0 +1,12 @@
+// If you want to modify theme colors:
+// @import "~bootstrap/scss/functions";
+// @import "~bootstrap/scss/variables";
+// @import "~bootstrap/scss/mixins";
+
+/* Override Bootstrap React Styles */
+// $bs-accordion-bg: teal; /* Changes the background color. */
+// $bs-accordion-color: teal; /*Changes the text color.
+// --bs-accordion-border-radius: Changes the border radius.
+// --bs-accordion-btn-focus-box-shadow: Removes the blue outline when an item is focused. */
+
+@import 'bootstrap';

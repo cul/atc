@@ -1,0 +1,35 @@
+<%#
+    This is the layout wrapping the S3 Browser UI React app.
+    The view file located at app/views/s3_browser/index.html.erb renders the root element for the React app to attach to,
+    and the React app's entrypoint is located at app/frontend/entrypoints/s3_browser.tsx -- which is here served
+    by Vite.
+%>
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta name="robots" content="noindex" />
+    <%= vite_client_tag %>
+    <%# See: https://vite-ruby.netlify.app/guide/rails.html#enabling-hot-module-reload-%F0%9F%94%A5 %>
+    <%= vite_react_refresh_tag %>
+    <%= vite_typescript_tag 's3_browser.tsx' %>
+    <%= vite_stylesheet_tag 's3_browser.scss' %>
+
+    <%= yield :head %>
+  </head>
+  <body id="main-content">
+    <nav class="d-flex py-2 px-5 bg-primary bg-opacity-25 justify-content-end">
+      <% if user_signed_in? %>
+        <% # The sign out route uses a DELETE method to prevent CSRF attacks. %>
+        <p>
+          <%= form_with(url: destroy_user_session_path, method: "delete") do |form| %>
+            <%= form.submit "Sign out", class: "btn btn-light btn-sm" %>
+          <% end %>
+        </p>
+      <% else %>
+        <p><%= link_to 'Sign in', user_session_path %></p>
+      <% end %>
+    </nav>
+    <%= yield %>
+  </body>
+</html>

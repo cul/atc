@@ -13,4 +13,8 @@ module Atc::Exceptions
   class UnreadableFiles < DirectoryLoadError; end
   class InvalidAip < DirectoryLoadError; end
   class MissingAipChecksums < DirectoryLoadError; end
+
+  # API errors
+  class InvalidBucketError < AtcError; end
+  class InvalidKeyName < AtcError; end
 end
