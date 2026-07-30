@@ -15,6 +15,6 @@ class ApplicationController < ActionController::Base
   private
 
   def access_denied
-    redirect_to '/403'
+    render file: Rails.root.join('public/403.html'), status: :forbidden, layout: false
   end
 end

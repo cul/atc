@@ -3,15 +3,15 @@
 # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
 
 class Api::S3BrowserController < Api::BaseController
-  before_action :authorize_s3_browser_api_read_access!,
-                only: %i[index_buckets list object]
+  before_action :authorize_s3_browser_api_read_access!
 
   def index_buckets
     render json: { buckets: buckets }
   end
 
   # GET /api/buckets/:bucket/list?prefix={objectPrefix}
-  # Uses AWS S3 ListObjectV2 API method with a '/' delimiter to get contents at the given prefix level within the given bucket
+  # Uses AWS S3 ListObjectV2 API method with a '/' delimiter to get contents at the given prefix level
+  # within the given bucket.
   # Note:
   #   - The API returns the parent folder as part of the objects list, so we filter it out before returning the response
   #   - If no prefix query param is provided, this endpoint will return the top level contents of the bucket
@@ -57,7 +57,8 @@ class Api::S3BrowserController < Api::BaseController
   # GET /api/buckets/:bucket/object?key={objectKey}
   # Uses AWS S3 HeadObject API method to get object details.
   # Note:
-  #   - S3 object keys can technically begin with a slash, but this is a pattern that we avoid in our buckets.  So any key received by this action will be normalized to remove the leading slash.
+  #   - S3 object keys can technically begin with a slash, but this is a pattern that we avoid in our buckets.
+  #   So any key received by this action will be normalized to remove the leading slash.
   #   - Though the documentation for the sdk warns that any spaces must be converted to '%20' in the key, doing so will
   #     actually result in a 404. The key should be passed as-is.
   def object
