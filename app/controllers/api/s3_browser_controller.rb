@@ -54,27 +54,6 @@ class Api::S3BrowserController < Api::BaseController
     render json: { folders: folders, objects: objects }
   end
 
-  # POST /api/csv_exports
-  # Validates the requested buckets, records the export request and enqueues the
-  # background job. Responds 202 with the new record's id so the client can later
-  # redirect to the CSV detail page.
-  # A single request may span multiple buckets (one `selections` entry per bucket).
-  def queue_csv_export_job
-    selections = build_selections(csv_export_params)
-    selections.each { |selection| validate_bucket!(selection[:bucket]) }
-
-    csv_export = CsvExport.create!(
-      path_to_csv_file: "#{SecureRandom.uuid}.csv", # temp
-      export_paths: selections.to_json,
-      user: current_user,
-      status: :pending
-    )
-
-    PrepareCsvExportJob.perform_later(csv_export.id)
-
-    render json: { id: csv_export.id }, status: :accepted
-  end
-
   # GET /api/buckets/:bucket/object?key={objectKey}
   # Uses AWS S3 HeadObject API method to get object details.
   # Note:
@@ -98,27 +77,6 @@ class Api::S3BrowserController < Api::BaseController
     render json: object_details_json(bucket, object_key, s3_object)
   end
 
-  def index_csv_exports
-    authorize! :index, CsvExport
-
-    csv_exports = CsvExport.accessible_by(current_ability)
-                           .order(updated_at: :desc)
-                           .page(params[:page])
-                           .per(20)
-
-    render json: {
-      csvExports: csv_exports.map { |csv_export| csv_export_summary_json(csv_export) },
-      pagination: pagination_data(csv_exports)
-    }
-  end
-
-  # TODO: Add a method to camelize the response keys
-  def show_csv_export
-    csv_export = CsvExport.find(params[:id])
-    authorize! :show, csv_export
-    render json: csv_export_detail_json(csv_export)
-  end
-
   private
 
   def list_params
@@ -128,25 +86,6 @@ class Api::S3BrowserController < Api::BaseController
   def object_params
     params.require(:key)
     params.permit(:bucket, :key)
-  end
-
-  def csv_export_params
-    params.permit(selections: [:bucket, { files: [], directories: [] }])
-  end
-
-  # Normalizes the per-bucket selection payload into
-  # [{ bucket:, keys: [...], prefixes: [...] }, ...]
-  def build_selections(permitted)
-    Array(permitted[:selections]).map do |selection|
-      {
-        bucket: selection[:bucket],
-        keys: Array(selection[:files]).map { |key| key.to_s.delete_prefix('/') },
-        prefixes: Array(selection[:directories]).map do |dir|
-          dir = dir.to_s.delete_prefix('/')
-          dir.end_with?('/') ? dir : "#{dir}/"
-        end
-      }
-    end
   end
 
   def buckets
@@ -173,35 +112,6 @@ class Api::S3BrowserController < Api::BaseController
       storageClass: s3_object.storage_class || 'STANDARD', # s3 api returns nil for standard storage class
       archiveStatus: s3_object.archive_status,
       restoreStatus: s3_object.restore
-    }
-  end
-
-  def csv_export_detail_json(csv_export)
-    {
-      id: csv_export.id,
-      export_paths: JSON.parse(csv_export.export_paths), # do we want to limit the number of paths returned here?
-      status: csv_export.status,
-      updated_at: csv_export.updated_at
-    }
-  end
-
-  def csv_export_summary_json(csv_export)
-    {
-      id: csv_export.id,
-      status: csv_export.status,
-      export_paths: JSON.parse(csv_export.export_paths),
-      export_errors: csv_export.export_errors,
-      path_to_csv_file: csv_export.path_to_csv_file,
-      updated_at: csv_export.updated_at
-    }
-  end
-
-  def pagination_data(scope)
-    {
-      current_page: scope.current_page,
-      per_page: scope.limit_value,
-      total_pages: scope.total_pages,
-      total_count: scope.total_count
     }
   end
 

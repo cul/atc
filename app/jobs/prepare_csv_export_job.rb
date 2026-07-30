@@ -20,11 +20,9 @@ class PrepareCsvExportJob < ApplicationJob
     puts "Selections for CSV export #{csv_export_id}: #{selections.inspect}"
     objects = collect_objects(selections)
 
-    # TODO: Write CSV
-    csv_export_path = Rails.root.join('tmp', 'csv_exports', csv_export.path_to_csv_file)
-    write_csv(csv_export_path, objects)
+    csv_export_filename = write_csv_export(csv_export_id, objects)
 
-    csv_export.update!(status: :success)
+    csv_export.update!(status: :success, path_to_csv_file: csv_export_filename)
   rescue StandardError => e
     Rails.logger.error("CSV export #{csv_export_id} failed: #{e.class} -> #{e.message}")
     csv_export&.update(status: :failure, export_errors: [e.message])
@@ -32,11 +30,19 @@ class PrepareCsvExportJob < ApplicationJob
 
   private
 
+  def write_csv_export(csv_export_id, objects)
+    filename = "csv_export_#{csv_export_id}_#{Time.current.strftime('%Y%m%d%H%M%S')}.csv"
+    path = File.join(AWS_CONFIG[:s3_browser][:csv_exports_directory], filename)
+    write_csv(path, objects)
+    filename
+  end
+
   # Ported from the S3BrowserController#collect_objects method
   def s3_client
     @s3_client ||= S3_CLIENT
   end
 
+  # rubocop:disable Metrics/MethodLength
   def collect_objects(selections)
     objects = []
 
@@ -68,7 +74,6 @@ class PrepareCsvExportJob < ApplicationJob
 
   def modify_with_storage_data(bucket, obj)
     h = s3_client.head_object(bucket: bucket, key: obj[:key])
-    # puts "HeadObject for #{obj[:key]}: #{h.inspect}"
     obj[:archive_status] = h.archive_status
     obj[:restore]        = h.restore
   end

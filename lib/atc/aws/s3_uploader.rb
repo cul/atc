@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop: disable Metrics/AbcSize
-
 class Atc::Aws::S3Uploader
   PROGRESS_DISPLAY_PROC = proc do |bytes, totals|
     print "\r                                               "
