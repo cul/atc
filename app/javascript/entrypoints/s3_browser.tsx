@@ -6,4 +6,3 @@ if (!s3BrowserAppElement) throw new Error('S3 Browser app root element not found
 
 const s3BrowserRoot = createRoot(s3BrowserAppElement);
 s3BrowserRoot.render(<App />);
-
