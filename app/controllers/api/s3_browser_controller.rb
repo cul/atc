@@ -24,7 +24,7 @@ class Api::S3BrowserController < Api::BaseController
     prefix = list_params[:prefix] || ''
     # normalize input
     prefix += '/' unless prefix.end_with? '/'
-    prefix = prefix.delete_prefix('/') # unfortunate method name but we need to rm leading /. A blank prefix is OK.
+    prefix = prefix.sub(/^\//, '') # A en empty string prefix value is OK.
     folders = []
     objects = []
 
