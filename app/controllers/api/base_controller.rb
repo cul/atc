@@ -33,6 +33,25 @@ class Api::BaseController < ApplicationController
     params.merge!(data.with_indifferent_access)
   end
 
+  # Renders a JSON response with all keys deep-transformed to camelCase.
+  # Use in place of `render json:` throughout API v2 controllers.
+  def render_camelized_json(data, **options)
+    render json: deep_camelize(data), **options
+  end
+
+  # Recursively transforms all hash to lowerCamelCase
+  def deep_camelize(obj)
+    case obj
+    when Hash
+      obj.transform_keys { |k| k.to_s.camelize(:lower) }
+         .transform_values { |v| deep_camelize(v) }
+    when Array
+      obj.map { |v| deep_camelize(v) }
+    else
+      obj
+    end
+  end
+
   def handle_json_parse_error(error)
     Rails.logger.error "JSON parse error: #{error.message}"
     render json: { error: 'Invalid JSON in request body' },

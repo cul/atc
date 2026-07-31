@@ -21,7 +21,7 @@ class Api::CsvExportsController < Api::BaseController
 
     PrepareCsvExportJob.perform_later(csv_export.id)
 
-    render json: { id: csv_export.id }, status: :accepted
+    render_camelized_json({ id: csv_export.id }, status: :accepted)
   end
 
   # Normalizes the per-bucket selection payload into
@@ -47,16 +47,15 @@ class Api::CsvExportsController < Api::BaseController
                            .page(params[:page])
                            .per(20)
 
-    render json: {
+    render_camelized_json({
       csvExports: csv_exports.map { |csv_export| csv_export_summary_json(csv_export) },
       pagination: pagination_data(csv_exports)
-    }
+    })
   end
 
-  # TODO: Add a method to camelize the response keys
   def show
     authorize! :show, @csv_export
-    render json: csv_export_detail_json(@csv_export)
+    render_camelized_json(csv_export_detail_json(@csv_export))
   end
 
   def download
@@ -85,6 +84,7 @@ class Api::CsvExportsController < Api::BaseController
     {
       id: csv_export.id,
       export_paths: JSON.parse(csv_export.export_paths), # do we want to limit the number of paths returned here?
+      export_errors: csv_export.export_errors,
       status: csv_export.status,
       updated_at: csv_export.updated_at
     }
