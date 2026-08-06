@@ -15,6 +15,10 @@ export const clientLoader =
     // Our API returns results in ~1-2 seconds for large buckets, so we don't want to
     // await this and block the UI. Instead, we let the component handle the loading state.
     queryClient.prefetchQuery(query);
+
+    // also prefecgh all ancestors
+    // - most likely, it immediately returns because they navigated downn to this level
+    // - if a new tab, these will finish in the bg before the user acually selects an item
   };
 
 const BucketContentsRoute = () => {

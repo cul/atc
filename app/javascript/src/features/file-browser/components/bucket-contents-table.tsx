@@ -2,10 +2,11 @@ import { useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router';
 import { columnDefs } from '../utils/bucket-contents-column-defs';
 import { toBucketItems } from '../utils/transform-to-bucket-items';
-import { useBucketContentsQuery } from '../api/get-bucket-contents';
+import { useBucketContentsQueries, useBucketContentsQuery } from '../api/get-bucket-contents';
 import TableBuilder from '@/components/ui/table-builder/table-builder';
 import { usePagination } from '../hooks/use-pagination';
 import { normalizePrefix } from '../utils/format-utils';
+import { getAncestors } from '../utils/selection-utils';
 
 interface BucketContentsTableProps {
   pageSize?: number;
@@ -16,7 +17,16 @@ const BucketContentsTable = ({ pageSize }: BucketContentsTableProps) => {
   const [searchParams] = useSearchParams();
   const prefix = normalizePrefix(searchParams.get('prefix') ?? '');
   const currentDirectory = prefix ? prefix.split('/').filter(Boolean).pop() : bucketName;
+  const ancestorQueriesArgs = getAncestors({ type: 'folder', fullPath: prefix }).map(
+    (ancestorPrefix) => {
+      return {
+        bucket: bucketName,
+        prefix: ancestorPrefix,
+      };
+    },
+  );
 
+  useBucketContentsQueries(ancestorQueriesArgs);
   const { data, isLoading } = useBucketContentsQuery({
     bucket: bucketName,
     prefix,
