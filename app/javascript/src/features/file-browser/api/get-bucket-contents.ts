@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { queryOptions, useQueries, useQuery } from '@tanstack/react-query';
 import { BucketContentsResponse } from '@/types/api';
 import { api } from '@/lib/api-client';
 import { QueryConfig } from '@/lib/react-query';
@@ -36,5 +36,16 @@ export const useBucketContentsQuery = ({
   return useQuery({
     ...getBucketContentsQueryOptions(bucket, prefix),
     ...queryConfig,
+  });
+};
+
+export const useBucketContentsQueries = (queryArgs: UseBucketContentsOptions[]) => {
+  return useQueries({
+    queries: queryArgs.map((args) => {
+      return {
+        ...getBucketContentsQueryOptions(args.bucket, args.prefix),
+        ...args.queryConfig,
+      };
+    }),
   });
 };
