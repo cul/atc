@@ -3,7 +3,7 @@
 require 'csv'
 
 # Builds the CSV file for a CsvExport record
-class PrepareCsvExportJob < ApplicationJob
+class PrepareCsvExportJob < ApplicationJob # rubocop:disable Metrics/ClassLength
   queue_as Atc::Queues::CSV_EXPORT
 
   CSV_HEADERS = [
@@ -12,20 +12,22 @@ class PrepareCsvExportJob < ApplicationJob
   ].freeze
 
   def perform(csv_export_id)
-    csv_export = CsvExport.find(csv_export_id)
+    @errors = []
+    @csv_export = CsvExport.find(csv_export_id)
 
-    csv_export.update!(status: :processing)
+    @csv_export.update!(status: :processing)
 
-    selections = JSON.parse(csv_export.export_paths, symbolize_names: true)
+    selections = JSON.parse(@csv_export.export_paths, symbolize_names: true)
     puts "Selections for CSV export #{csv_export_id}: #{selections.inspect}"
     objects = collect_objects(selections)
 
     csv_export_filename = write_csv_export(csv_export_id, objects)
 
-    csv_export.update!(status: :success, path_to_csv_file: csv_export_filename)
+    @csv_export.update!(status: @errors.any? ? :completed_with_errors : :success,
+                        path_to_csv_file: csv_export_filename, export_errors: @errors)
   rescue StandardError => e
     Rails.logger.error("CSV export #{csv_export_id} failed: #{e.class} -> #{e.message}")
-    csv_export&.update(status: :failure, export_errors: [e.message])
+    @csv_export&.update(status: :failure, export_errors: @errors + [e.message])
   end
 
   private
@@ -42,7 +44,7 @@ class PrepareCsvExportJob < ApplicationJob
     @s3_client ||= S3_CLIENT
   end
 
-  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def collect_objects(selections)
     objects = []
 
@@ -57,12 +59,18 @@ class PrepareCsvExportJob < ApplicationJob
           modify_with_storage_data(bucket, obj) if needs_storage_details?(obj)
           objects << obj
         end
+      rescue Aws::S3::Errors::ServiceError => e
+        @errors << "Could not read folder s3://#{bucket}/#{prefix} - #{e.message}"
       end
 
       # Keys represent specific files. head_meta already issues a head_object and returns the complete
       # metadata (including archive/restore status) so no additional call is needed for these.
       # puts "Processing keys: #{selection[:keys].inspect}"
-      selection[:keys].each { |key| objects << head_meta(bucket, key) }
+      selection[:keys].each do |key|
+        objects << head_meta(bucket, key)
+      rescue Aws::S3::Errors::ServiceError => e
+        @errors << "Could not read file s3://#{bucket}/#{key} - #{e.message}"
+      end
       # puts "Objects after processing keys: #{objects.inspect}"
     end
     puts "Objects collected for CSV export: #{objects.inspect}"
@@ -79,6 +87,8 @@ class PrepareCsvExportJob < ApplicationJob
     h = s3_client.head_object(bucket: bucket, key: obj[:key])
     obj[:archive_status] = h.archive_status
     obj[:restore]        = h.restore
+  rescue Aws::S3::Errors::ServiceError => e
+    @errors << "Could not read file s3://#{bucket}/#{obj[:key]} - #{e.message}"
   end
 
   # Like list but without delimeter
