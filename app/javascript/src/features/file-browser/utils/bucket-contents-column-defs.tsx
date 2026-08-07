@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, useParams } from 'react-router';
 import { createColumnHelper, Row } from '@tanstack/react-table';
 import { BucketItem } from '@/types/api';
 import {
@@ -35,17 +35,18 @@ const sortByTypeAndExtension = (a: BucketItem, b: BucketItem) => {
 };
 
 const RowActions = ({ row }: { row: Row<BucketItem> }) => {
+  const { bucketName } = useParams();
   const { selectItem, deselectItem } = useSelectedItemsStore();
   const queryClient = useQueryClient();
-  const checkedState = useCheckboxState(row.original);
+  const checkedState = useCheckboxState(bucketName, row.original);
   const [pending, setPending] = useState(false);
 
   const executeSelection = (rowItem: BucketItem, checkedState: string) => {
     if (checkedState === 'checked') {
-      deselectItem(rowItem, queryClient);
+      deselectItem(rowItem, bucketName, queryClient);
     } else {
       // checkedState === 'unchecked' || checkedState ==='partial'
-      selectItem(rowItem, queryClient);
+      selectItem(rowItem, bucketName, queryClient);
     }
   };
 
