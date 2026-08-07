@@ -2,21 +2,24 @@ import { getAncestors, getAncestorsBetween } from '@/features/file-browser/utils
 import { Bucket, BucketContentsResponse, BucketItem } from '@/types/api';
 import { QueryClient } from '@tanstack/react-query';
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
+import { enableMapSet, current } from 'immer';
+import BucketsRoute from '@/app/routes/buckets';
 
-const BUCKET = 'cul-dlstor-digital-access';
+// Immer only supports add, has, and delete on sets, so we can't use unions, etc.
+enableMapSet();
 
 type BucketSelection = {
+  bucketName: string;
   folders: Set<string>;
   objects: Set<string>;
 };
 
 // TODO: add cross bucket selection
 type SelectedItemsStore = {
-  // buckets: Array<BucketSelection>;
-  folders: Set<string>;
-  objects: Set<string>;
-  selectItem: (item: BucketItem, queryClient: QueryClient) => void;
-  deselectItem: (item: BucketItem, queryClient: QueryClient) => void;
+  buckets: Array<BucketSelection>;
+  selectItem: (item: BucketItem, currentBucket: string, queryClient: QueryClient) => void;
+  deselectItem: (item: BucketItem, currentBucket: string, queryClient: QueryClient) => void;
   reset: () => void;
 };
 
@@ -37,13 +40,13 @@ const countSelectedAncestorChildren = (
   prefix: string,
 ) => {
   let count = 0;
-  for (const path of nextFolders.union(nextObjects)) {
-    if (isDirectChildOf(path, prefix)) count++;
-  }
+  for (const path of nextFolders) if (isDirectChildOf(path, prefix)) count++;
+  for (const path of nextObjects) if (isDirectChildOf(path, prefix)) count++;
   return count;
 };
 
 const collapseParents = (
+  currentBucket: string,
   item: BucketItem,
   queryClient: QueryClient,
   nextFolders: Set<string>,
@@ -61,7 +64,7 @@ const collapseParents = (
   for (const ancestorPrefix of ancestors) {
     const ancestorData = queryClient.getQueryData<BucketContentsResponse>([
       'bucket-contents',
-      BUCKET, // TODO account for cross bucket selections
+      currentBucket, // TODO account for cross bucket selections
       ancestorPrefix,
     ]);
     console.log('  data for ' + ancestorPrefix);
@@ -99,7 +102,6 @@ const collapseParents = (
     }
   }
   console.log('----------- selection added -----');
-  return { folders: nextFolders, objects: nextObjects };
 };
 
 const isAnyChildOf = (path: string, prefix: string) => path.startsWith(prefix);
@@ -113,11 +115,13 @@ const getNearestSelectedParent = (path: string, folders: Set<string>) => {
 };
 
 const explodeParents = (
+  currentBucket: string,
   item: BucketItem,
   queryClient: QueryClient,
   nextObjects: Set<string>,
   nextFolders: Set<string>,
 ) => {
+  console.log('explodeParents entry');
   const nearestSelectedParent = getNearestSelectedParent(item.fullPath, nextFolders);
   console.log('nearest parent is ' + nearestSelectedParent);
   if (nearestSelectedParent) {
@@ -126,12 +130,20 @@ const explodeParents = (
     console.log('ancestors between:');
     console.log(ancestorFolders);
     for (const ancestorFolder of ancestorFolders) {
+      console.log('querying for:');
+      console.log([
+        'bucket-contents',
+        currentBucket, // TODO account for cross bucket selections
+        ancestorFolder,
+      ]);
       const ancestorData = queryClient.getQueryData<BucketContentsResponse>([
         'bucket-contents',
-        BUCKET, // TODO account for cross bucket selections
+        currentBucket, // TODO account for cross bucket selections
         ancestorFolder,
       ]);
       console.log('      ancestorFolder: ' + ancestorFolder);
+      console.log('      ancestor data:');
+      console.log(ancestorData);
       if (nextFolders.has(ancestorFolder)) nextFolders.delete(ancestorFolder);
       // add all items except for the ancestor folder itself and the object itself...
       for (const object of ancestorData.objects) {
@@ -156,99 +168,88 @@ const explodeParents = (
   }
 
   console.log('--------- done with deselect');
-  return { folders: nextFolders, objects: nextObjects };
 };
 
-export const useSelectedItemsStore = create<SelectedItemsStore>()((set) => ({
-  folders: new Set<string>(),
-  objects: new Set<string>(),
-  reset: () => {
-    console.log('resetting selection');
-    set({ folders: new Set<string>(), objects: new Set<string>() });
-  },
-  selectItem: (item: BucketItem, queryClient: QueryClient) => {
-    set((state) => {
-      console.log('------   select item ------- ');
-      const nextFolders = new Set<string>(state.folders);
-      const nextObjects = new Set<string>(state.objects);
-      if (item.type === 'object') nextObjects.add(item.fullPath);
-      if (item.type === 'folder') {
-        // remove any children, then add folder
-        for (const path of nextFolders) {
-          if (isAnyChildOf(path, item.fullPath)) {
-            nextFolders.delete(path);
-          }
+export const useSelectedItemsStore = create<SelectedItemsStore>()(
+  immer((set) => ({
+    buckets: [],
+    reset: () => {
+      console.log('resetting selection');
+      set({ buckets: [] });
+      // set({ folders: new Set<string>(), objects: new Set<string>() });
+    },
+    selectItem: (item: BucketItem, currentBucket: string, queryClient: QueryClient) => {
+      set((state) => {
+        console.log('------   select item ------- ');
+        let bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
+        console.log('current state:');
+        console.log(current(state));
+
+        // Base case: first selection
+        if (!bucketSelection) {
+          state.buckets.push({
+            bucketName: currentBucket,
+            folders: new Set<string>(),
+            objects: new Set<string>(),
+          });
+          console.log('creating bucket selection!');
+          bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
         }
-        for (const path of nextObjects) {
-          if (isAnyChildOf(path, item.fullPath)) {
-            nextObjects.delete(path);
+
+        const nextFolders = bucketSelection.folders;
+        console.log('set');
+        const nextObjects = bucketSelection.objects;
+
+        // TODO : YOU ARE HERE! :)
+
+        console.log('here1');
+        if (item.type === 'object') nextObjects.add(item.fullPath);
+        if (item.type === 'folder') {
+          // remove any children, then add folder
+          for (const path of nextFolders) {
+            if (isAnyChildOf(path, item.fullPath)) {
+              nextFolders.delete(path);
+            }
           }
+          for (const path of nextObjects) {
+            if (isAnyChildOf(path, item.fullPath)) {
+              nextObjects.delete(path);
+            }
+          }
+          nextFolders.add(item.fullPath);
         }
-        nextFolders.add(item.fullPath);
-      }
 
-      return collapseParents(item, queryClient, nextFolders, nextObjects);
-    });
-  },
-  deselectItem: (item: BucketItem, queryClient: QueryClient) => {
-    console.log('--------- deselecting item');
+        collapseParents(currentBucket, item, queryClient, nextFolders, nextObjects);
+      });
+    },
+    deselectItem: (item: BucketItem, currentBucket: string, queryClient: QueryClient) => {
+      console.log('--------- deselecting item');
 
-    set((state) => {
-      const nextFolders = new Set<string>(state.folders);
-      const nextObjects = new Set<string>(state.objects);
-      item.type === 'object'
-        ? nextObjects.delete(item.fullPath)
-        : nextFolders.delete(item.fullPath);
+      set((state) => {
+        let bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
+        console.log('current selected bucket');
+        console.log(current(state));
+        const nextFolders = bucketSelection.folders;
+        const nextObjects = bucketSelection.objects;
+        console.log('huh');
+        item.type === 'object'
+          ? nextObjects.delete(item.fullPath)
+          : nextFolders.delete(item.fullPath);
 
-      // // explode logic...
-      // const nearestSelectedParent = getNearestSelectedParent(item.fullPath, nextFolders);
-      // console.log('nearest parent is ' + nearestSelectedParent);
-      // if (nearestSelectedParent) {
-      //   // explode recursively up
-      //   const ancestorFolders = getAncestorsBetween(item, nearestSelectedParent);
-      //   console.log('ancestors between:');
-      //   console.log(ancestorFolders);
-      //   for (const ancestorFolder of ancestorFolders) {
-      //     const ancestorData = queryClient.getQueryData<BucketContentsResponse>([
-      //       'bucket-contents',
-      //       BUCKET, // TODO account for cross bucket selections
-      //       ancestorFolder,
-      //     ]);
-      //     console.log('      ancestorFolder: ' + ancestorFolder);
-      //     if (nextFolders.has(ancestorFolder)) nextFolders.delete(ancestorFolder);
-      //     // add all items except for the ancestor folder itself and the object itself...
-      //     for (const object of ancestorData.objects) {
-      //       if (object.key !== item.fullPath) {
-      //         console.log('adding object');
-      //         nextObjects.add(object.key);
-      //       }
-      //     }
-      //     for (const folder of ancestorData.folders) {
-      //       // Do not add a folder if it is part of the ancestor tree itself (that will be a partial selection)
-      //       if (ancestorFolders.includes(folder)) {
-      //         console.log('removing folder');
-      //         nextFolders.delete(folder);
-      //       } else {
-      //         console.log('adding folder');
-      //         if (folder !== item.fullPath) nextFolders.add(folder);
-      //       }
-      //     }
-      //   }
-      // } else {
-      //   console.log('no nearest parent');
-      // }
-
-      // console.log('--------- done with deselect');
-      return explodeParents(item, queryClient, nextObjects, nextFolders);
-    });
-  },
-}));
+        console.log('what');
+        explodeParents(currentBucket, item, queryClient, nextObjects, nextFolders);
+      });
+    },
+  })),
+);
 
 type CheckboxState = 'checked' | 'unchecked' | 'partial';
 
-export const useCheckboxState = (item: BucketItem): CheckboxState => {
+export const useCheckboxState = (bucketName: string, item: BucketItem): CheckboxState => {
   return useSelectedItemsStore((state) => {
-    const { folders, objects } = state;
+    const currentBucket = state.buckets.find((bucket) => bucket.bucketName === bucketName);
+    if (currentBucket === undefined) return 'unchecked';
+    const { folders, objects } = currentBucket;
 
     // exact folder or item match
     if (folders.has(item.fullPath) || objects.has(item.fullPath)) return 'checked';
