@@ -8,7 +8,7 @@ export const getAncestors = (
 ): Array<string> => {
   const ancestors = [];
   let path = item.fullPath;
-  // Do not include the current item itself if it is a folder
+  // Do not include the current item itself (if it is a folder)
   if (item.type === 'folder') path = path.substring(0, path.lastIndexOf('/'));
   while (path.includes('/')) {
     const nextAncestor = path.substring(0, path.lastIndexOf('/'));
@@ -22,15 +22,45 @@ export const getAncestors = (
 // Returns array of the current folder or object's ancestors up until the cap
 // in order of closest to furthest (highest)
 // e.g. ('a/b/c/d/', 'a/') -> [ 'a/b/c/', 'a/b/', 'a/']
-export const getAncestorsBetween = (item: BucketItem, cap: string) => {
+export const getAncestorsBetween = (item: BucketItem, limit: string) => {
   const ancestors = [];
   let path = item.fullPath;
-  // Do not include the current item itself if it is a folder
+  // Do not include the current item itself (if it is a folder)
   if (item.type === 'folder') path = path.substring(0, path.lastIndexOf('/'));
-  while (`${path}/` !== cap) {
+  while (`${path}/` !== limit) {
     const nextAncestor = path.substring(0, path.lastIndexOf('/'));
     ancestors.push(`${nextAncestor}/`);
     path = nextAncestor;
   }
   return ancestors;
+};
+
+export const subtractPrefix = (path: string, prefix: string) => path.replace(prefix, '');
+
+export const isDirectChildOf = (path: string, prefix: string) => {
+  if (path.endsWith('/')) path = path.slice(0, -1); // Remove trailing / for folders
+  // Base case: top level of a bucket
+  if (prefix === '/') {
+    return !path.includes('/');
+  }
+  return path.startsWith(prefix) && !subtractPrefix(path, prefix).includes('/');
+};
+
+export const countSelectedAncestorChildren = (
+  nextFolders: Set<string>,
+  nextObjects: Set<string>,
+  prefix: string,
+) => {
+  let count = 0;
+  for (const path of nextFolders) if (isDirectChildOf(path, prefix)) count++;
+  for (const path of nextObjects) if (isDirectChildOf(path, prefix)) count++;
+  return count;
+};
+
+export const isAnyChildOf = (path: string, prefix: string) => path.startsWith(prefix);
+
+export const getNearestSelectedParent = (path: string, folders: Set<string>) => {
+  for (const folder of folders) {
+    if (path.includes(folder)) return folder;
+  }
 };
