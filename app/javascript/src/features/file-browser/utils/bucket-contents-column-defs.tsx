@@ -1,5 +1,5 @@
-import { Link, useParams } from 'react-router';
-import { createColumnHelper, Row } from '@tanstack/react-table';
+import { Link } from 'react-router';
+import { createColumnHelper } from '@tanstack/react-table';
 import { BucketItem } from '@/types/api';
 import {
   capitalizeStr,
@@ -7,12 +7,7 @@ import {
   formatSize,
   formatLastModified,
 } from './format-utils';
-import { useCheckboxState, useSelectedItemsStore } from '@/stores/selected-items-store';
-import { useEffect, useRef, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { Spinner } from 'react-bootstrap';
-import { getAncestors } from './selection-utils';
-import { getBucketContentsQueryOptions } from '../api/get-bucket-contents';
+import SelectionCheckbox from '../components/selection-checkbox';
 
 const columnHelper = createColumnHelper<BucketItem>();
 
@@ -34,64 +29,10 @@ const sortByTypeAndExtension = (a: BucketItem, b: BucketItem) => {
   return a.name.localeCompare(b.name);
 };
 
-const RowActions = ({ row }: { row: Row<BucketItem> }) => {
-  const { bucketName } = useParams();
-  const { selectItem, deselectItem } = useSelectedItemsStore();
-  const queryClient = useQueryClient();
-  const checkedState = useCheckboxState(bucketName, row.original);
-  const [pending, setPending] = useState(false);
-
-  const executeSelection = (rowItem: BucketItem, checkedState: string) => {
-    if (checkedState === 'checked') {
-      deselectItem(rowItem, bucketName, queryClient);
-    } else {
-      // checkedState === 'unchecked' || checkedState ==='partial'
-      selectItem(rowItem, bucketName, queryClient);
-    }
-  };
-
-  const handleClick = async (rowItem: BucketItem, checkedState: string) => {
-    setPending(true);
-    try {
-      await Promise.all(
-        getAncestors(rowItem).map((ancestorPrefix) =>
-          queryClient.fetchQuery({
-            ...getBucketContentsQueryOptions('cul-dlstor-digital-testing1', ancestorPrefix),
-          }),
-        ),
-      );
-      executeSelection(rowItem, checkedState);
-    } catch {
-      // TODO: render error notification
-    } finally {
-      setPending(false);
-    }
-  };
-
-  if (pending) return <Spinner animation="border" size="sm" variant="primary" />;
-
-  return (
-    <div>
-      <input
-        className="form-check-input"
-        type="checkbox"
-        checked={checkedState === 'checked'}
-        id={`checkItem${row.id}`}
-        onChange={() => handleClick(row.original, checkedState)}
-      ></input>
-      <label className="form-check-label" htmlFor={`checkItem${row.id}`} />
-      {checkedState}
-    </div>
-  );
-};
-
-// non modifiable checkbox for folder selection's children
-// then we only track exactly what the user does and only correct indeterminate check to full check when they manually check it off
-
 export const columnDefs = (bucket: string) => [
   columnHelper.display({
-    id: 'select', // what is the id for?
-    cell: (props) => <RowActions row={props.row} />,
+    id: 'select',
+    cell: (props) => <SelectionCheckbox row={props.row} />,
   }),
   columnHelper.accessor('name', {
     header: 'Name',
