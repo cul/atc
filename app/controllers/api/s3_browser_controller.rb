@@ -19,7 +19,6 @@ class Api::S3BrowserController < Api::BaseController
   #     normalize any provided prefix to ensure it ends with a '/'. Conversely, it must not start with a '/'. The
   #     exception to this is a root-level search, which must be entirely empty.
   def list # rubocop:disable Metrics/CyclomaticComplexity
-    # sleep(5) if list_params[:prefix] == 'dev/'
     bucket = list_params[:bucket]
     validate_bucket! bucket
     prefix = list_params[:prefix] || ''
@@ -52,7 +51,6 @@ class Api::S3BrowserController < Api::BaseController
       obj[:key] == prefix && obj[:size].zero?
     end
 
-    # puts '        RETURNED LIST DATA   !!!!' if list_params[:prefix] == 'fstore/diskonly/preservation/'
     render json: { folders: folders, objects: objects }
   end
 
