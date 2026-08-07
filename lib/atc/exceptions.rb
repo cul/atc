@@ -17,4 +17,5 @@ module Atc::Exceptions
   # API errors
   class InvalidBucketError < AtcError; end
   class InvalidKeyName < AtcError; end
+  class InvalidSelectionError < AtcError; end
 end

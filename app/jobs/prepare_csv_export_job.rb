@@ -49,27 +49,30 @@ class PrepareCsvExportJob < ApplicationJob
     selections.each do |selection|
       bucket = selection[:bucket]
 
-      # Get all objects under the given prefixes (folders)
+      # Objects under the given prefixes (folders). Listing using list_objects_v2 returns
+      # everything except archive/restore status so we only fetch the extra head_object
+      # on the objects that can actually have those values (see needs_storage_details?).
       selection[:prefixes].each do |prefix|
         list_prefix(bucket, prefix) do |obj|
+          modify_with_storage_data(bucket, obj) if needs_storage_details?(obj)
           objects << obj
         end
       end
 
-      # Keys represent specific files so we need to get their metadata using head_object
-      if selection[:keys].any?
-        # puts "Processing keys: #{selection[:keys].inspect}"
-        selection[:keys].each { |key| objects << head_meta(bucket, key) }
-        # puts "Objects after processing keys: #{objects.inspect}"
-      end
-
-      # TODO: At this point, some of the objects will already have the archive_status and restore_status
-      # values (via the keys path)
-      # Refactor so that we don't duplicate the head_object calls.
-      objects.each { |obj| modify_with_storage_data(bucket, obj) }
+      # Keys represent specific files. head_meta already issues a head_object and returns the complete
+      # metadata (including archive/restore status) so no additional call is needed for these.
+      # puts "Processing keys: #{selection[:keys].inspect}"
+      selection[:keys].each { |key| objects << head_meta(bucket, key) }
+      # puts "Objects after processing keys: #{objects.inspect}"
     end
     puts "Objects collected for CSV export: #{objects.inspect}"
     objects
+  end
+
+  # Objects in the STANDARD storage class will never have a restore in progress
+  # and don't have an archive status.
+  def needs_storage_details?(obj)
+    obj[:storage_class] == 'INTELLIGENT_TIERING'
   end
 
   def modify_with_storage_data(bucket, obj)

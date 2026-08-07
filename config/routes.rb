@@ -17,12 +17,11 @@ Rails.application.routes.draw do
     get '/buckets/:bucket/object', to: 's3_browser#object'
     get '/users/_self', to: 'users#_self'
 
-    resources :csv_exports, only: [:index, :show] do
+    resources :csv_exports, only: [:index, :show, :create] do
       member do
         get :download
       end
     end
-    post '/csv_exports', to: 'csv_exports#queue_csv_export_job', defaults: { format: nil }
   end
 
   resque_web_constraint = lambda do |request|

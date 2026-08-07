@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Api::CsvExportsController < Api::BaseController
-  skip_before_action :verify_authenticity_token
+  skip_before_action :verify_authenticity_token # remove after testing with Postman
   before_action :set_csv_export, only: [:show, :download]
 
   # POST /api/csv_exports
@@ -9,8 +9,11 @@ class Api::CsvExportsController < Api::BaseController
   # background job. Responds 202 with the new record's id so the client can later
   # redirect to the CSV detail page.
   # A single request may span multiple buckets (one `selections` entry per bucket).
-  def queue_csv_export_job
+  def create
+    authorize! :create, CsvExport
+
     selections = build_selections(csv_export_params)
+    validate_selections!(selections)
     selections.each { |selection| validate_bucket!(selection[:bucket]) }
 
     csv_export = CsvExport.create!(
@@ -30,9 +33,11 @@ class Api::CsvExportsController < Api::BaseController
     Array(permitted[:selections]).map do |selection|
       {
         bucket: selection[:bucket],
-        keys: Array(selection[:files]).map { |key| key.to_s.delete_prefix('/') },
-        prefixes: Array(selection[:directories]).map do |dir|
+        keys: Array(selection[:files]).map { |key| key.to_s.delete_prefix('/') }.reject(&:blank?),
+        prefixes: Array(selection[:directories]).filter_map do |dir|
           dir = dir.to_s.delete_prefix('/')
+          next if dir.blank?
+
           dir.end_with?('/') ? dir : "#{dir}/"
         end
       }
@@ -108,6 +113,17 @@ class Api::CsvExportsController < Api::BaseController
       total_pages: scope.total_pages,
       total_count: scope.total_count
     }
+  end
+
+  # A request must include at least one selection and every selection must target
+  # at least one file OR directory
+  def validate_selections!(selections)
+    raise Atc::Exceptions::InvalidSelectionError, 'You must include at least one selection.' if selections.empty?
+
+    return if selections.all? { |selection| selection[:keys].any? || selection[:prefixes].any? }
+
+    raise Atc::Exceptions::InvalidSelectionError,
+          'Each selection must include at least one file or directory.'
   end
 
   # TODO: Duplicates code in S3BrowserController, refactor

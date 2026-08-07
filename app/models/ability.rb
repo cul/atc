@@ -52,6 +52,8 @@ class Ability
     else
       # Includes index and show actions
       can :read, CsvExport, user_id: user.id
+      # Any authenticated user may request an export
+      can :create, CsvExport
     end
   end
 end

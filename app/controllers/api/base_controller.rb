@@ -7,6 +7,7 @@ class Api::BaseController < ApplicationController
   rescue_from JSON::ParserError, with: :handle_json_parse_error
   rescue_from Atc::Exceptions::InvalidBucketError, with: :handle_invalid_bucket_error
   rescue_from Atc::Exceptions::InvalidKeyName, with: :handle_invalid_key_name_error
+  rescue_from Atc::Exceptions::InvalidSelectionError, with: :handle_invalid_selection_error
   rescue_from Aws::S3::Errors::ServiceError, with: :handle_aws_service_error
 
   private
@@ -34,7 +35,7 @@ class Api::BaseController < ApplicationController
   end
 
   # Renders a JSON response with all keys deep-transformed to camelCase.
-  # Use in place of `render json:` throughout API v2 controllers.
+  # Use in place of `render json:` throughout API controllers.
   def render_camelized_json(data, **options)
     render json: deep_camelize(data), **options
   end
@@ -75,5 +76,12 @@ class Api::BaseController < ApplicationController
   def handle_invalid_key_name_error(error)
     render json: { error: error.message },
            status: :bad_request
+  end
+
+  # The selections payload has nothing to export (no selections at all
+  # or a selection with neither files nor directories)
+  def handle_invalid_selection_error(error)
+    render json: { error: error.message },
+           status: :unprocessable_entity
   end
 end
