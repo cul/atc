@@ -10,7 +10,7 @@ import { BucketContentsResponse, BucketItem } from '@/types/api';
 import { QueryClient } from '@tanstack/react-query';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { enableMapSet, current } from 'immer';
+import { enableMapSet } from 'immer';
 
 // Enable Sets for immer. Immer only supports add, has, and delete on sets,
 // so even with this we can't use unions, intersections, etc.

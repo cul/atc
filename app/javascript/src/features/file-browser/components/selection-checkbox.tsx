@@ -1,5 +1,5 @@
 import { Spinner } from 'react-bootstrap';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router';
 import { Row } from '@tanstack/react-table';
@@ -9,15 +9,17 @@ import { getAncestors } from '../utils/selection-utils';
 import { BucketItem } from '@/types/api';
 import { useCheckboxState, useSelectedItemsStore } from '@/stores/selected-items-store';
 
-// non modifiable checkbox for folder selection's children
-// then we only track exactly what the user does and only correct indeterminate check to full check when they manually check it off
-
 const SelectionCheckbox = ({ row }: { row: Row<BucketItem> }) => {
   const { bucketName } = useParams();
   const { selectItem, deselectItem } = useSelectedItemsStore();
   const queryClient = useQueryClient();
   const checkedState = useCheckboxState(bucketName, row.original);
   const [pending, setPending] = useState(false);
+  const checkboxRef = useRef(null);
+
+  useEffect(() => {
+    checkboxRef.current.indeterminate = checkedState === 'partial' ? true : false;
+  }, [checkboxRef, checkedState]);
 
   const executeSelection = (rowItem: BucketItem, checkedState: string) => {
     if (checkedState === 'checked') {
@@ -53,13 +55,13 @@ const SelectionCheckbox = ({ row }: { row: Row<BucketItem> }) => {
   return (
     <div className="text-center">
       <input
+        ref={checkboxRef}
         className="form-check-input"
         type="checkbox"
         checked={checkedState === 'checked'}
         id={`checkItem${row.id}`}
         onChange={() => handleClick(row.original, checkedState)}
-      ></input>
-      {checkedState}
+      />
       <label className="form-check-label" htmlFor={`checkItem${row.id}`} />
     </div>
   );

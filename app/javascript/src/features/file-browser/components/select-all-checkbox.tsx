@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Spinner } from 'react-bootstrap';
 import { useParams, useSearchParams } from 'react-router';
 
@@ -15,6 +15,11 @@ const SelectAllCheckbox = () => {
   const queryClient = useQueryClient();
   const [pending, setPending] = useState(false);
   const checkedState = useSelectAllCheckboxState(bucketName, currentPrefix);
+  const checkboxRef = useRef(null);
+
+  useEffect(() => {
+    checkboxRef.current.indeterminate = checkedState === 'partial' ? true : false;
+  }, [checkboxRef, checkedState]);
 
   // Clicking the select all checkbox is like you clicked the folder itself
   const executeSelection = (folder: string, checkedState: string) => {
@@ -52,13 +57,13 @@ const SelectAllCheckbox = () => {
   return (
     <div className="text-center">
       <input
+        ref={checkboxRef}
         className="form-check-input"
         type="checkbox"
         checked={checkedState === 'checked'}
         id={`selectAll-${currentPrefix}`}
         onChange={() => handleClick(currentPrefix, checkedState)}
-      ></input>
-      {checkedState}
+      />
       <label className="form-check-label" htmlFor={`selectAll-${currentPrefix}`} />
     </div>
   );
