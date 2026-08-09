@@ -60,7 +60,11 @@ export const countSelectedAncestorChildren = (
   return count;
 };
 
-export const isAnyChildOf = (path: string, prefix: string) => path.startsWith(prefix);
+export const isAnyChildOf = (path: string, prefix: string) => {
+  // Everything is a child of the root level, but the items don't startWith('/')
+  if (prefix === '/') return true;
+  return path.startsWith(prefix);
+};
 
 export const getNearestSelectedParent = (path: string, folders: Set<string>) => {
   for (const folder of folders) {
