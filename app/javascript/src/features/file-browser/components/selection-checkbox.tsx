@@ -36,7 +36,7 @@ const SelectionCheckbox = ({ row }: { row: Row<BucketItem> }) => {
       await Promise.all(
         getAncestors(rowItem).map((ancestorPrefix) =>
           queryClient.fetchQuery({
-            ...getBucketContentsQueryOptions('cul-dlstor-digital-testing1', ancestorPrefix),
+            ...getBucketContentsQueryOptions(bucketName, ancestorPrefix),
           }),
         ),
       );
@@ -51,7 +51,7 @@ const SelectionCheckbox = ({ row }: { row: Row<BucketItem> }) => {
   if (pending) return <Spinner animation="border" size="sm" variant="primary" />;
 
   return (
-    <div>
+    <div className="text-center">
       <input
         className="form-check-input"
         type="checkbox"
@@ -59,8 +59,8 @@ const SelectionCheckbox = ({ row }: { row: Row<BucketItem> }) => {
         id={`checkItem${row.id}`}
         onChange={() => handleClick(row.original, checkedState)}
       ></input>
-      <label className="form-check-label" htmlFor={`checkItem${row.id}`} />
       {checkedState}
+      <label className="form-check-label" htmlFor={`checkItem${row.id}`} />
     </div>
   );
 };

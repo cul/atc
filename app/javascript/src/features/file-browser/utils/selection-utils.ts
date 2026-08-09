@@ -22,7 +22,10 @@ export const getAncestors = (
 // Returns array of the current folder or object's ancestors up until the cap
 // in order of closest to furthest (highest)
 // e.g. ('a/b/c/d/', 'a/') -> [ 'a/b/c/', 'a/b/', 'a/']
-export const getAncestorsBetween = (item: BucketItem, limit: string) => {
+export const getAncestorsBetween = (
+  item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
+  limit: string,
+) => {
   const ancestors = [];
   let path = item.fullPath;
   // Do not include the current item itself (if it is a folder)

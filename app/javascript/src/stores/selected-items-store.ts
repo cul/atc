@@ -26,8 +26,17 @@ type BucketSelection = {
 
 type SelectedItemsStore = {
   buckets: Array<BucketSelection>;
-  selectItem: (item: BucketItem, currentBucket: string, queryClient: QueryClient) => void;
-  deselectItem: (item: BucketItem, currentBucket: string, queryClient: QueryClient) => void;
+
+  selectItem: (
+    item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
+    currentBucket: string,
+    queryClient: QueryClient,
+  ) => void;
+  deselectItem: (
+    item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
+    currentBucket: string,
+    queryClient: QueryClient,
+  ) => void;
   reset: () => void;
 };
 
@@ -39,7 +48,7 @@ type SelectedItemsStore = {
 // on the nex layer up, until we can no longer collapse)
 const collapseParents = (
   currentBucket: string,
-  item: BucketItem,
+  item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
   queryClient: QueryClient,
   nextFolders: Set<string>,
   nextObjects: Set<string>,
@@ -86,7 +95,7 @@ const collapseParents = (
 // items individually to the selection store for this bucket
 const explodeParents = (
   currentBucket: string,
-  item: BucketItem,
+  item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
   queryClient: QueryClient,
   nextObjects: Set<string>,
   nextFolders: Set<string>,
@@ -125,7 +134,11 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
     reset: () => {
       set({ buckets: [] });
     },
-    selectItem: (item: BucketItem, currentBucket: string, queryClient: QueryClient) => {
+    selectItem: (
+      item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
+      currentBucket: string,
+      queryClient: QueryClient,
+    ) => {
       set((state) => {
         let bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
 
@@ -161,7 +174,11 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
         collapseParents(currentBucket, item, queryClient, nextFolders, nextObjects);
       });
     },
-    deselectItem: (item: BucketItem, currentBucket: string, queryClient: QueryClient) => {
+    deselectItem: (
+      item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
+      currentBucket: string,
+      queryClient: QueryClient,
+    ) => {
       set((state) => {
         let bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
         const nextFolders = bucketSelection.folders;
@@ -176,6 +193,37 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
     },
   })),
 );
+
+export const useSelectAllCheckboxState = (
+  bucketName: string,
+  currentFolder: string,
+): CheckboxState => {
+  return useSelectedItemsStore((state) => {
+    const currentBucket = state.buckets.find((bucket) => bucket.bucketName === bucketName);
+    if (!currentBucket) return 'unchecked';
+    const { folders, objects } = currentBucket;
+
+    if (folders.has(currentFolder)) return 'checked';
+
+    // Root directory of bucket case
+    if (currentFolder === '/' && (folders.size > 0 || objects.size > 0)) return 'partial';
+
+    // If the folder is contained by a selected folder -> checked
+    if (
+      getAncestors({ type: 'folder', fullPath: currentFolder }).some((ancestor) =>
+        folders.has(ancestor),
+      )
+    ) {
+      return 'checked';
+    }
+
+    // At least one item in selection is a child of current folder -> partial
+    for (const folder of folders) if (folder.startsWith(currentFolder)) return 'partial';
+    for (const object of objects) if (object.startsWith(currentFolder)) return 'partial';
+
+    return 'unchecked';
+  });
+};
 
 // This is used to determine the checked state of a row in a bucket-contents table.
 export const useCheckboxState = (bucketName: string, item: BucketItem): CheckboxState => {
@@ -192,8 +240,8 @@ export const useCheckboxState = (bucketName: string, item: BucketItem): Checkbox
 
     // Item is a folder and some selected objects or folders are contained within it --> partial
     if (item.type === 'folder') {
-      for (let folder of folders) if (folder.startsWith(item.fullPath)) return 'partial';
-      for (let object of objects) if (object.startsWith(item.fullPath)) return 'partial';
+      for (const folder of folders) if (folder.startsWith(item.fullPath)) return 'partial';
+      for (const object of objects) if (object.startsWith(item.fullPath)) return 'partial';
     }
 
     return 'unchecked';

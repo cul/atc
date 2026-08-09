@@ -8,6 +8,7 @@ import {
   formatLastModified,
 } from './format-utils';
 import SelectionCheckbox from '../components/selection-checkbox';
+import SelectAllCheckbox from '../components/select-all-checkbox';
 
 const columnHelper = createColumnHelper<BucketItem>();
 
@@ -32,6 +33,7 @@ const sortByTypeAndExtension = (a: BucketItem, b: BucketItem) => {
 export const columnDefs = (bucket: string) => [
   columnHelper.display({
     id: 'select',
+    header: () => <SelectAllCheckbox />,
     cell: (props) => <SelectionCheckbox row={props.row} />,
   }),
   columnHelper.accessor('name', {
