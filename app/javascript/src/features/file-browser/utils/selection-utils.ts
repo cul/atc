@@ -66,8 +66,14 @@ export const isAnyChildOf = (path: string, prefix: string) => {
   return path.startsWith(prefix);
 };
 
+// Returns the selected folder that contains this item marked for deselection
+// (if such a folder exists)
+// This works because if there is a selected folder that contains this item marked
+// for deselection, that folder will be a complete substring of the item's path
 export const getNearestSelectedParent = (path: string, folders: Set<string>) => {
   for (const folder of folders) {
     if (path.includes(folder)) return folder;
   }
+  // base case: the nearest selected parent is the entire bucket
+  if (folders.has('/')) return '/';
 };
