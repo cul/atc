@@ -52,20 +52,24 @@ const SelectAllCheckbox = () => {
     }
   };
 
-  if (pending) return <Spinner animation="border" size="sm" variant="primary" />;
-
   return (
     <div className="text-center">
-      <input
-        ref={checkboxRef}
-        className="form-check-input"
-        type="checkbox"
-        checked={checkedState === 'checked'}
-        id={`selectAll-${currentPrefix}`}
-        onChange={() => handleClick(currentPrefix, checkedState)}
-      />
-      <FontAwesomeIcon icon={faSquareCaretDown} />
-      <label className="form-check-label" htmlFor={`selectAll-${currentPrefix}`} />
+      {pending ? (
+        <Spinner animation="border" size="sm" variant="primary" />
+      ) : (
+        <>
+          <input
+            ref={checkboxRef}
+            className="form-check-input"
+            type="checkbox"
+            checked={checkedState === 'checked'}
+            id={`selectAll-${currentPrefix}`}
+            onChange={() => handleClick(currentPrefix, checkedState)}
+          />
+          <FontAwesomeIcon icon={faSquareCaretDown} />
+          <label className="form-check-label" htmlFor={`selectAll-${currentPrefix}`} />
+        </>
+      )}
     </div>
   );
 };

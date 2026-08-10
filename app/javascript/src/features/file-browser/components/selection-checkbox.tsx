@@ -50,19 +50,23 @@ const SelectionCheckbox = ({ row }: { row: Row<BucketItem> }) => {
     }
   };
 
-  if (pending) return <Spinner animation="border" size="sm" variant="primary" />;
-
   return (
     <div className="text-center">
-      <input
-        ref={checkboxRef}
-        className="form-check-input"
-        type="checkbox"
-        checked={checkedState === 'checked'}
-        id={`checkItem${row.id}`}
-        onChange={() => handleClick(row.original, checkedState)}
-      />
-      <label className="form-check-label" htmlFor={`checkItem${row.id}`} />
+      {pending ? (
+        <Spinner animation="border" size="sm" variant="primary" />
+      ) : (
+        <>
+          <input
+            ref={checkboxRef}
+            className="form-check-input"
+            type="checkbox"
+            checked={checkedState === 'checked'}
+            id={`checkItem${row.id}`}
+            onChange={() => handleClick(row.original, checkedState)}
+          />
+          <label className="form-check-label" htmlFor={`checkItem${row.id}`} />
+        </>
+      )}
     </div>
   );
 };

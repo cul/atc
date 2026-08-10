@@ -18,7 +18,7 @@ enableMapSet();
 
 type CheckboxState = 'checked' | 'unchecked' | 'partial';
 
-type BucketSelection = {
+export type BucketSelection = {
   bucketName: string;
   folders: Set<string>;
   objects: Set<string>;
