@@ -82,4 +82,6 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 export const api = {
   get: <T>(endpoint: string, options?: Omit<RequestOptions, 'method'>) =>
     request<T>(endpoint, { ...options, method: 'GET' }),
+  post: <T>(endpoint: string, data?: unknown, options?: Omit<RequestOptions, 'method'>) =>
+    request<T>(endpoint, { ...options, method: 'POST', body: JSON.stringify(data) }),
 };
