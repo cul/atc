@@ -189,6 +189,11 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
           : nextFolders.delete(item.fullPath);
 
         explodeParents(currentBucket, item, queryClient, nextObjects, nextFolders);
+
+        // Remove any empty buckets
+        state.buckets = state.buckets.filter((bucket) => {
+          return [...bucket.folders].length > 0 || [...bucket.objects].length > 0;
+        });
       });
     },
   })),
