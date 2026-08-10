@@ -180,13 +180,12 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
       queryClient: QueryClient,
     ) => {
       set((state) => {
-        let bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
+        const bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
         const nextFolders = bucketSelection.folders;
         const nextObjects = bucketSelection.objects;
 
-        item.type === 'object'
-          ? nextObjects.delete(item.fullPath)
-          : nextFolders.delete(item.fullPath);
+        if (item.type === 'object') nextObjects.delete(item.fullPath);
+        else nextFolders.delete(item.fullPath);
 
         explodeParents(currentBucket, item, queryClient, nextObjects, nextFolders);
 

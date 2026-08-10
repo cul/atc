@@ -6,8 +6,6 @@ import { useParams, useSearchParams } from 'react-router';
 import { useSelectedItemsStore, useSelectAllCheckboxState } from '@/stores/selected-items-store';
 import { getBucketContentsQueryOptions } from '../api/get-bucket-contents';
 import { getAncestors } from '../utils/selection-utils';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSquareCaretDown } from '@fortawesome/free-solid-svg-icons';
 
 const SelectAllCheckbox = () => {
   const { bucketName } = useParams();
