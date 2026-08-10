@@ -54,6 +54,7 @@ const SelectAllCheckbox = () => {
 
   return (
     <div className="text-center">
+      <span>Selection </span>
       {pending ? (
         <Spinner animation="border" size="sm" variant="primary" />
       ) : (
@@ -66,7 +67,6 @@ const SelectAllCheckbox = () => {
             id={`selectAll-${currentPrefix}`}
             onChange={() => handleClick(currentPrefix, checkedState)}
           />
-          <FontAwesomeIcon icon={faSquareCaretDown} />
           <label className="form-check-label" htmlFor={`selectAll-${currentPrefix}`} />
         </>
       )}

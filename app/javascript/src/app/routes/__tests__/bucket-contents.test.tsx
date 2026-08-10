@@ -45,6 +45,7 @@ describe('BucketContentsRoute', () => {
 
       const headers = await screen.findAllByRole('columnheader');
       expect(headers.map((header) => header.textContent?.trim())).toEqual([
+        'Selection',
         'Name',
         'Last Modified',
         'Type',
@@ -108,7 +109,7 @@ describe('BucketContentsRoute', () => {
   describe('sorting bucket contents', () => {
     const getNameOrder = () => {
       const rows = screen.getAllByRole('row').slice(1); // drop header row
-      return rows.map((row) => within(row).getAllByRole('cell')[0].textContent);
+      return rows.map((row) => within(row).getAllByRole('cell')[1].textContent);
     };
 
     it('reverses the name order when the Name header is clicked', async () => {
