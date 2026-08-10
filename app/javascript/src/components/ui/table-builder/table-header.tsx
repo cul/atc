@@ -47,7 +47,7 @@ function TableHeader<T>({ headerGroup }: TableHeaderProps<T>) {
         {headerGroup.headers.map((header) => (
           <th
             key={header.id}
-            className={`${header.column.getIsSorted() && 'bg-primary bg-opacity-25'}`}
+            className={`${header.column.getIsSorted() && 'bg-primary bg-opacity-25'} text-${(header.column.columnDef.meta as any)?.textAlign}`}
           >
             {createColumnHeader(header)}
           </th>

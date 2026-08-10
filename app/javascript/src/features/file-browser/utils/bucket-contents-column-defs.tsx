@@ -34,6 +34,7 @@ export const columnDefs = (bucket: string) => [
   columnHelper.display({
     id: 'select',
     header: () => <SelectAllCheckbox />,
+    meta: { textAlign: 'center' },
     cell: (props) => <SelectionCheckbox row={props.row} />,
   }),
   columnHelper.accessor('name', {
