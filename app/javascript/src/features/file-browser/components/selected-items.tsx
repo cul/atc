@@ -18,7 +18,7 @@ const csvExportReqBody = (buckets: BucketSelection[]): CsvExportBody[] => {
   });
 };
 
-function SelectionBoxActions({ eventKey, disabled }: { eventKey: string; disabled: boolean }) {
+const SelectionBoxActions = ({ eventKey, disabled }: { eventKey: string; disabled: boolean }) => {
   const { buckets } = useSelectedItemsStore();
   const expandSelection = useAccordionButton(eventKey);
   const exportSelection = async () => {
@@ -46,7 +46,7 @@ function SelectionBoxActions({ eventKey, disabled }: { eventKey: string; disable
       </button>
     </div>
   );
-}
+};
 
 const getFullSelectionCount = (buckets: BucketSelection[]) => {
   let count = 0;

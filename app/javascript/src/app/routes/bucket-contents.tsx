@@ -16,9 +16,10 @@ export const clientLoader =
     // await this and block the UI. Instead, we let the component handle the loading state.
     queryClient.prefetchQuery(query);
 
-    // also prefecgh all ancestors
-    // - most likely, it immediately returns because they navigated downn to this level
-    // - if a new tab, these will finish in the bg before the user acually selects an item
+    // also prefetch all ancestors
+    // - most likely, it immediately returns because they navigated down to this level
+    // - if a new tab, these will finish in the bg before the user actually selects an item
+    // TODO
   };
 
 const BucketContentsRoute = () => {
