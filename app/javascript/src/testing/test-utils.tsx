@@ -7,7 +7,7 @@ import {
   within,
 } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RouterProvider, createMemoryRouter } from 'react-router';
+import { LoaderFunction, RouteObject, RouterProvider, createMemoryRouter } from 'react-router';
 import { Notifications } from '@/components/ui/notifications/notifications';
 
 export {
@@ -31,7 +31,9 @@ const createTestQueryClient = () =>
 
 interface RenderAppOptions {
   url?: string;
-  path?: string;
+  path?: string; // parent
+  loaderFn?: (queryClient: QueryClient) => LoaderFunction;
+  children?: RouteObject[]; // for nested routes and tests rendered in layouts with an Outlet
   [key: string]: unknown;
 }
 
@@ -39,7 +41,9 @@ const buildRoutedRender = (
   ui: React.ReactElement,
   {
     url = '/', // simulated browser location to navigate to (e.g. '/users/janedoe/edit')
-    path, // route pattern React Router uses for matching and resolving params (e.g. '/users/:userUid/edit')
+    path, // parent route - route pattern React Router uses for matching and resolving params (e.g. '/users/:userUid/edit')
+    loaderFn = undefined,
+    children = undefined,
     ...renderOptions
   }: RenderAppOptions = {},
 ) => {
@@ -47,10 +51,21 @@ const buildRoutedRender = (
   const routePath = path ?? url; // defaults to url — only pass path for parameterized routes
 
   const isRoot = url === '/';
-  const router = createMemoryRouter([{ path: routePath, element: ui }], {
-    initialEntries: isRoot ? ['/'] : ['/', url],
-    initialIndex: isRoot ? 0 : 1,
-  });
+  const router = createMemoryRouter(
+    [
+      {
+        path: routePath,
+        element: ui,
+        loader: loaderFn ? loaderFn(queryClient) : undefined,
+        children: children,
+        hydrateFallbackElement: <div />,
+      },
+    ],
+    {
+      initialEntries: isRoot ? ['/'] : ['/', url],
+      initialIndex: isRoot ? 0 : 1,
+    },
+  );
 
   const result = rtlRender(
     <QueryClientProvider client={queryClient}>
@@ -60,7 +75,7 @@ const buildRoutedRender = (
     renderOptions,
   );
 
-  return { result, router };
+  return { result, router, queryClient };
 };
 
 // Default helper - renders a component inside a QueryClient + MemoryRouter
