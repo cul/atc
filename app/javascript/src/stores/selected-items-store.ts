@@ -1,3 +1,9 @@
+import { QueryClient } from '@tanstack/react-query';
+import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import { enableMapSet } from 'immer';
+
 import {
   countSelectedAncestorChildren,
   getAncestors,
@@ -7,10 +13,6 @@ import {
   isDirectChildOf,
 } from '@/features/file-browser/utils/selection-utils';
 import { BucketContentsResponse, BucketItem } from '@/types/api';
-import { QueryClient } from '@tanstack/react-query';
-import { create } from 'zustand';
-import { immer } from 'zustand/middleware/immer';
-import { enableMapSet } from 'immer';
 
 // Enable Sets for immer. Immer only supports add, has, and delete on sets,
 // so even with this we can't use unions, intersections, etc.
@@ -128,74 +130,98 @@ const explodeParents = (
   } // else - no parent folder is in the selection
 };
 
+// Custom serializer to handle Hash Sets
+const storage = createJSONStorage(() => localStorage, {
+  replacer: (_key, value) => {
+    if (value instanceof Set) {
+      return [...value];
+    }
+    return value;
+  },
+  reviver: (key, value: string) => {
+    if (key === 'folders' || key === 'objects') {
+      return new Set<string>(value);
+    }
+    return value;
+  },
+});
+
 export const useSelectedItemsStore = create<SelectedItemsStore>()(
-  immer((set) => ({
-    buckets: [],
-    reset: () => {
-      set({ buckets: [] });
-    },
-    selectItem: (
-      item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
-      currentBucket: string,
-      queryClient: QueryClient,
-    ) => {
-      set((state) => {
-        let bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
+  persist(
+    immer((set) => ({
+      buckets: [],
+      reset: () => {
+        set({ buckets: [] });
+      },
+      selectItem: (
+        item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
+        currentBucket: string,
+        queryClient: QueryClient,
+      ) => {
+        set((state) => {
+          let bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
 
-        // Case of first time making a selection in this bucket
-        if (!bucketSelection) {
-          state.buckets.push({
-            bucketName: currentBucket,
-            folders: new Set<string>(),
-            objects: new Set<string>(),
-          });
-          bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
-        }
-
-        const nextFolders = bucketSelection.folders;
-        const nextObjects = bucketSelection.objects;
-
-        if (item.type === 'object') nextObjects.add(item.fullPath);
-        if (item.type === 'folder') {
-          // remove any children, then add the folder
-          for (const path of nextFolders) {
-            if (isAnyChildOf(path, item.fullPath)) {
-              nextFolders.delete(path);
-            }
+          // Case of first time making a selection in this bucket
+          if (!bucketSelection) {
+            state.buckets.push({
+              bucketName: currentBucket,
+              folders: new Set<string>(),
+              objects: new Set<string>(),
+            });
+            bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
           }
-          for (const path of nextObjects) {
-            if (isAnyChildOf(path, item.fullPath)) {
-              nextObjects.delete(path);
+
+          const nextFolders = bucketSelection.folders;
+          const nextObjects = bucketSelection.objects;
+
+          if (item.type === 'object') nextObjects.add(item.fullPath);
+          if (item.type === 'folder') {
+            // remove any children, then add the folder
+            for (const path of nextFolders) {
+              if (isAnyChildOf(path, item.fullPath)) {
+                nextFolders.delete(path);
+              }
             }
+            for (const path of nextObjects) {
+              if (isAnyChildOf(path, item.fullPath)) {
+                nextObjects.delete(path);
+              }
+            }
+            nextFolders.add(item.fullPath);
           }
-          nextFolders.add(item.fullPath);
-        }
 
-        collapseParents(currentBucket, item, queryClient, nextFolders, nextObjects);
-      });
-    },
-    deselectItem: (
-      item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
-      currentBucket: string,
-      queryClient: QueryClient,
-    ) => {
-      set((state) => {
-        const bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
-        const nextFolders = bucketSelection.folders;
-        const nextObjects = bucketSelection.objects;
-
-        if (item.type === 'object') nextObjects.delete(item.fullPath);
-        else nextFolders.delete(item.fullPath);
-
-        explodeParents(currentBucket, item, queryClient, nextObjects, nextFolders);
-
-        // Remove any empty buckets
-        state.buckets = state.buckets.filter((bucket) => {
-          return [...bucket.folders].length > 0 || [...bucket.objects].length > 0;
+          collapseParents(currentBucket, item, queryClient, nextFolders, nextObjects);
         });
-      });
+      },
+      deselectItem: (
+        item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
+        currentBucket: string,
+        queryClient: QueryClient,
+      ) => {
+        set((state) => {
+          const bucketSelection = state.buckets.find(
+            (bucket) => bucket.bucketName === currentBucket,
+          );
+          const nextFolders = bucketSelection.folders;
+          const nextObjects = bucketSelection.objects;
+
+          if (item.type === 'object') nextObjects.delete(item.fullPath);
+          else nextFolders.delete(item.fullPath);
+
+          explodeParents(currentBucket, item, queryClient, nextObjects, nextFolders);
+
+          // Remove any empty buckets
+          state.buckets = state.buckets.filter((bucket) => {
+            return [...bucket.folders].length > 0 || [...bucket.objects].length > 0;
+          });
+        });
+      },
+    })),
+    {
+      name: 'AtcS3BrowserSelectedItems',
+      storage: storage,
     },
-  })),
+  ),
 );
 
 export const useSelectAllCheckboxState = (
