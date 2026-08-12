@@ -40,9 +40,7 @@ const BucketContentsTable = ({ pageSize }: BucketContentsTableProps) => {
     return toBucketItems(data);
   }, [data]);
 
-  // Column defs depend on bucketName for building folder and file links.
-  // Recomputes only when the bucketName changes.
-  const columns = useMemo(() => columnDefs(bucketName), [bucketName]);
+  const columns = columnDefs;
 
   return (
     <div>
