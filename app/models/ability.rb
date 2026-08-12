@@ -44,7 +44,7 @@ class Ability
 
     # We can add more Api Controllers and restrict access based on the current user
     # Right now, any authenticated user can access any API
-    can ACCESS_API_READ_METHODS, Api::S3BrowserController
+    can ACCESS_API_READ_METHODS, Api::BucketsController
     can ACCESS_API_READ_METHODS, Api::UsersController
 
     if user.admin?

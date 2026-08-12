@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-class Api::CsvExportsController < Api::BaseController
+class Api::CsvExportsController < Api::BaseController # rubocop:disable Metrics/ClassLength
+  include BucketValidation
+
   skip_before_action :verify_authenticity_token # remove after testing with Postman
   before_action :set_csv_export, only: [:show, :download]
 
@@ -14,6 +16,7 @@ class Api::CsvExportsController < Api::BaseController
 
     selections = build_selections(csv_export_params)
     validate_selections!(selections)
+    validate_no_overlapping_selections!(selections)
     selections.each { |selection| validate_bucket!(selection[:bucket]) }
 
     csv_export = CsvExport.create!(
@@ -33,13 +36,8 @@ class Api::CsvExportsController < Api::BaseController
     Array(permitted[:selections]).map do |selection|
       {
         bucket: selection[:bucket],
-        keys: Array(selection[:files]).map { |key| key.to_s.delete_prefix('/') }.reject(&:blank?),
-        prefixes: Array(selection[:directories]).filter_map do |dir|
-          dir = dir.to_s.delete_prefix('/')
-          next if dir.blank?
-
-          dir.end_with?('/') ? dir : "#{dir}/"
-        end
+        keys: normalize_keys(selection[:files]),
+        prefixes: normalize_prefixes(selection[:directories])
       }
     end
   end
@@ -115,6 +113,22 @@ class Api::CsvExportsController < Api::BaseController
     }
   end
 
+  # Files: strip leading slashes, drop blanks and remove exact duplicates
+  def normalize_keys(files)
+    Array(files).map { |key| key.to_s.delete_prefix('/') }.reject(&:blank?).uniq
+  end
+
+  # Folders: strip leading slashes, drop blank entries, ensure a single trailing slash and remove exact duplicates
+  def normalize_prefixes(directories)
+    prefixes = Array(directories).filter_map do |dir|
+      dir = dir.to_s.delete_prefix('/')
+      next if dir.blank?
+
+      dir.end_with?('/') ? dir : "#{dir}/"
+    end
+    prefixes.uniq
+  end
+
   # A request must include at least one selection and every selection must target
   # at least one file OR directory
   def validate_selections!(selections)
@@ -126,15 +140,22 @@ class Api::CsvExportsController < Api::BaseController
           'Each selection must include at least one file or directory.'
   end
 
-  # TODO: Duplicates code in S3BrowserController, refactor
-  def validate_bucket!(bucket)
-    return if buckets.map(&:name).include? bucket
+  # Rejects overlapping selections. Frontend should prevent this but we validate here to ensure
+  # the request is well-formed. Overlap is defined as any of the following:
+  # - a file that is already covered by a selected folder
+  # - a folder that is already covered by a selected folder
+  def validate_no_overlapping_selections!(selections)
+    selections.each do |selection|
+      prefixes = selection[:prefixes]
+      overlaps = (selection[:keys] + prefixes).filter_map do |item|
+        folder = prefixes.find { |prefix| item != prefix && item.start_with?(prefix) }
+        "#{item} (already covered by #{folder})" if folder
+      end
+      next if overlaps.empty?
 
-    raise Atc::Exceptions::InvalidBucketError, "Invalid bucket: #{bucket}"
-  end
-
-  # Also a duplicate
-  def buckets
-    @buckets ||= AWS_CONFIG[:s3_browser][:buckets]
+      raise Atc::Exceptions::InvalidSelectionError,
+            "Selection for bucket '#{selection[:bucket]}' includes items already covered by a " \
+            "selected folder: #{overlaps.join('; ')}"
+    end
   end
 end

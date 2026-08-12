@@ -2,7 +2,9 @@
 
 # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
 
-class Api::S3BrowserController < Api::BaseController
+class Api::BucketsController < Api::BaseController
+  include BucketValidation
+
   before_action :authorize_s3_browser_api_read_access!
 
   def index_buckets
@@ -88,18 +90,8 @@ class Api::S3BrowserController < Api::BaseController
     params.permit(:bucket, :key)
   end
 
-  def buckets
-    @buckets ||= AWS_CONFIG[:s3_browser][:buckets]
-  end
-
   def s3_client
     @s3_client ||= S3_CLIENT
-  end
-
-  def validate_bucket!(bucket)
-    return if buckets.map(&:name).include? bucket
-
-    raise Atc::Exceptions::InvalidBucketError, "Invalid bucket: #{bucket}"
   end
 
   def object_details_json(bucket, key, s3_object)
