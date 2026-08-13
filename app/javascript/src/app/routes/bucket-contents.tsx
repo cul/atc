@@ -3,23 +3,23 @@ import { LoaderFunctionArgs, useParams } from 'react-router';
 import { getBucketContentsQueryOptions } from '@/features/file-browser/api/get-bucket-contents';
 import BucketContentsTable from '@/features/file-browser/components/bucket-contents-table';
 import { normalizePrefix } from '@/features/file-browser/utils/format-utils';
+import { getAncestors } from '@/features/file-browser/utils/selection-utils';
 
 export const clientLoader =
   (queryClient: QueryClient) =>
   async ({ params, request }: LoaderFunctionArgs) => {
     const bucketName = params.bucketName as string;
     const url = new URL(request.url);
-    const prefix = normalizePrefix(url.searchParams.get('prefix') ?? '');
-    const query = getBucketContentsQueryOptions(bucketName, prefix);
+    const currentPrefix = normalizePrefix(url.searchParams.get('prefix') ?? '');
+    const prefixes = [currentPrefix, ...getAncestors({ type: 'folder', fullPath: currentPrefix })];
 
     // Our API returns results in ~1-2 seconds for large buckets, so we don't want to
-    // await this and block the UI. Instead, we let the component handle the loading state.
-    queryClient.prefetchQuery(query);
-
-    // also prefetch all ancestors
-    // - most likely, it immediately returns because they navigated down to this level
-    // - if a new tab, these will finish in the bg before the user actually selects an item
-    // TODO
+    // await this and block the UI. Instead, we let the component handle the loading state
+    // and kick off the prefetch here. We also prefetch the data for ancestor levels
+    // because selection store actions depend on this data.
+    prefixes.forEach((prefix) => {
+      queryClient.prefetchQuery(getBucketContentsQueryOptions(bucketName, prefix));
+    });
   };
 
 const BucketContentsRoute = () => {
