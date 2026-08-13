@@ -17,7 +17,7 @@ class Api::BaseController < ApplicationController
   end
 
   # Convert incoming JSON request body keys from camelCase to snake_case
-  def transform_json_params # rubocop:disable Metrics/AbcSize
+  def transform_json_params
     return unless request.content_type&.include?('application/json')
     return unless request.body.size.positive?
 

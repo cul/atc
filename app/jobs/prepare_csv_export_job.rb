@@ -18,7 +18,7 @@ class PrepareCsvExportJob < ApplicationJob # rubocop:disable Metrics/ClassLength
     @csv_export.update!(status: :processing)
 
     selections = JSON.parse(@csv_export.export_paths, symbolize_names: true)
-    puts "Selections for CSV export #{csv_export_id}: #{selections.inspect}"
+    Rails.logger.info("Preparing CSV export #{csv_export_id} with selections: #{selections.inspect}")
     objects = collect_objects(selections)
 
     csv_export_filename = write_csv_export(csv_export_id, objects)
@@ -39,12 +39,11 @@ class PrepareCsvExportJob < ApplicationJob # rubocop:disable Metrics/ClassLength
     filename
   end
 
-  # Ported from the S3BrowserController#collect_objects method
   def s3_client
     @s3_client ||= S3_CLIENT
   end
 
-  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  # rubocop:disable Metrics/MethodLength
   def collect_objects(selections)
     objects = []
 
@@ -65,15 +64,13 @@ class PrepareCsvExportJob < ApplicationJob # rubocop:disable Metrics/ClassLength
 
       # Keys represent specific files. head_meta already issues a head_object and returns the complete
       # metadata (including archive/restore status) so no additional call is needed for these.
-      # puts "Processing keys: #{selection[:keys].inspect}"
       selection[:keys].each do |key|
         objects << head_meta(bucket, key)
       rescue Aws::S3::Errors::ServiceError => e
         @errors << "Could not read file s3://#{bucket}/#{key} - #{e.message}"
       end
-      # puts "Objects after processing keys: #{objects.inspect}"
     end
-    puts "Objects collected for CSV export: #{objects.inspect}"
+    Rails.logger.info("Objects collected for CSV export: #{objects.inspect}")
     objects
   end
 
@@ -94,13 +91,11 @@ class PrepareCsvExportJob < ApplicationJob # rubocop:disable Metrics/ClassLength
   # Like list but without delimeter
   def list_prefix(bucket, prefix)
     s3_client.list_objects_v2(bucket: bucket, prefix: prefix).each do |page|
+      # NOTE: This object includes restore_status but that value is always nil, unless we include
+      # "optional_object_attributes" in the request. Since we need to retrieve addition information using
+      # head_object anyway, we retrieve the restore_status in the head_meta method instead of here.
       page.contents.each do |obj|
         next if obj.key.end_with?('/') # 0-byte folder markers, not files
-
-        # NOTE: This object includes restore_status but that value is always nil, unless we include
-        # "optional_object_attributes" in the request. Since we need to retrieve addition information using
-        # head_object anyway, we retrieve the restore_status there instead of this method.
-        puts obj.inspect
 
         yield(bucket: bucket, key: obj.key, size: obj.size, last_modified: obj.last_modified,
               storage_class: obj.storage_class, archive_status: nil, restore: nil)
@@ -115,7 +110,7 @@ class PrepareCsvExportJob < ApplicationJob # rubocop:disable Metrics/ClassLength
   end
 
   def write_csv(path, objects)
-    puts "Writing CSV to #{path} with #{objects.size} objects"
+    Rails.logger.info("Writing CSV to #{path} with #{objects.size} objects")
 
     CSV.open(path, 'w') do |csv|
       csv << CSV_HEADERS
@@ -124,7 +119,7 @@ class PrepareCsvExportJob < ApplicationJob # rubocop:disable Metrics/ClassLength
   end
 
   def build_row(obj)
-    row = [
+    [
       "s3://#{obj[:bucket]}/#{obj[:key]}",
       File.basename(obj[:key]),
       obj[:last_modified],
@@ -133,9 +128,6 @@ class PrepareCsvExportJob < ApplicationJob # rubocop:disable Metrics/ClassLength
       obj[:size],
       restore_in_progress?(obj[:restore])
     ]
-    puts "Row for object #{obj[:key]}: #{row.inspect}"
-
-    row
   end
 
   # TODO: Rewrite, probably using switch

@@ -3,6 +3,8 @@
 module BucketValidation
   extend ActiveSupport::Concern
 
+  private
+
   def buckets
     @buckets ||= AWS_CONFIG[:s3_browser][:buckets]
   end
