@@ -45,8 +45,6 @@ Rails/Output:
     - 'lib/atc/aws/s3_uploader.rb'
     - 'lib/atc/aip_reader.rb'
     - 'lib/atc/directory_reader.rb'
-    - 'app/controllers/api/s3_browser-controller' # temp
-    - 'app/jobs/prepare_csv_export_job.rb' # temp
 
 Lint/MissingCopEnableDirective:
   Enabled: false

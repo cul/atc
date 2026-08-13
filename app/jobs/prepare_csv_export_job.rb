@@ -130,18 +130,19 @@ class PrepareCsvExportJob < ApplicationJob # rubocop:disable Metrics/ClassLength
     ]
   end
 
-  # TODO: Rewrite, probably using switch
   def storage_tier(obj)
-    'STANDARD' if obj[:storage_class].nil?
-
-    return unless obj[:storage_class] == 'INTELLIGENT_TIERING'
-
-    if obj[:archive_status] == 'ARCHIVE_ACCESS'
-      'Intelligent Tiering (Archive Access)'
-    elsif obj[:archive_status] == 'DEEP_ARCHIVE_ACCESS'
-      'Intelligent Tiering (Deep Archive Access)'
-    else
-      'Intelligent Tiering (Frequent Access, Infrequent Access, or Archive Instant Access tier)'
+    case obj[:storage_class]
+    when nil
+      'STANDARD'
+    when 'INTELLIGENT_TIERING'
+      case obj[:archive_status]
+      when 'ARCHIVE_ACCESS'
+        'Intelligent Tiering (Archive Access)'
+      when 'DEEP_ARCHIVE_ACCESS'
+        'Intelligent Tiering (Deep Archive Access)'
+      else
+        'Intelligent Tiering (Frequent Access, Infrequent Access, or Archive Instant Access tier)'
+      end
     end
   end
 
