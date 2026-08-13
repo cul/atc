@@ -1,3 +1,4 @@
+import { BucketSelection } from '@/stores/selected-items-store';
 import { BucketItem } from '@/types/api';
 
 // Returns an array of the current folder or object's ancestors in order of
@@ -76,4 +77,36 @@ export const getNearestSelectedParent = (path: string, folders: Set<string>) => 
   }
   // base case: the nearest selected parent is the entire bucket
   if (folders.has('/')) return '/';
+};
+
+export const getFullSelectionCount = (buckets: BucketSelection[]) => {
+  let count = 0;
+  buckets.forEach((bucket) => {
+    count += [...bucket.folders].length;
+    count += [...bucket.objects].length;
+  });
+  return count;
+};
+
+export const getBucketSelectionCount = (bucket: BucketSelection) => {
+  let count = 0;
+  count += [...bucket.folders].length;
+  count += [...bucket.objects].length;
+  return count > 1 ? `${count} selections` : `1 selection`;
+};
+
+export type SelectionCsvExportBody = {
+  bucket: string;
+  files: string[];
+  directories: string[];
+};
+
+export const csvExportReqBody = (buckets: BucketSelection[]): SelectionCsvExportBody[] => {
+  return buckets.map((bucket) => {
+    return {
+      bucket: bucket.bucketName,
+      files: [...bucket.objects],
+      directories: [...bucket.folders],
+    };
+  });
 };

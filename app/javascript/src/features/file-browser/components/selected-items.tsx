@@ -1,24 +1,17 @@
-import { api } from '@/lib/api-client';
-import { BucketSelection, useSelectedItemsStore } from '@/stores/selected-items-store';
 import { Accordion, Card, Col, Row, useAccordionButton } from 'react-bootstrap';
 
-type CsvExportBody = {
-  bucket: string;
-  files: string[];
-  directories: string[];
-};
+import { api } from '@/lib/api-client';
+import { useSelectedItemsStore } from '@/stores/selected-items-store';
+import {
+  csvExportReqBody,
+  getBucketSelectionCount,
+  getFullSelectionCount,
+} from '../utils/selection-utils';
 
-const csvExportReqBody = (buckets: BucketSelection[]): CsvExportBody[] => {
-  return buckets.map((bucket) => {
-    return {
-      bucket: bucket.bucketName,
-      files: [...bucket.objects],
-      directories: [...bucket.folders],
-    };
-  });
-};
-
-const SelectionBoxActions = ({ eventKey, disabled }: { eventKey: string; disabled: boolean }) => {
+// I would prefer to keep this header component in the same file as the Selected Items accordion, because
+// it is tightly coupled to that component, won't be reused, and cannot be inlined in SelectedItems because
+// it calls the useAccordionButton hook
+const SelectionBoxHeader = ({ eventKey, disabled }: { eventKey: string; disabled: boolean }) => {
   const { buckets } = useSelectedItemsStore();
   const expandSelection = useAccordionButton(eventKey);
   const exportSelection = async () => {
@@ -48,30 +41,14 @@ const SelectionBoxActions = ({ eventKey, disabled }: { eventKey: string; disable
   );
 };
 
-const getFullSelectionCount = (buckets: BucketSelection[]) => {
-  let count = 0;
-  buckets.forEach((bucket) => {
-    count += [...bucket.folders].length;
-    count += [...bucket.objects].length;
-  });
-  return count;
-};
-
-const getBucketSelectionCount = (bucket: BucketSelection) => {
-  let count = 0;
-  count += [...bucket.folders].length;
-  count += [...bucket.objects].length;
-  return count > 1 ? `${count} selections` : `1 selection`;
-};
-
 const SelectedItems = () => {
   const { buckets, reset } = useSelectedItemsStore();
 
   return (
-    <Accordion className="my-2">
+    <Accordion data-testid="selected-items" className="my-2">
       <Card>
         <Card.Header>
-          <SelectionBoxActions eventKey="0" disabled={buckets.length === 0} />
+          <SelectionBoxHeader eventKey="0" disabled={buckets.length === 0} />
         </Card.Header>
         <Accordion.Collapse eventKey="0">
           <div className="p-3" style={{ fontSize: '.9em' }}>
@@ -81,7 +58,7 @@ const SelectedItems = () => {
             {buckets.length > 0 && (
               <>
                 <button className="btn btn-danger btn-sm mb-3" onClick={() => reset()}>
-                  reset selection
+                  Reset Selection
                 </button>
               </>
             )}
