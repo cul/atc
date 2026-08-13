@@ -54,6 +54,8 @@ gem 'stringex', '~> 2.8', '>= 2.8.6'
 gem 'turbo-rails'
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: %i[windows jruby]
+# For cron tasks
+gem 'whenever', require: false
 
 # Use devise and omniauth for authentication
 gem 'devise'

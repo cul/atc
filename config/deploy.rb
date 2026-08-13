@@ -61,6 +61,9 @@ set :rvm_ruby_version, fetch(:deploy_name) # This RVM alias must exist on the se
   )
 end
 
+# Whenever gem
+set :whenever_identifier, -> { "#{fetch(:application)}_#{fetch(:stage)}" }
+
 # Default value for default_env is {}
 # set :default_env, NODE_ENV: 'production'
 
