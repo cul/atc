@@ -58,7 +58,7 @@ const buildRoutedRender = (
         element: ui,
         loader: loaderFn ? loaderFn(queryClient) : undefined,
         children: children,
-        hydrateFallbackElement: <div />,
+        hydrateFallbackElement: <div>Hydration Fallback (test)...</div>,
       },
     ],
     {
