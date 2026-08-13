@@ -22,7 +22,7 @@ export function useCurrentUser() {
     queryKey: AUTH_QUERY_KEY,
     queryFn: getCurrentUser,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 60, // 60 minutes cache garbage collection
+    gcTime: 1000 * 60 * 30, // 30 minutes cache garbage collection
     retry: false,
   });
 }
