@@ -5,12 +5,14 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { enableMapSet } from 'immer';
 
 import {
+  checkboxState,
   countSelectedAncestorChildren,
   getAncestors,
   getAncestorsBetween,
   getNearestSelectedParent,
   isAnyChildOf,
   isDirectChildOf,
+  selectAllCheckboxState,
 } from '@/features/file-browser/utils/selection-utils';
 import { BucketContentsResponse, BucketItem } from '@/types/api';
 
@@ -26,7 +28,7 @@ export type BucketSelection = {
   objects: Set<string>;
 };
 
-type SelectedItemsStore = {
+export type SelectedItemsStore = {
   buckets: Array<BucketSelection>;
 
   selectItem: (
@@ -130,7 +132,7 @@ const explodeParents = (
   } // else - no parent folder is in the selection
 };
 
-// Custom serializer to handle Hash Sets
+// Custom serializer to handle Hash Sets when persisting to local storage
 const storage = createJSONStorage(() => localStorage, {
   replacer: (_key, value) => {
     if (value instanceof Set) {
@@ -161,7 +163,7 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
         set((state) => {
           let bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
 
-          // Case of first time making a selection in this bucket
+          // Case: first time making a selection in this bucket
           if (!bucketSelection) {
             state.buckets.push({
               bucketName: currentBucket,
@@ -224,56 +226,15 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
   ),
 );
 
+// Determine the state of a select all checkbox in a bucket-contents table
 export const useSelectAllCheckboxState = (
   bucketName: string,
   currentFolder: string,
 ): CheckboxState => {
-  return useSelectedItemsStore((state) => {
-    const currentBucket = state.buckets.find((bucket) => bucket.bucketName === bucketName);
-    if (!currentBucket) return 'unchecked';
-    const { folders, objects } = currentBucket;
-
-    if (folders.has(currentFolder)) return 'checked';
-
-    // Root directory of bucket case
-    if (currentFolder === '/' && (folders.size > 0 || objects.size > 0)) return 'partial';
-
-    // If the folder is contained by a selected folder -> checked
-    if (
-      getAncestors({ type: 'folder', fullPath: currentFolder }).some((ancestor) =>
-        folders.has(ancestor),
-      )
-    ) {
-      return 'checked';
-    }
-
-    // At least one item in selection is a child of current folder -> partial
-    for (const folder of folders) if (folder.startsWith(currentFolder)) return 'partial';
-    for (const object of objects) if (object.startsWith(currentFolder)) return 'partial';
-
-    return 'unchecked';
-  });
+  return useSelectedItemsStore((state) => selectAllCheckboxState(state, bucketName, currentFolder));
 };
 
-// This is used to determine the checked state of a row in a bucket-contents table.
+// Determine the checked state of an item checkbox in a row of a bucket-contents table.
 export const useCheckboxState = (bucketName: string, item: BucketItem): CheckboxState => {
-  return useSelectedItemsStore((state) => {
-    const currentBucket = state.buckets.find((bucket) => bucket.bucketName === bucketName);
-    if (currentBucket === undefined) return 'unchecked';
-    const { folders, objects } = currentBucket;
-
-    // Exact folder or item match
-    if (folders.has(item.fullPath) || objects.has(item.fullPath)) return 'checked';
-
-    // Item is contained in a selected folder, i.e. are any of it's ancestors included in the selected folders
-    if (getAncestors(item).some((ancestor) => folders.has(ancestor))) return 'checked';
-
-    // Item is a folder and some selected objects or folders are contained within it --> partial
-    if (item.type === 'folder') {
-      for (const folder of folders) if (folder.startsWith(item.fullPath)) return 'partial';
-      for (const object of objects) if (object.startsWith(item.fullPath)) return 'partial';
-    }
-
-    return 'unchecked';
-  });
+  return useSelectedItemsStore((state) => checkboxState(state, bucketName, item));
 };
