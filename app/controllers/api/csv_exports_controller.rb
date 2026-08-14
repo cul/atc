@@ -3,7 +3,6 @@
 class Api::CsvExportsController < Api::BaseController # rubocop:disable Metrics/ClassLength
   include BucketValidation
 
-  skip_before_action :verify_authenticity_token # remove after testing with Postman
   before_action :set_csv_export, only: [:show, :download]
 
   # POST /api/csv_exports
