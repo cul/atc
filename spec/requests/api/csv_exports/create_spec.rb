@@ -100,6 +100,24 @@ describe 'POST /api/csv_exports', type: :request do
       end
     end
 
+    context 'with a directory that selects the entire bucket' do
+      let(:selections) { [{ bucket: valid_bucket, files: [], directories: ['/'] }] }
+
+      it 'returns unprocessable entity status' do
+        post_export(selections)
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it 'returns an exporting error' do
+        post_export(selections)
+        expect(JSON.parse(response.body)['error']).to include('Exporting an entire bucket is not supported')
+      end
+
+      it 'does not create an export' do
+        expect { post_export(selections) }.not_to change(CsvExport, :count)
+      end
+    end
+
     context 'with an invalid bucket' do
       let(:selections) { [{ bucket: 'not-a-configured-bucket', files: ['a.txt'], directories: [] }] }
 

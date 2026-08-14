@@ -121,10 +121,14 @@ class Api::CsvExportsController < Api::BaseController # rubocop:disable Metrics/
   # Folders: strip leading slashes, drop blank entries, ensure a single trailing slash and remove exact duplicates
   def normalize_prefixes(directories)
     prefixes = Array(directories).filter_map do |dir|
-      dir = dir.to_s.delete_prefix('/')
-      next if dir.blank?
+      prefix = dir.to_s.delete_prefix('/')
+      if prefix.empty? && dir.present?
+        raise Atc::Exceptions::InvalidSelectionError,
+              'Exporting an entire bucket is not supported. Select specific folders or files'
+      end
+      next if prefix.blank?
 
-      dir.end_with?('/') ? dir : "#{dir}/"
+      prefix.end_with?('/') ? prefix : "#{prefix}/"
     end
     prefixes.uniq
   end
