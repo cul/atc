@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from 'react-router';
 
 import { useSelectedItemsStore, useSelectAllCheckboxState } from '@/stores/selected-items-store';
 import { getBucketContentsQueryOptions } from '../api/get-bucket-contents';
-import { getAncestors } from '../utils/selection-utils';
+import { getAncestors, notifySelectionError } from '../utils/selection-utils';
 
 const SelectAllCheckbox = () => {
   const { bucketName } = useParams();
@@ -18,12 +18,13 @@ const SelectAllCheckbox = () => {
   const checkboxRef = useRef(null);
 
   useEffect(() => {
-    checkboxRef.current.indeterminate = checkedState === 'partial' ? true : false;
-  }, [checkboxRef, checkedState]);
+    if (checkboxRef.current) {
+      checkboxRef.current.indeterminate = checkedState === 'partial' ? true : false;
+    }
+  }, [checkboxRef, checkedState, pending]);
 
   // Clicking the select all checkbox is like you clicked the folder itself
   const executeSelection = (folder: string, checkedState: string) => {
-    if (bucketName === folder) folder = '/';
     if (checkedState === 'checked') {
       deselectItem({ type: 'folder', fullPath: folder }, bucketName, queryClient);
     } else {
@@ -43,8 +44,8 @@ const SelectAllCheckbox = () => {
         ),
       );
       executeSelection(folder, checkedState);
-    } catch {
-      // TODO: render error notification
+    } catch (error) {
+      notifySelectionError(error.message);
     } finally {
       setPending(false);
     }

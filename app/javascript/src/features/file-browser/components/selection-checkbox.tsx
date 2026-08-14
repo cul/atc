@@ -5,7 +5,7 @@ import { useParams } from 'react-router';
 import { Row } from '@tanstack/react-table';
 
 import { getBucketContentsQueryOptions } from '../api/get-bucket-contents';
-import { getAncestors } from '../utils/selection-utils';
+import { getAncestors, notifySelectionError } from '../utils/selection-utils';
 import { BucketItem } from '@/types/api';
 import { useCheckboxState, useSelectedItemsStore } from '@/stores/selected-items-store';
 
@@ -18,8 +18,10 @@ const SelectionCheckbox = ({ row }: { row: Row<BucketItem> }) => {
   const checkboxRef = useRef(null);
 
   useEffect(() => {
-    checkboxRef.current.indeterminate = checkedState === 'partial' ? true : false;
-  }, [checkboxRef, checkedState]);
+    if (checkboxRef.current) {
+      checkboxRef.current.indeterminate = checkedState === 'partial' ? true : false;
+    }
+  }, [checkboxRef, checkedState, pending]);
 
   const executeSelection = (rowItem: BucketItem, checkedState: string) => {
     if (checkedState === 'checked') {
@@ -43,8 +45,8 @@ const SelectionCheckbox = ({ row }: { row: Row<BucketItem> }) => {
         ),
       );
       executeSelection(rowItem, checkedState);
-    } catch {
-      // TODO: render error notification
+    } catch (error) {
+      notifySelectionError(error.message);
     } finally {
       setPending(false);
     }

@@ -22,6 +22,11 @@ enableMapSet();
 
 type CheckboxState = 'checked' | 'unchecked' | 'partial';
 
+export const ERRORS = {
+  entireBucketSelection:
+    "Selecting an entire bucket's contents is not supported. If you would like to request an export of an entire bucket's contents, please contact an administrator.",
+};
+
 export type BucketSelection = {
   bucketName: string;
   folders: Set<string>;
@@ -71,6 +76,9 @@ const collapseParents = (
       ancestorFolder,
     );
     if (numSelectedAncestorChildren === numAncestorChildren) {
+      if (ancestorFolder === '/') {
+        throw new Error(ERRORS.entireBucketSelection);
+      }
       // We have now selected all at this prefix level, we should remove all selected items at this level
       for (const folder of nextFolders) {
         if (isDirectChildOf(folder, ancestorFolder)) {
@@ -161,6 +169,10 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
         queryClient: QueryClient,
       ) => {
         set((state) => {
+          if (item.fullPath === '/') {
+            throw new Error(ERRORS.entireBucketSelection);
+          }
+
           let bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
 
           // Case: first time making a selection in this bucket

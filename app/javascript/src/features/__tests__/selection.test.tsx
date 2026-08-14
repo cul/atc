@@ -189,7 +189,7 @@ describe('Item Selection Feature', () => {
       expect(await within(selectionStore).findByText('objectD')).toBeInTheDocument();
     });
 
-    it('bucket itself is in the selection store when all bucket items are selected', async () => {
+    it('does not allow user to select entire bucket by adding objects one by one', async () => {
       await renderAppAndWait();
       await userEvent.click(await screen.findByRole('link', { name: 'bucket-2' }));
       await screen.findByText('folder3');
@@ -198,12 +198,26 @@ describe('Item Selection Feature', () => {
       const folder3Row = screen.getByText('folder3').closest('tr');
       const folder3Checkbox = within(folder3Row).getByRole('checkbox');
       await userEvent.click(objectDCheckbox);
-      await userEvent.click(folder3Checkbox);
+      await userEvent.click(folder3Checkbox); // will not be selected
+
       const selectionStore = await screen.findByTestId('selected-items');
       expect(await within(selectionStore).findByText('bucket-2')).toBeInTheDocument();
-      expect(
-        await within(selectionStore).findByText(/Entire bucket is selected/),
-      ).toBeInTheDocument();
+      expect(await within(selectionStore).findByText(/objectD/)).toBeInTheDocument();
+
+      expect(objectDCheckbox).toBeChecked();
+      expect(await within(folder3Row).findByRole('checkbox')).not.toBeChecked();
+    });
+
+    it('does not allow user to select entire bucket by clicking select all on bucket root', async () => {
+      await renderAppAndWait();
+      await userEvent.click(await screen.findByRole('link', { name: 'bucket-2' }));
+      const selectAllCell = (await screen.findAllByRole('columnheader')).find((r) =>
+        r.textContent.includes('Selection'),
+      );
+      const selectAllCheckBox = within(selectAllCell).getByRole('checkbox');
+      await userEvent.click(selectAllCheckBox);
+
+      expect(await within(selectAllCell).findByRole('checkbox')).not.toBeChecked();
     });
 
     it('when a folder is selected and a child is then deselected, the folder is removed from the store and the other children are added', async () => {

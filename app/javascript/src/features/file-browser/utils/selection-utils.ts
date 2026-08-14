@@ -1,3 +1,4 @@
+import { useNotifications } from '@/stores/notifications-store';
 import { BucketSelection, SelectedItemsStore } from '@/stores/selected-items-store';
 import { BucketItem } from '@/types/api';
 
@@ -133,6 +134,14 @@ export const checkboxState = (state: SelectedItemsStore, bucketName: string, ite
   }
 
   return 'unchecked';
+};
+
+export const notifySelectionError = (errorMessage: string) => {
+  useNotifications.getState().addNotification({
+    type: 'error',
+    title: `Error Selecting Item`,
+    message: errorMessage,
+  });
 };
 
 // Returns count of all items in the selection store -- the number of selected items
