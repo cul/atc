@@ -84,38 +84,7 @@ export const getNearestSelectedParent = (path: string, folders: Set<string>) => 
   if (folders.has('/')) return '/';
 };
 
-// Logic for determining what state the select all checkbox for currentFolder should be
-export const selectAllCheckboxState = (
-  state: SelectedItemsStore,
-  bucketName: string,
-  currentFolder: string,
-) => {
-  const currentBucket = state.buckets.find((bucket) => bucket.bucketName === bucketName);
-  if (!currentBucket) return 'unchecked';
-  const { folders, objects } = currentBucket;
-
-  if (folders.has(currentFolder)) return 'checked';
-
-  // Root directory of bucket case
-  if (currentFolder === '/' && (folders.size > 0 || objects.size > 0)) return 'partial';
-
-  // If the folder is contained by a selected folder -> checked
-  if (
-    getAncestors({ type: 'folder', fullPath: currentFolder }).some((ancestor) =>
-      folders.has(ancestor),
-    )
-  ) {
-    return 'checked';
-  }
-
-  // At least one item in selection is a child of current folder -> partial
-  for (const folder of folders) if (folder.startsWith(currentFolder)) return 'partial';
-  for (const object of objects) if (object.startsWith(currentFolder)) return 'partial';
-
-  return 'unchecked';
-};
-
-// Logic for determining what state the selection checkbox for item should be
+// Logic for determining what state a selection checkbox should be
 export const checkboxState = (state: SelectedItemsStore, bucketName: string, item: BucketItem) => {
   const currentBucket = state.buckets.find((bucket) => bucket.bucketName === bucketName);
   if (currentBucket === undefined) return 'unchecked';
@@ -123,6 +92,10 @@ export const checkboxState = (state: SelectedItemsStore, bucketName: string, ite
 
   // Exact folder or item match
   if (folders.has(item.fullPath) || objects.has(item.fullPath)) return 'checked';
+
+  // If the current item is the root level folder of a bucket & should be partial
+  if (item.type === 'folder' && item.fullPath === '/' && (folders.size > 0 || objects.size > 0))
+    return 'partial';
 
   // Item is contained in a selected folder, i.e. are any of it's ancestors included in the selected folders
   if (getAncestors(item).some((ancestor) => folders.has(ancestor))) return 'checked';

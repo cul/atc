@@ -12,7 +12,6 @@ import {
   getNearestSelectedParent,
   isAnyChildOf,
   isDirectChildOf,
-  selectAllCheckboxState,
 } from '@/features/file-browser/utils/selection-utils';
 import { BucketContentsResponse, BucketItem } from '@/types/api';
 
@@ -238,15 +237,8 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
   ),
 );
 
-// Determine the state of a select all checkbox in a bucket-contents table
-export const useSelectAllCheckboxState = (
-  bucketName: string,
-  currentFolder: string,
-): CheckboxState => {
-  return useSelectedItemsStore((state) => selectAllCheckboxState(state, bucketName, currentFolder));
-};
-
-// Determine the checked state of an item checkbox in a row of a bucket-contents table.
 export const useCheckboxState = (bucketName: string, item: BucketItem): CheckboxState => {
-  return useSelectedItemsStore((state) => checkboxState(state, bucketName, item));
+  return useSelectedItemsStore((state) => {
+    return checkboxState(state, bucketName, item);
+  });
 };
