@@ -32,12 +32,6 @@ class Ability
     # See the wiki for details:
     # https://github.com/CanCanCommunity/cancancan/blob/develop/docs/define_check_abilities.md
 
-    #
-    # Currently, this ability file enforces 0 restrictions based on the current user
-    # In the future, we will want to restrict certain users from accessing certain
-    # APIs/endpoints, while allowing others to use those features. That will be implemented
-    # here.
-    #
     return if user.blank?
 
     can ACCESS_S3_BROWSER_UI, UiController

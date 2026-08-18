@@ -6,8 +6,7 @@ S3_CLIENT = Aws::S3::Client.new(
   region: AWS_CONFIG[:aws_region],
   credentials: Aws::Credentials.new(
     AWS_CONFIG[:aws_access_key_id],
-    AWS_CONFIG[:aws_secret_access_key],
-    AWS_CONFIG[:aws_session_token]
+    AWS_CONFIG[:aws_secret_access_key]
   )
 )
 
@@ -19,7 +18,7 @@ def validate_aws_config!
   csv_exports_directory = AWS_CONFIG[:s3_browser][:csv_exports_directory]
 
   if csv_exports_directory.blank?
-    logger.error('CSV export directory is not configured in aws.yml')
+    Rails.logger.error('CSV export directory is not configured in aws.yml')
     raise 'CSV export directory is not configured in aws.yml'
   end
 

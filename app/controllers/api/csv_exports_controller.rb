@@ -29,18 +29,6 @@ class Api::CsvExportsController < Api::BaseController # rubocop:disable Metrics/
     render_camelized_json({ id: csv_export.id }, status: :accepted)
   end
 
-  # Normalizes the per-bucket selection payload into
-  # [{ bucket:, keys: [...], prefixes: [...] }, ...]
-  def build_selections(permitted)
-    Array(permitted[:selections]).map do |selection|
-      {
-        bucket: selection[:bucket],
-        keys: normalize_keys(selection[:files]),
-        prefixes: normalize_prefixes(selection[:directories])
-      }
-    end
-  end
-
   def index
     authorize! :index, CsvExport
 
@@ -79,13 +67,13 @@ class Api::CsvExportsController < Api::BaseController # rubocop:disable Metrics/
   end
 
   def set_csv_export
-    @csv_export = CsvExport.find(params[:id])
+    @csv_export = CsvExport.find(params.require(:id))
   end
 
   def csv_export_detail_json(csv_export)
     {
       id: csv_export.id,
-      export_paths: JSON.parse(csv_export.export_paths), # do we want to limit the number of paths returned here?
+      export_paths: JSON.parse(csv_export.export_paths),
       export_errors: csv_export.export_errors,
       status: csv_export.status,
       updated_at: csv_export.updated_at
@@ -110,6 +98,18 @@ class Api::CsvExportsController < Api::BaseController # rubocop:disable Metrics/
       total_pages: scope.total_pages,
       total_count: scope.total_count
     }
+  end
+
+  # Normalizes the per-bucket selection payload into
+  # [{ bucket:, keys: [...], prefixes: [...] }, ...]
+  def build_selections(permitted)
+    Array(permitted[:selections]).map do |selection|
+      {
+        bucket: selection[:bucket],
+        keys: normalize_keys(selection[:files]),
+        prefixes: normalize_prefixes(selection[:directories])
+      }
+    end
   end
 
   # Files: strip leading slashes, drop blanks and remove exact duplicates
