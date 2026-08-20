@@ -3,6 +3,8 @@
 class Api::CsvExportsController < Api::BaseController # rubocop:disable Metrics/ClassLength
   include BucketValidation
 
+  SELECTION_SAMPLE_SIZE = 2
+
   before_action :set_csv_export, only: [:show, :download]
 
   # POST /api/csv_exports
@@ -84,11 +86,48 @@ class Api::CsvExportsController < Api::BaseController # rubocop:disable Metrics/
     {
       id: csv_export.id,
       status: csv_export.status,
-      export_paths: JSON.parse(csv_export.export_paths),
-      export_errors: csv_export.export_errors,
-      path_to_csv_file: csv_export.path_to_csv_file,
+      selection_summary: selection_summary(csv_export),
       updated_at: csv_export.updated_at
     }
+  end
+
+  # A selection can span thousands of paths so instead of sending every path we send a short
+  # sample plus the total count which includes every selected directory and file.
+  def selection_summary(csv_export)
+    selections = parse_selections(csv_export)
+
+    {
+      sample: selection_sample(selections),
+      total_count: count_paths(selections, :prefixes) + count_paths(selections, :keys)
+    }
+  end
+
+  def count_paths(selections, source)
+    selections.sum { |selection| Array(selection[source]).size }
+  end
+
+  # Prioritize directories before files: a directory path says more about what an export contains than
+  # any one filename does
+  def selection_sample(selections)
+    directories = sample_paths(selections, :prefixes)
+    return directories if directories.size >= SELECTION_SAMPLE_SIZE
+
+    directories + sample_paths(selections, :keys).first(SELECTION_SAMPLE_SIZE - directories.size)
+  end
+
+  def sample_paths(selections, source)
+    paths = selections.flat_map do |selection|
+      Array(selection[source]).map { |path| "#{selection[:bucket]}/#{path}" }
+    end
+    paths.sort_by(&:downcase).first(SELECTION_SAMPLE_SIZE)
+  end
+
+  def parse_selections(csv_export)
+    parsed = JSON.parse(csv_export.export_paths.to_s, symbolize_names: true)
+    parsed.is_a?(Array) ? parsed : []
+  rescue JSON::ParserError
+    Rails.logger.error("CSV export #{csv_export.id} has unparseable export_paths")
+    []
   end
 
   def pagination_data(scope)
