@@ -1,5 +1,5 @@
 import { useNotifications } from '@/stores/notifications-store';
-import { BucketSelection, SelectedItemsStore } from '@/stores/selected-items-store';
+import { BucketSelection } from '@/stores/selected-items-store';
 import { BucketItem } from '@/types/api';
 
 // Returns an array of the current folder or object's ancestors in order of
@@ -85,8 +85,7 @@ export const getNearestSelectedParent = (path: string, folders: Set<string>) => 
 };
 
 // Logic for determining what state a selection checkbox should be
-export const checkboxState = (state: SelectedItemsStore, bucketName: string, item: BucketItem) => {
-  const currentBucket = state.buckets.find((bucket) => bucket.bucketName === bucketName);
+export const checkboxState = (currentBucket: BucketSelection | undefined, item: BucketItem) => {
   if (currentBucket === undefined) return 'unchecked';
   const { folders, objects } = currentBucket;
 

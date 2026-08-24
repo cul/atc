@@ -18,7 +18,7 @@ import { BucketContentsResponse, BucketItem } from '@/types/api';
 // so even with this we can't use unions, intersections, etc.
 enableMapSet();
 
-type CheckboxState = 'checked' | 'unchecked' | 'partial';
+export type CheckboxState = 'checked' | 'unchecked' | 'partial';
 
 export const ERRORS = {
   entireBucketSelection:
@@ -228,6 +228,7 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
 
 export const useCheckboxState = (bucketName: string, item: BucketItem): CheckboxState => {
   return useSelectedItemsStore((state) => {
-    return checkboxState(state, bucketName, item);
+    const currentBucket = state.buckets.find((bucket) => bucket.bucketName === bucketName);
+    return checkboxState(currentBucket, item);
   });
 };
