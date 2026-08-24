@@ -2,7 +2,9 @@
 
 # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
 
-class Api::S3BrowserController < Api::BaseController
+class Api::BucketsController < Api::BaseController
+  include BucketValidation
+
   before_action :authorize_s3_browser_api_read_access!
 
   def index_buckets
@@ -51,7 +53,7 @@ class Api::S3BrowserController < Api::BaseController
       obj[:key] == prefix && obj[:size].zero?
     end
 
-    render json: { folders: folders, objects: objects }
+    render_camelized_json({ folders: folders, objects: objects })
   end
 
   # GET /api/buckets/:bucket/object?key={objectKey}
@@ -74,7 +76,7 @@ class Api::S3BrowserController < Api::BaseController
       key: object_key
     })
 
-    render json: object_details_json(bucket, object_key, s3_object)
+    render_camelized_json(object_details_json(bucket, object_key, s3_object))
   end
 
   private
@@ -88,30 +90,20 @@ class Api::S3BrowserController < Api::BaseController
     params.permit(:bucket, :key)
   end
 
-  def buckets
-    @buckets ||= AWS_CONFIG[:s3_browser][:buckets]
-  end
-
   def s3_client
     @s3_client ||= S3_CLIENT
-  end
-
-  def validate_bucket!(bucket)
-    return if buckets.map(&:name).include? bucket
-
-    raise Atc::Exceptions::InvalidBucketError, "Invalid bucket: #{bucket}"
   end
 
   def object_details_json(bucket, key, s3_object)
     {
       bucket: bucket,
       key: key,
-      lastModified: s3_object.last_modified,
+      last_modified: s3_object.last_modified,
       size: s3_object.content_length,
-      contentType: s3_object.content_type,
-      storageClass: s3_object.storage_class || 'STANDARD', # s3 api returns nil for standard storage class
-      archiveStatus: s3_object.archive_status,
-      restoreStatus: s3_object.restore
+      content_type: s3_object.content_type,
+      storage_class: s3_object.storage_class || 'STANDARD', # s3 api returns nil for standard storage class
+      archive_status: s3_object.archive_status,
+      restore_status: s3_object.restore
     }
   end
 

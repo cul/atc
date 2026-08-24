@@ -9,7 +9,7 @@ def read_buckets_from_config_file
 end
 
 # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/ClientStubs.html
-describe Api::S3BrowserController, type: :request do
+describe Api::BucketsController, type: :request do
   include_examples 'unauthenticated user accessing authenticated API endpoint' do
     let(:http_request) { get '/api/buckets' }
     let(:user) { FactoryBot.create(:user) }

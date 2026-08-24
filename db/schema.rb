@@ -10,13 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_24_120351) do
+ActiveRecord::Schema[7.1].define(version: 2026_07_23_175609) do
   create_table "checksum_algorithms", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.binary "empty_binary_value", null: false
     t.index ["name"], name: "index_checksum_algorithms_on_name", unique: true
+  end
+
+  create_table "csv_exports", force: :cascade do |t|
+    t.string "path_to_csv_file"
+    t.integer "user_id", null: false
+    t.integer "status", default: 0, null: false
+    t.text "export_errors"
+    t.text "export_paths"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_csv_exports_on_user_id"
   end
 
   create_table "fixity_verifications", force: :cascade do |t|
@@ -115,11 +126,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_24_120351) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "uid"
+    t.boolean "is_admin", default: false, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["uid"], name: "index_users_on_uid", unique: true
   end
 
+  add_foreign_key "csv_exports", "users"
   add_foreign_key "pending_transfers", "checksum_algorithms", column: "transfer_checksum_algorithm_id"
   add_foreign_key "source_objects", "checksum_algorithms", column: "fixity_checksum_algorithm_id"
   add_foreign_key "stored_objects", "checksum_algorithms", column: "transfer_checksum_algorithm_id"

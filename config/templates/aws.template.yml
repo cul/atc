@@ -9,6 +9,7 @@ development:
     buckets:
       - name: example-dev-bucket
         description: description
+    csv_exports_directory: <%= Rails.root.join('tmp', 'csv_exports') %>
 
 test:
   <<: *default
@@ -20,3 +21,4 @@ test:
         description: test description
       - name: test-bucket-2
         description: test description
+    csv_exports_directory: <%= Rails.root.join('tmp', 'csv_exports') %>

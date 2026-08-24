@@ -12,10 +12,16 @@ Rails.application.routes.draw do
 
   # S3 Browser API routes
   namespace :api, defaults: { format: :json } do
-    get '/buckets', to: 's3_browser#index_buckets'
-    get '/buckets/:bucket/list', to: 's3_browser#list'
-    get '/buckets/:bucket/object', to: 's3_browser#object'
+    get '/buckets', to: 'buckets#index_buckets'
+    get '/buckets/:bucket/list', to: 'buckets#list'
+    get '/buckets/:bucket/object', to: 'buckets#object'
     get '/users/_self', to: 'users#_self'
+
+    resources :csv_exports, only: [:index, :show, :create] do
+      member do
+        get :download
+      end
+    end
   end
 
   resque_web_constraint = lambda do |request|

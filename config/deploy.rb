@@ -32,7 +32,7 @@ append  :linked_files,
         'config/resque.yml'
 
 # Default value for linked_dirs is []
-append :linked_dirs, 'log', 'tmp/pids'
+append :linked_dirs, 'log', 'tmp/pids', 'tmp/csv_exports'
 
 set :passenger_restart_with_touch, true
 
@@ -60,6 +60,9 @@ set :rvm_ruby_version, fetch(:deploy_name) # This RVM alias must exist on the se
     "#{fetch(:rvm_custom_path, '~/.rvm')}/bin/rvm #{fetch(:rvm_ruby_version)} do"
   )
 end
+
+# Whenever gem
+set :whenever_identifier, -> { "#{fetch(:application)}_#{fetch(:stage)}" }
 
 # Default value for default_env is {}
 # set :default_env, NODE_ENV: 'production'
