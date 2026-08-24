@@ -1,4 +1,3 @@
-import { QueryClient } from '@tanstack/react-query';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -38,12 +37,12 @@ export type SelectedItemsStore = {
   selectItem: (
     item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
     currentBucket: string,
-    queryClient: QueryClient,
+    getFolderContents: (prefix: string) => BucketContentsResponse | undefined,
   ) => void;
   deselectItem: (
     item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
     currentBucket: string,
-    queryClient: QueryClient,
+    getFolderContents: (prefix: string) => BucketContentsResponse | undefined,
   ) => void;
   reset: () => void;
 };
@@ -55,19 +54,14 @@ export type SelectedItemsStore = {
 // children of that folder and add the folder to the selection store (repeating
 // on the nex layer up, until we can no longer collapse)
 const collapseParents = (
-  currentBucket: string,
   item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
-  queryClient: QueryClient,
   nextFolders: Set<string>,
   nextObjects: Set<string>,
+  getFolderContents: (prefix: string) => BucketContentsResponse | undefined,
 ) => {
   const ancestors = getAncestors(item);
   for (const ancestorFolder of ancestors) {
-    const ancestorData = queryClient.getQueryData<BucketContentsResponse>([
-      'bucket-contents',
-      currentBucket,
-      ancestorFolder,
-    ]);
+    const ancestorData = getFolderContents(ancestorFolder);
     const numAncestorChildren = ancestorData.folders.length + ancestorData.objects.length;
     const numSelectedAncestorChildren = countSelectedAncestorChildren(
       nextFolders,
@@ -105,21 +99,16 @@ const collapseParents = (
 // until that containing folder -- exploding means adding all the children
 // items individually to the selection store for this bucket
 const explodeParents = (
-  currentBucket: string,
   item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
-  queryClient: QueryClient,
   nextObjects: Set<string>,
   nextFolders: Set<string>,
+  getFolderContents: (prefix: string) => BucketContentsResponse | undefined,
 ) => {
   const nearestSelectedParent = getNearestSelectedParent(item.fullPath, nextFolders);
   if (nearestSelectedParent) {
     const ancestorFolders = getAncestorsBetween(item, nearestSelectedParent);
     for (const ancestorFolder of ancestorFolders) {
-      const ancestorData = queryClient.getQueryData<BucketContentsResponse>([
-        'bucket-contents',
-        currentBucket,
-        ancestorFolder,
-      ]);
+      const ancestorData = getFolderContents(ancestorFolder);
       if (nextFolders.has(ancestorFolder)) nextFolders.delete(ancestorFolder);
       // add all items except for the ancestor folder itself and the object itself
       for (const object of ancestorData.objects) {
@@ -165,7 +154,7 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
       selectItem: (
         item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
         currentBucket: string,
-        queryClient: QueryClient,
+        getFolderContents: (prefix: string) => BucketContentsResponse | undefined,
       ) => {
         set((state) => {
           if (item.fullPath === '/') {
@@ -203,13 +192,13 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
             nextFolders.add(item.fullPath);
           }
 
-          collapseParents(currentBucket, item, queryClient, nextFolders, nextObjects);
+          collapseParents(item, nextFolders, nextObjects, getFolderContents);
         });
       },
       deselectItem: (
         item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
         currentBucket: string,
-        queryClient: QueryClient,
+        getFolderContents: (prefix: string) => BucketContentsResponse | undefined,
       ) => {
         set((state) => {
           const bucketSelection = state.buckets.find(
@@ -221,7 +210,7 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
           if (item.type === 'object') nextObjects.delete(item.fullPath);
           else nextFolders.delete(item.fullPath);
 
-          explodeParents(currentBucket, item, queryClient, nextObjects, nextFolders);
+          explodeParents(item, nextObjects, nextFolders, getFolderContents);
 
           // Remove any empty buckets
           state.buckets = state.buckets.filter((bucket) => {

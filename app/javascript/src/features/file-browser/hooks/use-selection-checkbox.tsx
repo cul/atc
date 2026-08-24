@@ -1,16 +1,20 @@
-import { useSelectedItemsStore } from '@/stores/selected-items-store';
+import { CheckboxState, useSelectedItemsStore } from '@/stores/selected-items-store';
 import { BucketItem } from '@/types/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState, useRef, useEffect } from 'react';
 
-import { getBucketContentsQueryOptions } from '../api/get-bucket-contents';
+import { getBucketContentsQueryOptions, getCachedBucketContents } from '../api/get-bucket-contents';
 import { getAncestors, notifySelectionError } from '../utils/selection-utils';
 
-function useSelectionCheckbox(item: BucketItem, checkedState: string, bucketName: string) {
+function useSelectionCheckbox(item: BucketItem, checkedState: CheckboxState, bucketName: string) {
   const { selectItem, deselectItem } = useSelectedItemsStore();
   const queryClient = useQueryClient();
   const [pending, setPending] = useState(false);
   const checkboxRef = useRef<HTMLInputElement>(null);
+
+  const getFolderContents = (prefix: string) => {
+    return getCachedBucketContents(queryClient, bucketName, prefix);
+  };
 
   useEffect(() => {
     if (checkboxRef.current) {
@@ -20,9 +24,9 @@ function useSelectionCheckbox(item: BucketItem, checkedState: string, bucketName
 
   const executeSelection = () => {
     if (checkedState === 'checked') {
-      deselectItem(item, bucketName, queryClient);
+      deselectItem(item, bucketName, getFolderContents);
     } else {
-      selectItem(item, bucketName, queryClient);
+      selectItem(item, bucketName, getFolderContents);
     }
   };
 

@@ -1,4 +1,4 @@
-import { queryOptions, useQueries, useQuery } from '@tanstack/react-query';
+import { QueryClient, queryOptions, useQueries, useQuery } from '@tanstack/react-query';
 import { BucketContentsResponse } from '@/types/api';
 import { api } from '@/lib/api-client';
 import { QueryConfig } from '@/lib/react-query';
@@ -26,6 +26,14 @@ export const getBucketContentsQueryOptions = (bucket: string, prefix: string) =>
     queryKey: ['bucket-contents', bucket, prefix],
     queryFn: () => getBucketContents(bucket, prefix),
   });
+};
+
+export const getCachedBucketContents = (
+  queryClient: QueryClient,
+  bucket: string,
+  prefix: string,
+): BucketContentsResponse | undefined => {
+  return queryClient.getQueryData(getBucketContentsQueryOptions(bucket, prefix).queryKey);
 };
 
 export const useBucketContentsQuery = ({
