@@ -124,8 +124,8 @@ export const notifySelectionError = (errorMessage: string) => {
 export const getFullSelectionCount = (buckets: BucketSelection[]) => {
   let count = 0;
   buckets.forEach((bucket) => {
-    count += [...bucket.folders].length;
-    count += [...bucket.objects].length;
+    count += bucket.folders.size;
+    count += bucket.objects.size;
   });
   return count;
 };
@@ -136,8 +136,8 @@ export const getFullSelectionCount = (buckets: BucketSelection[]) => {
 // do not count how many children it has -- we may add that in the future).
 export const getBucketSelectionCount = (bucket: BucketSelection) => {
   let count = 0;
-  count += [...bucket.folders].length;
-  count += [...bucket.objects].length;
+  count += bucket.folders.size;
+  count += bucket.objects.size;
   return count > 1 ? `${count} selections` : `1 selection`;
 };
 
