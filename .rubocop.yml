@@ -45,6 +45,7 @@ Rails/Output:
     - 'lib/atc/aws/s3_uploader.rb'
     - 'lib/atc/aip_reader.rb'
     - 'lib/atc/directory_reader.rb'
+    - 'lib/atc/smb/connector.rb'
 
 Lint/MissingCopEnableDirective:
   Enabled: false

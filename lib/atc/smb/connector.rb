@@ -14,7 +14,8 @@ class Atc::Smb::Connector
 
     smb_client.negotiate
     status = smb_client.authenticate
-    Rails.logger.info("Authentication status: #{status}")
-    Rails.logger.info("Negotiated dialect #{smb_client.dialect}")
+    puts status
+    Rails.logger.debug("Authentication status: #{status}")
+    Rails.logger.debug("Negotiated dialect #{smb_client.dialect}")
   end
 end
