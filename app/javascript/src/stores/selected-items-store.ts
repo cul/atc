@@ -28,7 +28,7 @@ export const ERRORS = {
 export type BucketSelection = {
   bucketName: string;
   folders: Set<string>;
-  objects: Set<string>;
+  files: Set<string>;
 };
 
 export type SelectedItemsStore = {
@@ -56,16 +56,18 @@ export type SelectedItemsStore = {
 const collapseParents = (
   item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
   nextFolders: Set<string>,
-  nextObjects: Set<string>,
+  nextFiles: Set<string>,
   getFolderContents: (prefix: string) => BucketContentsResponse | undefined,
 ) => {
   const ancestors = getAncestors(item);
   for (const ancestorFolder of ancestors) {
+    console.log('collapse parents');
     const ancestorData = getFolderContents(ancestorFolder);
-    const numAncestorChildren = ancestorData.folders.length + ancestorData.objects.length;
+    console.log(ancestorData);
+    const numAncestorChildren = ancestorData.folders.length + ancestorData.files.length;
     const numSelectedAncestorChildren = countSelectedAncestorChildren(
       nextFolders,
-      nextObjects,
+      nextFiles,
       ancestorFolder,
     );
     if (numSelectedAncestorChildren === numAncestorChildren) {
@@ -78,9 +80,9 @@ const collapseParents = (
           nextFolders.delete(folder);
         }
       }
-      for (const object of nextObjects) {
-        if (isDirectChildOf(object, ancestorFolder)) {
-          nextObjects.delete(object);
+      for (const file of nextFiles) {
+        if (isDirectChildOf(file, ancestorFolder)) {
+          nextFiles.delete(file);
         }
       }
       // And add the parent to the selected folders set
@@ -100,7 +102,7 @@ const collapseParents = (
 // items individually to the selection store for this bucket
 const explodeParents = (
   item: BucketItem | Pick<BucketItem, 'type' | 'fullPath'>,
-  nextObjects: Set<string>,
+  nextFiles: Set<string>,
   nextFolders: Set<string>,
   getFolderContents: (prefix: string) => BucketContentsResponse | undefined,
 ) => {
@@ -110,10 +112,10 @@ const explodeParents = (
     for (const ancestorFolder of ancestorFolders) {
       const ancestorData = getFolderContents(ancestorFolder);
       if (nextFolders.has(ancestorFolder)) nextFolders.delete(ancestorFolder);
-      // add all items except for the ancestor folder itself and the object itself
-      for (const object of ancestorData.objects) {
-        if (object.key !== item.fullPath) {
-          nextObjects.add(object.key);
+      // add all items except for the ancestor folder itself and the file itself
+      for (const file of ancestorData.files) {
+        if (file.key !== item.fullPath) {
+          nextFiles.add(file.key);
         }
       }
       for (const folder of ancestorData.folders) {
@@ -137,7 +139,7 @@ const storage = createJSONStorage(() => localStorage, {
     return value;
   },
   reviver: (key, value: string) => {
-    if (key === 'folders' || key === 'objects') {
+    if (key === 'folders' || key === 'files') {
       return new Set<string>(value);
     }
     return value;
@@ -168,15 +170,15 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
             state.buckets.push({
               bucketName: currentBucket,
               folders: new Set<string>(),
-              objects: new Set<string>(),
+              files: new Set<string>(),
             });
             bucketSelection = state.buckets.find((bucket) => bucket.bucketName === currentBucket);
           }
 
           const nextFolders = bucketSelection.folders;
-          const nextObjects = bucketSelection.objects;
+          const nextFiles = bucketSelection.files;
 
-          if (item.type === 'object') nextObjects.add(item.fullPath);
+          if (item.type === 'object') nextFiles.add(item.fullPath);
           if (item.type === 'folder') {
             // remove any children, then add the folder
             for (const path of nextFolders) {
@@ -184,15 +186,15 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
                 nextFolders.delete(path);
               }
             }
-            for (const path of nextObjects) {
+            for (const path of nextFiles) {
               if (isAnyChildOf(path, item.fullPath)) {
-                nextObjects.delete(path);
+                nextFiles.delete(path);
               }
             }
             nextFolders.add(item.fullPath);
           }
 
-          collapseParents(item, nextFolders, nextObjects, getFolderContents);
+          collapseParents(item, nextFolders, nextFiles, getFolderContents);
         });
       },
       deselectItem: (
@@ -205,16 +207,16 @@ export const useSelectedItemsStore = create<SelectedItemsStore>()(
             (bucket) => bucket.bucketName === currentBucket,
           );
           const nextFolders = bucketSelection.folders;
-          const nextObjects = bucketSelection.objects;
+          const nextFiles = bucketSelection.files;
 
-          if (item.type === 'object') nextObjects.delete(item.fullPath);
+          if (item.type === 'object') nextFiles.delete(item.fullPath);
           else nextFolders.delete(item.fullPath);
 
-          explodeParents(item, nextObjects, nextFolders, getFolderContents);
+          explodeParents(item, nextFiles, nextFolders, getFolderContents);
 
           // Remove any empty buckets
           state.buckets = state.buckets.filter((bucket) => {
-            return [...bucket.folders].length > 0 || [...bucket.objects].length > 0;
+            return [...bucket.folders].length > 0 || [...bucket.files].length > 0;
           });
         });
       },

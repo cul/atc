@@ -2,7 +2,7 @@ import { useNotifications } from '@/stores/notifications-store';
 import { BucketSelection } from '@/stores/selected-items-store';
 import { BucketItem } from '@/types/api';
 
-// Returns an array of the current folder or object's ancestors in order of
+// Returns an array of the current folder or file's ancestors in order of
 // closest to furthest (highest)
 // e.g. 'a/b/c/d/' -> [ 'a/b/c/', 'a/b/', 'a/', '/' ]
 export const getAncestors = (
@@ -21,7 +21,7 @@ export const getAncestors = (
   return ancestors;
 };
 
-// Returns array of the current folder or object's ancestors up until the cap
+// Returns array of the current folder or file's ancestors up until the cap
 // in order of closest to furthest (highest)
 // e.g. ('a/b/c/d/', 'a/') -> [ 'a/b/c/', 'a/b/', 'a/']
 export const getAncestorsBetween = (
@@ -53,15 +53,15 @@ export const isDirectChildOf = (path: string, prefix: string) => {
   return path.startsWith(prefix) && !subtractPrefix(path, prefix).includes('/');
 };
 
-// Returns count of folders and objects in the selection store that are direct children of prefix
+// Returns count of folders and files in the selection store that are direct children of prefix
 export const countSelectedAncestorChildren = (
   nextFolders: Set<string>,
-  nextObjects: Set<string>,
+  nextFiles: Set<string>,
   prefix: string,
 ) => {
   let count = 0;
   for (const path of nextFolders) if (isDirectChildOf(path, prefix)) count++;
-  for (const path of nextObjects) if (isDirectChildOf(path, prefix)) count++;
+  for (const path of nextFiles) if (isDirectChildOf(path, prefix)) count++;
   return count;
 };
 
@@ -87,22 +87,22 @@ export const getNearestSelectedParent = (path: string, folders: Set<string>) => 
 // Logic for determining what state a selection checkbox should be
 export const checkboxState = (currentBucket: BucketSelection | undefined, item: BucketItem) => {
   if (currentBucket === undefined) return 'unchecked';
-  const { folders, objects } = currentBucket;
+  const { folders, files } = currentBucket;
 
   // Exact folder or item match
-  if (folders.has(item.fullPath) || objects.has(item.fullPath)) return 'checked';
+  if (folders.has(item.fullPath) || files.has(item.fullPath)) return 'checked';
 
   // If the current item is the root level folder of a bucket & should be partial
-  if (item.type === 'folder' && item.fullPath === '/' && (folders.size > 0 || objects.size > 0))
+  if (item.type === 'folder' && item.fullPath === '/' && (folders.size > 0 || files.size > 0))
     return 'partial';
 
   // Item is contained in a selected folder, i.e. are any of it's ancestors included in the selected folders
   if (getAncestors(item).some((ancestor) => folders.has(ancestor))) return 'checked';
 
-  // Item is a folder and some selected objects or folders are contained within it --> partial
+  // Item is a folder and some selected files or folders are contained within it --> partial
   if (item.type === 'folder') {
     for (const folder of folders) if (folder.startsWith(item.fullPath)) return 'partial';
-    for (const object of objects) if (object.startsWith(item.fullPath)) return 'partial';
+    for (const file of files) if (file.startsWith(item.fullPath)) return 'partial';
   }
 
   return 'unchecked';
@@ -117,31 +117,35 @@ export const notifySelectionError = (errorMessage: string) => {
 };
 
 // Returns count of all items in the selection store -- the number of selected items
-// means selected folders and selected objects, not the total amount of objects contained
+// means selected folders and selected files, not the total amount of files contained
 // in the selection (i.e., a folder counts as one item, we do not count how many
 // children it has -- we may add that in the future).
 export const getFullSelectionCount = (buckets: BucketSelection[]) => {
   let count = 0;
   buckets.forEach((bucket) => {
     count += bucket.folders.size;
-    count += bucket.objects.size;
+    count += bucket.files.size;
   });
   return count;
 };
 
 // Returns count of all items in the selected for a particular bucket -- the number
-// of selected items means selected folders and selected objects, not the total amount
-// of objects contained in the selection (i.e., a folder counts as one item, we
+// of selected items means selected folders and selected files, not the total amount
+// of files contained in the selection (i.e., a folder counts as one item, we
 // do not count how many children it has -- we may add that in the future).
 export const getBucketSelectionCount = (bucket: BucketSelection) => {
   let count = 0;
   count += bucket.folders.size;
-  count += bucket.objects.size;
+  count += bucket.files.size;
   return count > 1 ? `${count} selections` : `1 selection`;
 };
 
 // Format for request body to backend CSV export endpoint
 export type SelectionCsvExportBody = {
+  selections: Array<BucketSelectionCsvExportJSON>;
+};
+
+type BucketSelectionCsvExportJSON = {
   bucket: string;
   files: string[];
   directories: string[];
@@ -149,12 +153,14 @@ export type SelectionCsvExportBody = {
 
 // Convert the selection store to the correct data shape for a request to the
 // backend CSV export endpoint
-export const csvExportReqBody = (buckets: BucketSelection[]): SelectionCsvExportBody[] => {
-  return buckets.map((bucket) => {
-    return {
-      bucket: bucket.bucketName,
-      files: [...bucket.objects],
-      directories: [...bucket.folders],
-    };
-  });
+export const csvExportReqBody = (buckets: BucketSelection[]): SelectionCsvExportBody => {
+  return {
+    selections: buckets.map((bucket) => {
+      return {
+        bucket: bucket.bucketName,
+        files: [...bucket.files],
+        directories: [...bucket.folders],
+      };
+    }),
+  };
 };

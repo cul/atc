@@ -17,7 +17,7 @@ const SelectionBoxHeader = ({ eventKey, disabled }: { eventKey: string; disabled
   const exportSelection = async () => {
     console.log('Export selection!');
     console.log(`${getFullSelectionCount(buckets)} items selected for export.`);
-    const response = await api.post('/api/csv_exports', csvExportReqBody(buckets));
+    const response = await api.post('/csv_exports', csvExportReqBody(buckets));
     console.log('response is:');
     console.log(response);
     // response contains ID of initiated export
@@ -82,8 +82,8 @@ const SelectedItems = () => {
                       <Col xs={6} className="border-start border-secondary">
                         files:
                         <ul>
-                          {[...bucket.objects].map((object, j) => (
-                            <li key={`object${j}`}>{object}</li>
+                          {[...bucket.files].map((file, j) => (
+                            <li key={`file${j}`}>{file}</li>
                           ))}
                         </ul>
                       </Col>
