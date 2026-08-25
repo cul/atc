@@ -29,7 +29,8 @@ append  :linked_files,
         'config/gcp.yml',
         'config/permissions.yml',
         'config/redis.yml',
-        'config/resque.yml'
+        'config/resque.yml',
+        'config/smb.yml'
 
 # Default value for linked_dirs is []
 append :linked_dirs, 'log', 'tmp/pids', 'tmp/csv_exports'

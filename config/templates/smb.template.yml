@@ -1,0 +1,12 @@
+development:
+  username: username@email.copm
+  password: pass123456789
+  domain: cul
+  host: host.cul.columbia.edu
+
+test:
+  username: testusername@email.copm
+  password: testpass123456789
+  domain: cul
+  host: testhost.cul.columbia.edu
+

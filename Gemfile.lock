@@ -110,6 +110,7 @@ GEM
     best_type (1.0.0)
       mime-types (~> 3.4)
     bigdecimal (3.3.1)
+    bindata (2.4.15)
     bindex (0.8.1)
     bootsnap (1.18.3)
       msgpack (~> 1.2)
@@ -302,6 +303,11 @@ GEM
     omniauth-cul (0.2.0)
       devise (>= 4.9)
       omniauth (>= 2.0)
+    openssl (3.3.3)
+    openssl-ccm (1.3.0)
+      openssl (~> 3.0)
+    openssl-cmac (2.1.0)
+      openssl (~> 3.0)
     orm_adapter (0.5.0)
     os (1.1.4)
     ostruct (0.6.3)
@@ -449,6 +455,14 @@ GEM
       rubocop-rspec (~> 2.28)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
+    ruby_smb (3.3.22)
+      bindata (= 2.4.15)
+      openssl-ccm
+      openssl-cmac
+      rubyntlm (>= 0.6.5)
+      windows_error (>= 0.1.4)
+    rubyntlm (0.6.5)
+      base64
     rubyzip (2.3.2)
     securerandom (0.4.1)
     selenium-webdriver (4.19.0)
@@ -527,6 +541,7 @@ GEM
     websocket-extensions (0.1.5)
     whenever (1.1.2)
       chronic (>= 0.6.3)
+    windows_error (0.1.6)
     xpath (3.2.0)
       nokogiri (~> 1.8)
     zeitwerk (2.7.3)
@@ -571,6 +586,7 @@ DEPENDENCIES
   retriable (~> 3.1)
   rspec-rails
   rubocul (~> 4.0.12)
+  ruby_smb
   selenium-webdriver
   simplecov (~> 0.22)
   sinatra (~> 3.0)
