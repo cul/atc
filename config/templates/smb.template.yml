@@ -3,10 +3,12 @@ development:
   password: pass123456789
   domain: cul
   host: host.cul.columbia.edu
+  share: folder-to-access
 
 test:
   username: testusername@email.copm
   password: testpass123456789
   domain: cul
   host: testhost.cul.columbia.edu
+  share: folder-to-access
 

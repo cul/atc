@@ -1,21 +1,26 @@
 # frozen_string_literal: true
 
 class Atc::Smb::Connector
-  def initialize
-    sock = TCPSocket.new(SMB_CONFIG[:host], 445)
-    dispatcher = RubySMB::Dispatcher::Socket.new(sock, read_timeout: 60)
+  def initialize(host: SMB_CONFIG[:host], share: SMB_CONFIG[:share], username: SMB_CONFIG[:username])
+    @host = host
+    @share = share
+    @username = username
+  end
 
-    smb_client = RubySMB::Client.new(
-      dispatcher,
-      username: SMB_CONFIG[:username],
-      password: SMB_CONFIG[:password],
-      domain: SMB_CONFIG[:domain]
-    )
+  # Remote dir is a directory on the share
+  def list(remote_dir)
+    command = smbclient_command(remote_dir)
+    puts "Running: #{command}"
+    output = `#{command} 2>&1`
+    puts output
+    output
+  end
 
-    smb_client.negotiate
-    status = smb_client.authenticate
-    puts status
-    Rails.logger.debug("Authentication status: #{status}")
-    Rails.logger.debug("Negotiated dialect #{smb_client.dialect}")
+  private
+
+  # Relies on Kerberos ticket. Change to use a password.
+  def smbclient_command(remote_dir)
+    "smbclient //#{@host}/#{@share} --user #{@username} -m SMB3 " \
+      "--use-kerberos=required --no-pass -D #{remote_dir.shellescape} --command ls"
   end
 end
