@@ -61,9 +61,7 @@ const collapseParents = (
 ) => {
   const ancestors = getAncestors(item);
   for (const ancestorFolder of ancestors) {
-    console.log('collapse parents');
     const ancestorData = getFolderContents(ancestorFolder);
-    console.log(ancestorData);
     const numAncestorChildren = ancestorData.folders.length + ancestorData.files.length;
     const numSelectedAncestorChildren = countSelectedAncestorChildren(
       nextFolders,

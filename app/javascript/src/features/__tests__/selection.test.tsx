@@ -58,7 +58,7 @@ describe('Item Selection Feature', () => {
     mockBucketList('bucket-1', {
       '': {
         folders: ['folder1/'],
-        objects: [
+        files: [
           buildS3Object({
             key: 'objectA',
             size: 1,
@@ -68,7 +68,7 @@ describe('Item Selection Feature', () => {
       },
       'folder1/': {
         folders: [],
-        objects: [
+        files: [
           buildS3Object({
             key: 'folder1/objectB',
             size: 1,
@@ -84,7 +84,7 @@ describe('Item Selection Feature', () => {
     });
     mockApi('get', '/buckets/bucket-2/list', {
       folders: ['folder3/'],
-      objects: [
+      files: [
         buildS3Object({
           key: 'objectD',
           size: 1,
@@ -144,7 +144,7 @@ describe('Item Selection Feature', () => {
         r.textContent.includes('Selection'),
       );
       const selectAllCheckBox = within(selectAllCell).getByRole('checkbox');
-      expect(selectAllCheckBox.indeterminate).toBe(true);
+      expect((selectAllCheckBox as HTMLInputElement).indeterminate).toBe(true);
     });
 
     it('selects entire level when select all button is checked', async () => {

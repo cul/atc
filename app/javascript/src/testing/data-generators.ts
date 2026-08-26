@@ -32,7 +32,7 @@ export const buildS3Objects = (count: number): S3Object[] =>
 export const buildBucketContents = (
   overrides?: Partial<BucketContentsResponse>,
 ): BucketContentsResponse => ({
-  objects: [],
+  files: [],
   folders: [],
   ...overrides,
 });

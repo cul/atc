@@ -22,10 +22,10 @@ const renderAppAndWait = async () => {
 
 describe('BucketContentsRoute', () => {
   describe('rendering bucket contents', () => {
-    it('renders folders and objects together, with folders typed as "Folder"', async () => {
+    it('renders folders and files together, with folders typed as "Folder"', async () => {
       const testBucket = buildBucketContents({
         folders: ['documents/'],
-        objects: [buildS3Object({ key: 'notes.txt' })],
+        files: [buildS3Object({ key: 'notes.txt' })],
       });
       mockApi('get', '/buckets/my-bucket/list', testBucket);
 
@@ -77,13 +77,13 @@ describe('BucketContentsRoute', () => {
       expect(screen.getByText('No entries found.')).toBeInTheDocument();
     });
 
-    it('formats object size and renders "-" for folder size/storage class', async () => {
+    it('formats file size and renders "-" for folder size/storage class', async () => {
       mockApi(
         'get',
         '/buckets/my-bucket/list',
         buildBucketContents({
           folders: ['archive/'],
-          objects: [
+          files: [
             buildS3Object({
               key: 'big.bin',
               size: 1024 * 1024,
@@ -95,9 +95,9 @@ describe('BucketContentsRoute', () => {
 
       await renderAppAndWait();
 
-      const objectRow = screen.getByText('big.bin').closest('tr')!;
-      expect(within(objectRow).getByText('1.00 MB')).toBeInTheDocument();
-      expect(within(objectRow).getByText('Intelligent Tiering')).toBeInTheDocument();
+      const fileRow = screen.getByText('big.bin').closest('tr')!;
+      expect(within(fileRow).getByText('1.00 MB')).toBeInTheDocument();
+      expect(within(fileRow).getByText('Intelligent Tiering')).toBeInTheDocument();
 
       // Folders have no Last Modified, Storage Class or Size so they all render "-"
       const folderRow = screen.getByText('archive').closest('tr')!;
@@ -117,7 +117,7 @@ describe('BucketContentsRoute', () => {
         '/buckets/my-bucket/list',
         buildBucketContents({
           folders: ['mango/'],
-          objects: [buildS3Object({ key: 'apple.txt' }), buildS3Object({ key: 'zebra.txt' })],
+          files: [buildS3Object({ key: 'apple.txt' }), buildS3Object({ key: 'zebra.txt' })],
         }),
       );
 
@@ -128,13 +128,13 @@ describe('BucketContentsRoute', () => {
       expect(getNameOrder()).toEqual(['zebra.txt', 'mango', 'apple.txt']);
     });
 
-    it('sorts folders before objects by type, then by extension, then by name', async () => {
+    it('sorts folders before files by type, then by extension, then by name', async () => {
       mockApi(
         'get',
         '/buckets/my-bucket/list',
         buildBucketContents({
           folders: ['z-folder/', 'a-folder/'],
-          objects: [
+          files: [
             buildS3Object({ key: 'delta.txt' }),
             buildS3Object({ key: 'beta.txt' }),
             buildS3Object({ key: 'zoo.jpg' }),
@@ -145,18 +145,18 @@ describe('BucketContentsRoute', () => {
       await renderAppAndWait();
       await userEvent.click(screen.getByRole('button', { name: 'Type' }));
 
-      // Folders first (alphabetical), then objects by extension (jpg < txt),
+      // Folders first (alphabetical), then files by extension (jpg < txt),
       // then by name within the same extension (beta < delta).
       expect(getNameOrder()).toEqual(['a-folder', 'z-folder', 'zoo.jpg', 'beta.txt', 'delta.txt']);
     });
 
-    it('sorts objects chronologically by last modified, folders last', async () => {
+    it('sorts files chronologically by last modified, folders last', async () => {
       mockApi(
         'get',
         '/buckets/my-bucket/list',
         buildBucketContents({
           folders: ['folder/'],
-          objects: [
+          files: [
             buildS3Object({ key: 'newer.txt', lastModified: '2026-03-01T00:00:00.000Z' }),
             buildS3Object({ key: 'older.txt', lastModified: '2026-01-01T00:00:00.000Z' }),
           ],
@@ -169,13 +169,13 @@ describe('BucketContentsRoute', () => {
       expect(getNameOrder()).toEqual(['older.txt', 'newer.txt', 'folder']);
     });
 
-    it('sorts objects by storage class, folders last', async () => {
+    it('sorts files by storage class, folders last', async () => {
       mockApi(
         'get',
         '/buckets/my-bucket/list',
         buildBucketContents({
           folders: ['folder/'],
-          objects: [
+          files: [
             buildS3Object({ key: 'archival.txt', storageClass: 'INTELLIGENT_TIERING' }),
             buildS3Object({ key: 'standard.txt', storageClass: 'STANDARD' }),
           ],
@@ -188,13 +188,13 @@ describe('BucketContentsRoute', () => {
       expect(getNameOrder()).toEqual(['archival.txt', 'standard.txt', 'folder']);
     });
 
-    it('sorts objects numerically by size, folders last', async () => {
+    it('sorts files numerically by size, folders last', async () => {
       mockApi(
         'get',
         '/buckets/my-bucket/list',
         buildBucketContents({
           folders: ['folder/'],
-          objects: [
+          files: [
             buildS3Object({ key: 'big.txt', size: 1024 * 1024 }),
             buildS3Object({ key: 'small.txt', size: 10 }),
           ],
@@ -229,11 +229,7 @@ describe('BucketContentsRoute', () => {
     };
 
     it('advances to the next page when the next arrow is clicked', async () => {
-      mockApi(
-        'get',
-        '/buckets/my-bucket/list',
-        buildBucketContents({ objects: buildS3Objects(10) }),
-      );
+      mockApi('get', '/buckets/my-bucket/list', buildBucketContents({ files: buildS3Objects(10) }));
 
       const { router } = await renderPaginatedAndWait();
 
@@ -248,11 +244,7 @@ describe('BucketContentsRoute', () => {
     });
 
     it('returns to the previous page when the previous arrow is clicked', async () => {
-      mockApi(
-        'get',
-        '/buckets/my-bucket/list',
-        buildBucketContents({ objects: buildS3Objects(10) }),
-      );
+      mockApi('get', '/buckets/my-bucket/list', buildBucketContents({ files: buildS3Objects(10) }));
 
       const { router } = await renderPaginatedAndWait('/browse/buckets/my-bucket?page=2');
 
@@ -267,11 +259,7 @@ describe('BucketContentsRoute', () => {
     });
 
     it('disables the navigation arrows when there is only one page', async () => {
-      mockApi(
-        'get',
-        '/buckets/my-bucket/list',
-        buildBucketContents({ objects: buildS3Objects(2) }),
-      );
+      mockApi('get', '/buckets/my-bucket/list', buildBucketContents({ files: buildS3Objects(2) }));
 
       await renderPaginatedAndWait();
 
@@ -284,15 +272,11 @@ describe('BucketContentsRoute', () => {
     });
 
     it('jumps to the last and first pages with the double-arrow buttons', async () => {
-      mockApi(
-        'get',
-        '/buckets/my-bucket/list',
-        buildBucketContents({ objects: buildS3Objects(10) }),
-      );
+      mockApi('get', '/buckets/my-bucket/list', buildBucketContents({ files: buildS3Objects(10) }));
 
       await renderPaginatedAndWait();
 
-      // Last page holds the final object only
+      // Last page holds the final file only
       await userEvent.click(screen.getByRole('button', { name: nav.last }));
       expect(await screen.findByText('object-009.txt')).toBeInTheDocument();
       expect(screen.queryByText('object-000.txt')).not.toBeInTheDocument();
@@ -303,11 +287,7 @@ describe('BucketContentsRoute', () => {
     });
 
     it('lands on the requested page when navigating directly to ?page=4', async () => {
-      mockApi(
-        'get',
-        '/buckets/my-bucket/list',
-        buildBucketContents({ objects: buildS3Objects(10) }),
-      );
+      mockApi('get', '/buckets/my-bucket/list', buildBucketContents({ files: buildS3Objects(10) }));
 
       const { router } = await renderPaginatedAndWait('/browse/buckets/my-bucket?page=4');
 
