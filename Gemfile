@@ -42,8 +42,6 @@ gem 'redis-namespace', '~> 1.11'
 gem 'resque', '~> 2.6'
 # Resque for retrying code after errors
 gem 'retriable', '~> 3.1'
-# SMB client library for Ruby
-gem 'ruby_smb'
 # We don't actually use sinatra directly, but it is used by resque.
 # We need to pin to 3.x because 4.x introduces a conflict.
 # The line below can be removed if resque ever stops requiring sinatra.
@@ -63,6 +61,8 @@ gem 'whenever', require: false
 gem 'devise'
 gem 'omniauth'
 gem 'omniauth-cul', '~> 0.2.0'
+
+gem 'open3'
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
