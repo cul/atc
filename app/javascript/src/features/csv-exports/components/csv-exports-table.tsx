@@ -34,11 +34,13 @@ const CsvExportsTable = () => {
         data={rowData}
         columns={columns}
         pagination={pagination}
-        isServerSidePaginated={true}
+        initialSorting={[{ id: 'id', desc: true }]}
         onPaginationChange={onPaginationChange}
         isLoading={isLoading}
         pageSize={perPage}
-        rowCount={data?.pagination.totalCount}
+        serverSidePaginatedProps={{
+          rowCount: data?.pagination.totalCount,
+        }}
       />
     </div>
   );
