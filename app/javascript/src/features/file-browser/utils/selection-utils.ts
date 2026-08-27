@@ -119,6 +119,16 @@ export const notifySelectionError = (errorMessage: string) => {
   });
 };
 
+export const notifyNewCsvExport = (exportId: string) => {
+  useNotifications.getState().addNotification({
+    type: 'success',
+    title: `Your Export has been ordered`,
+    message: `Your new CSV Export with ID ${exportId} has been ordered.`,
+    linkValue: `/csv_exports/${exportId}`,
+    linkText: 'View export details.',
+  });
+};
+
 // Returns count of all items in the selection store -- the number of selected items
 // means selected folders and selected files, not the total amount of files contained
 // in the selection (i.e., a folder counts as one item, we do not count how many
