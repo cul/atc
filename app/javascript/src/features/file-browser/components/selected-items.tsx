@@ -5,23 +5,19 @@ import { useSelectedItemsStore } from '@/stores/selected-items-store';
 import {
   csvExportReqBody,
   getBucketSelectionCount,
-  getFullSelectionCount,
+  notifyNewCsvExport,
 } from '../utils/selection-utils';
 
 // I would prefer to keep this header component in the same file as the Selected Items accordion, because
 // it is tightly coupled to that component, won't be reused, and cannot be inlined in SelectedItems because
 // it calls the useAccordionButton hook
 const SelectionBoxHeader = ({ eventKey, disabled }: { eventKey: string; disabled: boolean }) => {
-  const { buckets } = useSelectedItemsStore();
+  const { buckets, reset } = useSelectedItemsStore();
   const expandSelection = useAccordionButton(eventKey);
   const exportSelection = async () => {
-    console.log('Export selection!');
-    console.log(`${getFullSelectionCount(buckets)} items selected for export.`);
     const response = await api.post('/csv_exports', csvExportReqBody(buckets));
-    console.log('response is:');
-    console.log(response);
-    // response contains ID of initiated export
-    // display pop up with link to export view page
+    reset();
+    notifyNewCsvExport((response as { id: string })?.id);
   };
 
   return (

@@ -6,6 +6,7 @@ import { Spinner } from 'react-bootstrap';
 import MainLayout from '@/components/layouts/main-layout';
 import { RouteErrorFallback } from '@/components/errors/route-error';
 import CsvExportsLayout from '@/components/layouts/csv-exports-layout';
+import RootLayout from '@/components/layouts/root-layout';
 
 interface RouteModule {
   default: React.ComponentType;
@@ -31,6 +32,7 @@ export const createAppRouter = (queryClient: QueryClient) =>
     {
       hydrateFallbackElement: <Spinner animation="border" role="status" />,
       errorElement: <RouteErrorFallback />,
+      element: <RootLayout />,
       children: [
         {
           index: true,
