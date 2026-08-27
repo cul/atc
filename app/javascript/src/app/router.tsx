@@ -44,6 +44,10 @@ export const createAppRouter = (queryClient: QueryClient) =>
               index: true,
               lazy: () => import('./routes/csv-exports').then(convert(queryClient)),
             },
+            {
+              path: ':id',
+              lazy: () => import('./routes/csv-export-details').then(convert(queryClient)),
+            },
           ],
         },
         {
