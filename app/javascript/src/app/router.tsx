@@ -36,6 +36,15 @@ export const createAppRouter = (queryClient: QueryClient) =>
           loader: () => redirect('/browse/buckets'),
         },
         {
+          path: 'csv_exports',
+          children: [
+            {
+              index: true,
+              lazy: () => import('./routes/csv-exports').then(convert(queryClient)),
+            },
+          ],
+        },
+        {
           path: 'browse',
           children: [
             {
