@@ -1,5 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { CsvExportSummaryRow } from './csv-exports-utils';
+import { formatLastModified } from '@/features/file-browser/utils/format-utils';
+import { Link } from 'react-router';
 
 const columnHelper = createColumnHelper<CsvExportSummaryRow>();
 
@@ -7,7 +9,14 @@ export const columnDefs = [
   columnHelper.accessor('id', {
     header: 'ID',
     cell: ({ row }) => {
-      return row.original.id;
+      return (
+        <Link
+          to={{ pathname: `${encodeURIComponent(row.original.id)}` }}
+          className="link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
+        >
+          {row.original.id}
+        </Link>
+      );
     },
   }),
   columnHelper.accessor('status', {
@@ -42,7 +51,7 @@ export const columnDefs = [
   columnHelper.accessor('updatedAt', {
     header: 'Last Updated',
     cell: ({ row }) => {
-      return row.original.updatedAt;
+      return formatLastModified(row.original.updatedAt);
     },
   }),
 ];

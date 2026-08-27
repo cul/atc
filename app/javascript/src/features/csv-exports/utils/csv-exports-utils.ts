@@ -18,7 +18,7 @@ export type CsvExportSummary = {
     sample: Array<string>;
     totalCount: number;
   };
-  updatedAt: Date;
+  updatedAt: string;
 };
 
 export type CsvExportSummariesResponse = {
@@ -39,7 +39,7 @@ export type CsvExportSummaryRow = {
   status: CsvExportStatus;
   selectionSample: Array<string>;
   totalCount: number;
-  updatedAt: Date;
+  updatedAt: string;
 };
 
 export const transformCsvExportSummaryToRow = (
@@ -53,3 +53,70 @@ export const transformCsvExportSummaryToRow = (
 });
 
 export const DEFAULT_CSV_EXPORT_PAGE_SIZE = 20;
+
+export type ExportPath = {
+  bucket: string;
+  keys: Array<string>;
+  prefixes: Array<string>;
+};
+
+export type CsvExportDetailsResponse = {
+  id: number;
+  exportPaths: Array<ExportPath>;
+  exportErrors: Array<string>;
+  status: string;
+  updatedAt: string;
+};
+
+export type FullExportItem = {
+  number?: number;
+  bucket: string;
+  uri: string;
+  type: 'file' | 'folder';
+};
+
+// Take the array of Export Path objects and flatten them for use in the
+// export paths table on csv export detail pages
+export const convertToFullExportPathsList = (
+  exportPaths: Array<ExportPath>,
+): Array<FullExportItem> => {
+  const results = [];
+  exportPaths.forEach((exportPath) => {
+    exportPath.prefixes.forEach((folder) => {
+      results.push({
+        bucket: exportPath.bucket,
+        uri: folder,
+        type: 'folder',
+      });
+    });
+    exportPath.keys.forEach((file) => {
+      results.push({
+        bucket: exportPath.bucket,
+        uri: file,
+        type: 'file',
+      });
+    });
+  });
+  return results;
+};
+
+export const getNumberItemsSelected = (exportPaths: Array<ExportPath>) => {
+  let count = 0;
+  exportPaths.forEach((exportPath) => {
+    count += exportPath.prefixes.length;
+    count += exportPath.keys.length;
+  });
+  return count;
+};
+
+// Options match the statuses in the csv_export model
+export const getTextColorFromStatus = (status: string) => {
+  switch (status) {
+    case 'failure':
+      return 'danger';
+    case 'success':
+      return 'success';
+    default:
+      return 'warning';
+  }
+};
