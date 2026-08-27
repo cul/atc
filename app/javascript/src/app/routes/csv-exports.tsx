@@ -5,13 +5,11 @@ import { LoaderFunctionArgs } from 'react-router';
 
 export const clientLoader =
   (queryClient: QueryClient) =>
-  async ({ params, request }: LoaderFunctionArgs) => {
-    // load exports to cache
-    console.log('client loader for exports');
-    // todo : make sure pagination works!
-
-    // GET /api/csv_exports?page=<pageNo>perPage=<perPage>
-    const query = getCsvExportSummariesQueryOptions(params.pageIndex, params.perPage);
+  async ({ params }: LoaderFunctionArgs) => {
+    const query = getCsvExportSummariesQueryOptions(
+      Number(params.pageIndex),
+      Number(params.perPage),
+    );
     queryClient.prefetchQuery(query);
   };
 

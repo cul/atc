@@ -51,3 +51,5 @@ export const transformCsvExportSummaryToRow = (
   totalCount: csvExport.selectionSummary.totalCount,
   updatedAt: csvExport.updatedAt,
 });
+
+export const DEFAULT_CSV_EXPORT_PAGE_SIZE = 20;

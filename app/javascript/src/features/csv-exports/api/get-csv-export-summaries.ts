@@ -1,29 +1,31 @@
-import { api } from '@/lib/api-client';
-import { CsvExportSummariesResponse } from '../utils/csv-exports-utils';
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import { QueryConfig } from '@/lib/react-query';
+import { api } from '@/lib/api-client';
+import {
+  CsvExportSummariesResponse,
+  DEFAULT_CSV_EXPORT_PAGE_SIZE,
+} from '../utils/csv-exports-utils';
 
-const getCsvExportSummaries = (pageIndex: string = '1', perPage: string = '20') => {
+const getCsvExportSummaries = (pageIndex = 1, perPage = DEFAULT_CSV_EXPORT_PAGE_SIZE) => {
   const params = new URLSearchParams();
 
-  params.set('page', pageIndex);
-  params.set('perPage', perPage);
+  params.set('page', `${pageIndex}`);
+  params.set('perPage', `${perPage}`);
 
   const endpoint = `/csv_exports?${params}`;
-  console.log(`getting exports from : ${endpoint}`);
 
   return api.get<CsvExportSummariesResponse>(endpoint);
 };
 
 type UseCsvExportSummariesOptions = {
-  pageIndex: string;
-  perPage: string;
+  pageIndex: number;
+  perPage: number;
   queryConfig?: QueryConfig<typeof getCsvExportSummariesQueryOptions>;
 };
 
-export const getCsvExportSummariesQueryOptions = (pageIndex: string, perPage: string) => {
+export const getCsvExportSummariesQueryOptions = (pageIndex: number, perPage: number) => {
   return queryOptions({
-    queryKey: ['csv-export-summaries', pageIndex, perPage],
+    queryKey: ['csv-export-summaries', `index-${pageIndex}`, `perPage-${perPage}`],
     queryFn: () => getCsvExportSummaries(pageIndex, perPage),
   });
 };

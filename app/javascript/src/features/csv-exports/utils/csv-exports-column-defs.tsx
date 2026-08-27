@@ -1,5 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import { CsvExportSummary, CsvExportSummaryRow } from './csv-exports-utils';
+import { CsvExportSummaryRow } from './csv-exports-utils';
 
 const columnHelper = createColumnHelper<CsvExportSummaryRow>();
 
@@ -20,11 +20,16 @@ export const columnDefs = [
     header: 'Selected Items',
     cell: ({ row }) => {
       return (
-        <ul>
-          {row.original.selectionSample.map((sample) => (
-            <li>{sample}</li>
-          ))}
-        </ul>
+        <>
+          <ul>
+            {row.original.selectionSample.map((sample, i) => (
+              <li key={i}>{sample}</li>
+            ))}
+          </ul>
+          {row.original.selectionSample.length < row.original.totalCount && (
+            <span className="fst-italic">... (view export details for full selection)</span>
+          )}
+        </>
       );
     },
   }),

@@ -5,6 +5,7 @@ import { RouterProvider } from 'react-router/dom';
 import { Spinner } from 'react-bootstrap';
 import MainLayout from '@/components/layouts/main-layout';
 import { RouteErrorFallback } from '@/components/errors/route-error';
+import CsvExportsLayout from '@/components/layouts/csv-exports-layout';
 
 interface RouteModule {
   default: React.ComponentType;
@@ -37,6 +38,7 @@ export const createAppRouter = (queryClient: QueryClient) =>
         },
         {
           path: 'csv_exports',
+          Component: CsvExportsLayout,
           children: [
             {
               index: true,
