@@ -26,8 +26,13 @@ class Atc::Smb::Connector
 
   # Remote dir is a directory on the share
   def list(remote_dir)
-    # TODO: Add file path to CSV file
-    each_file(remote_dir) { |file_path| puts file_path }
+    # TODO: We should place this file under a folder that indicates what share folder this csv was generated for
+    csv_dir = "#{SMB_CONFIG[:stabilization_dir]}/output.csv"
+    CSV.open(csv_dir, 'w') do |csv|
+      csv << ['file_path']
+
+      each_file(remote_dir) { |file_path| csv << [file_path] }
+    end
   end
 
   # Recursively iterates over every file under remote_dir (a directory on the share).
