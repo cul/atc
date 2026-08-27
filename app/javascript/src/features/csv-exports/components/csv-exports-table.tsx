@@ -1,6 +1,5 @@
 import { useSearchParams } from 'react-router';
 import { useCsvExportSummariesQuery } from '../api/get-csv-export-summaries';
-import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import {
   DEFAULT_CSV_EXPORT_PAGE_SIZE,
   transformCsvExportSummaryToRow,
@@ -11,7 +10,7 @@ import { columnDefs } from '../utils/csv-exports-column-defs';
 import { usePagination } from '@/features/file-browser/hooks/use-pagination';
 
 const CsvExportsTable = () => {
-  let [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const pageIndex = Number(searchParams.get('page') ?? 1);
   const perPage = Number(searchParams.get('perPage') ?? DEFAULT_CSV_EXPORT_PAGE_SIZE);
 
@@ -20,7 +19,7 @@ const CsvExportsTable = () => {
   const rowData = useMemo(() => {
     if (!data) return [];
     return data.csvExports.map((csvExport) => transformCsvExportSummaryToRow(csvExport));
-  }, [searchParams, data]);
+  }, [data]);
 
   const { pagination, onPaginationChange } = usePagination(perPage);
 
