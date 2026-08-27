@@ -50,7 +50,6 @@ export const AppProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
       <ErrorBoundary FallbackComponent={MainErrorFallback}>
         <QueryClientProvider client={queryClient}>
           {import.meta.env.DEV && <ReactQueryDevtools />}
-          <Notifications />
           <AuthLoader>{children}</AuthLoader>
         </QueryClientProvider>
       </ErrorBoundary>
