@@ -5,7 +5,6 @@ import { RouterProvider } from 'react-router/dom';
 import { Spinner } from 'react-bootstrap';
 import MainLayout from '@/components/layouts/main-layout';
 import { RouteErrorFallback } from '@/components/errors/route-error';
-import CsvExportsLayout from '@/components/layouts/csv-exports-layout';
 
 interface RouteModule {
   default: React.ComponentType;
@@ -35,16 +34,6 @@ export const createAppRouter = (queryClient: QueryClient) =>
         {
           index: true,
           loader: () => redirect('/browse/buckets'),
-        },
-        {
-          path: 'csv_exports',
-          Component: CsvExportsLayout,
-          children: [
-            {
-              index: true,
-              lazy: () => import('./routes/csv-exports').then(convert(queryClient)),
-            },
-          ],
         },
         {
           path: 'browse',
