@@ -10,6 +10,7 @@ class Atc::Smb::Connector
   # Matches the header line that smbclient prints before going intothe contents of each subdirectory
   DIR_HEADER_REGEX = /\A\\(?<path>.*\S)\s*\z/
 
+  # TODO: Store the share folder for later use
   def initialize(
     host: SMB_CONFIG[:host],
     share: SMB_CONFIG[:share],
@@ -50,6 +51,35 @@ class Atc::Smb::Connector
     base_dir = normalize_path(remote_dir)
     with_auth_file do |auth_file_path|
       get_file_paths(base_dir, ls_output(base_dir, auth_file_path), &block)
+    end
+  end
+
+  def get_and_upload_files(remote_dir)
+    csv_file = "#{SMB_CONFIG[:stabilization_dir]}/normalization-log.csv"
+    rows = CSV.read(csv_file, headers: true)
+
+    with_auth_file do |auth_file_path|
+      rows.each do |row|
+        file_path = row['file_path']
+        normalized_path = row['normalized_path']
+
+        next if normalized_path == 'SKIPPED'
+
+        path_with_share = "#{remote_dir}#{File.dirname(file_path)}"
+        source_filename = File.basename(file_path)
+        normalized_filename = File.basename(normalized_path)
+
+        puts "Path with share: #{path_with_share}"
+        puts "Source filename: #{source_filename}"
+        puts "Normalized filename: #{normalized_filename}"
+
+        command = smbclient_get_command(path_with_share, source_filename, normalized_filename, auth_file_path)
+        puts "Running: #{command.join(' ')}"
+        _stdout, stderr, status = Open3.capture3(*command)
+        puts "Finished running command for #{file_path}, success=#{status.success?}"
+
+        raise "error retrieving #{file_path}: #{stderr.strip}" unless status.success?
+      end
     end
   end
 
@@ -101,7 +131,7 @@ class Atc::Smb::Connector
   end
 
   def ls_output(remote_dir, auth_file_path)
-    command = smbclient_command(remote_dir, auth_file_path)
+    command = smbclient_list_command(remote_dir, auth_file_path)
     puts "Running: #{command.join(' ')}"
     stdout, stderr, status = Open3.capture3(*command)
 
@@ -110,8 +140,14 @@ class Atc::Smb::Connector
     stdout
   end
 
-  def smbclient_command(remote_dir, auth_file_path)
+  # TODO: extract common command building logic
+  def smbclient_list_command(remote_dir, auth_file_path)
     ['smbclient', "//#{@host}/#{@share}", '--authentication-file', auth_file_path,
      '-m', 'SMB3', '--use-kerberos=required', '-D', remote_dir, '--command', 'recurse ON; ls']
+  end
+
+  def smbclient_get_command(remote_dir, source_filename, normalized_filename, auth_file_path)
+    ['smbclient', "//#{@host}/#{@share}", '--authentication-file', auth_file_path,
+     '-m', 'SMB3', '--use-kerberos=required', '-D', remote_dir, '--command', "get #{source_filename} #{normalized_filename}"]
   end
 end
