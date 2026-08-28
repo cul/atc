@@ -1,15 +1,11 @@
 import { useNotifications } from '@/stores/notifications-store';
 import { ErrorData } from '@/types/api';
 import { ApiError } from './api-error';
+import { getCsrfToken } from '@/components/utils/csrf-utils';
 
 export { ApiError };
 
 const BASE_URL = '/api';
-
-// POST, PUT, PATCH, and DELETE requests require the csrf token to be included in headers
-const getCsrfToken = () => {
-  return (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content;
-};
 
 const isErrorData = (data: unknown): data is ErrorData =>
   typeof data === 'object' &&
@@ -92,6 +88,6 @@ export const api = {
       ...options,
       method: 'POST',
       body: JSON.stringify(data),
-      headers: { 'X-CSRF-Token': getCsrfToken() },
+      headers: { 'X-CSRF-Token': getCsrfToken() }, // CSRF Token required for POST requests
     }),
 };
