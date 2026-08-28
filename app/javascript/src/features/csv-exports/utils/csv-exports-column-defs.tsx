@@ -5,18 +5,21 @@ import { Link } from 'react-router';
 
 const columnHelper = createColumnHelper<CsvExportSummaryRow>();
 
+const getDetailsLinkElement = (id: number | string, linkText: string) => (
+  <Link
+    to={{ pathname: `${encodeURIComponent(id)}` }}
+    className="link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
+  >
+    {linkText}
+  </Link>
+);
+
 export const columnDefs = [
   columnHelper.accessor('id', {
     header: 'ID',
     cell: ({ row }) => {
-      return (
-        <Link
-          to={{ pathname: `${encodeURIComponent(row.original.id)}` }}
-          className="link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
-        >
-          {row.original.id}
-        </Link>
-      );
+      const id = String(row.original.id);
+      return getDetailsLinkElement(id, id);
     },
   }),
   columnHelper.accessor('status', {
@@ -27,18 +30,22 @@ export const columnDefs = [
   }),
   columnHelper.accessor('selectionSample', {
     header: 'Selected Items',
-    cell: ({ row }) => {
+    size: 500,
+    cell: ({ row, column }) => {
       return (
-        <>
+        <div style={{ maxWidth: column.getSize(), overflowWrap: 'break-word' }}>
           <ul>
             {row.original.selectionSample.map((sample, i) => (
               <li key={i}>{sample}</li>
             ))}
           </ul>
           {row.original.selectionSample.length < row.original.totalCount && (
-            <span className="fst-italic">... (view export details for full selection)</span>
+            <span className="fst-italic">
+              ... (view {getDetailsLinkElement(row.original.id, 'export details')} for full
+              selection)
+            </span>
           )}
-        </>
+        </div>
       );
     },
   }),
