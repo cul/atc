@@ -47,7 +47,7 @@ const SelectedItems = () => {
           <SelectionBoxHeader eventKey="0" disabled={buckets.length === 0} />
         </Card.Header>
         <Accordion.Collapse eventKey="0">
-          <div className="p-3" style={{ fontSize: '.9em' }}>
+          <div className="p-3" style={{ fontSize: '.9em', maxHeight: '50vh', overflowY: 'auto' }}>
             {buckets.length === 0 && (
               <span className="text-secondary fst-italic">No items selected.</span>
             )}
@@ -63,28 +63,22 @@ const SelectedItems = () => {
                 Selected items in bucket <span className="fw-bold">{bucket.bucketName}</span> (
                 {getBucketSelectionCount(bucket)}):
                 <Row>
-                  {bucket.folders.has('/') ? (
-                    <span className="text-success">Entire bucket is selected</span>
-                  ) : (
-                    <>
-                      <Col xs={6}>
-                        Folders:
-                        <ul>
-                          {[...bucket.folders].map((folder, j) => (
-                            <li key={`folder${j}`}>{folder}</li>
-                          ))}
-                        </ul>
-                      </Col>
-                      <Col xs={6} className="border-start border-secondary">
-                        files:
-                        <ul>
-                          {[...bucket.files].map((file, j) => (
-                            <li key={`file${j}`}>{file}</li>
-                          ))}
-                        </ul>
-                      </Col>
-                    </>
-                  )}
+                  <Col xs={6}>
+                    Folders:
+                    <ul>
+                      {[...bucket.folders].map((folder, j) => (
+                        <li key={`folder${j}`}>{folder}</li>
+                      ))}
+                    </ul>
+                  </Col>
+                  <Col xs={6} className="border-start border-secondary">
+                    files:
+                    <ul>
+                      {[...bucket.files].map((file, j) => (
+                        <li key={`file${j}`}>{file}</li>
+                      ))}
+                    </ul>
+                  </Col>
                 </Row>
               </div>
             ))}
