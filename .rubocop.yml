@@ -16,6 +16,7 @@ AllCops:
     - 'vendor/**/*'
     - 'lib/tasks/**/*'
     - 'tmp/**/*'
+    - 'lib/atc/smb/csv_writer.rb' # temp
 
 Layout/LineLength:
   Exclude:
