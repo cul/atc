@@ -22,5 +22,13 @@ namespace :atc do
       processor = Atc::Smb::Processor.new(remote_dir)
       processor.download_and_process_source_files
     end
+
+    # Assumes CSV file already contains the list of files to upload and those files
+    # are present in the local stabilization directory
+    task test_upload: :environment do
+      remote_dir = ENV['source']
+      processor = Atc::Smb::Processor.new(remote_dir)
+      processor.upload_files
+    end
   end
 end

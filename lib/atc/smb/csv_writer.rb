@@ -36,7 +36,7 @@ class Atc::Smb::CsvWriter
     CSV.foreach(@csv_file, headers: true) do |row|
       next if row['skipped'] == 'SKIPPED'
 
-      yield row['file_path'], row['normalized_path']
+      yield row['file_path'], row['normalized_path'], row['size'].to_i
     end
   end
 

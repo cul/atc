@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'fileutils'
 require 'open3'
 require 'tempfile'
 
@@ -34,36 +35,51 @@ class Atc::Smb::Connector
     end
   end
 
-  # Downloads files from remote_dir (a directory on the share). `files` is an enumerable of
-  # [file_path, normalized_path] pairs.
-  # TODO: Implement the upload part after downloading the files (outside of this method)
-  def get_and_upload_files(remote_dir, files)
+  # Downloads files from remote_dir (a directory on the share) one at a time
+  def each_downloaded_file(remote_dir, files)
     with_auth_file do |auth_file_path|
-      files.each do |file_path, normalized_path|
-        download_file(remote_dir, file_path, normalized_path, auth_file_path)
+      files.each do |file_path, normalized_path, size|
+        local_path = download_file(remote_dir, file_path, normalized_path, auth_file_path)
+        verify_download_size(file_path, local_path, size)
+        yield local_path, normalized_path, size
       end
     end
   end
 
   private
 
-  # TODO: specify a different path for downloaded files
+  # Verify size since smbclient can exit successfully even if the file is incomplete
+  def verify_download_size(file_path, local_path, expected_size)
+    actual_size = File.size(local_path)
+    return if actual_size == expected_size
+
+    raise "size mismatch for #{file_path}: expected #{expected_size} bytes, downloaded #{actual_size}"
+  end
+
+  # Downloads a file under its normalized path
   def download_file(remote_dir, file_path, normalized_path, auth_file_path)
     path_with_share = "#{remote_dir}#{File.dirname(file_path)}"
     source_filename = File.basename(file_path)
-    normalized_filename = File.basename(normalized_path)
+    local_path = temp_path_for(normalized_path)
 
     puts "Path with share: #{path_with_share}"
     puts "Source filename: #{source_filename}"
-    puts "Normalized filename: #{normalized_filename}"
+    puts "Local path: #{local_path}"
 
-    # When downloading, renames the file to its normalized name
-    command = smbclient_command(path_with_share, auth_file_path, "get #{source_filename} #{normalized_filename}")
+    command = smbclient_command(path_with_share, auth_file_path, "get \"#{source_filename}\" \"#{local_path}\"")
     puts "Running: #{command.join(' ')}"
     _stdout, stderr, status = Open3.capture3(*command)
     puts "Finished running command for #{file_path}, success=#{status.success?}"
 
     raise "error retrieving #{file_path}: #{stderr.strip}" unless status.success?
+
+    local_path
+  end
+
+  def temp_path_for(normalized_path)
+    local_path = File.join(SMB_CONFIG[:stabilization_dir], normalized_path)
+    FileUtils.mkdir_p(File.dirname(local_path))
+    local_path
   end
 
   # Generate a temporary authentication file so that the password is not exposed
