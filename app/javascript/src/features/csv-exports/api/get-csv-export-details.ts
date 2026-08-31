@@ -6,7 +6,6 @@ import { CsvExportDetailsResponse } from '../utils/csv-exports-utils';
 const getCsvExportDetails = (exportId: string) => {
   const endpoint = `/csv_exports/${exportId}`;
 
-  console.log('endpoint: ' + endpoint);
   return api.get<CsvExportDetailsResponse>(endpoint);
 };
 

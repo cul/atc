@@ -2,6 +2,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { CsvExportSummaryRow } from './csv-exports-utils';
 import { formatLastModified } from '@/features/file-browser/utils/format-utils';
 import { Link } from 'react-router';
+import DownloadButton from '@/components/ui/download-button';
 
 const columnHelper = createColumnHelper<CsvExportSummaryRow>();
 
@@ -25,7 +26,20 @@ export const columnDefs = [
   columnHelper.accessor('status', {
     header: 'Export Status',
     cell: ({ row }) => {
-      return row.original.status;
+      return (
+        <>
+          {row.original.status}
+          {(row.original.status === 'success' ||
+            row.original.status === 'completed_with_errors') && (
+            <DownloadButton
+              endpoint={`/api/csv_exports/${row.original.id}/download`}
+              defaultFilename={`csv_export_${row.original.id}.csv`}
+              styles="ms-2 btn-sm"
+              variant="outline-primary"
+            />
+          )}
+        </>
+      );
     },
   }),
   columnHelper.accessor('selectionSample', {

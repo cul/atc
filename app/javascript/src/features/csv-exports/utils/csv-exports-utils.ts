@@ -1,4 +1,10 @@
-export type CsvExportStatus = 'checked' | 'unchecked' | 'partial';
+// Options matching the statuses in the csv_export model
+export type CsvExportStatus =
+  | 'pending'
+  | 'processing'
+  | 'success'
+  | 'failure'
+  | 'completed_with_errors';
 
 export type BucketSelection = {
   bucket: string;
@@ -109,8 +115,7 @@ export const getNumberItemsSelected = (exportPaths: Array<ExportPath>) => {
   return count;
 };
 
-// Options match the statuses in the csv_export model
-export const getTextColorFromStatus = (status: string) => {
+export const getTextColorFromStatus = (status: CsvExportStatus) => {
   switch (status) {
     case 'failure':
       return 'danger';
