@@ -1,15 +1,12 @@
 import { useParams } from 'react-router';
 
-import {
-  CsvExportStatus,
-  getNumberItemsSelected,
-  getTextColorFromStatus,
-} from '../utils/csv-exports-utils';
+import { getNumberItemsSelected, getTextColorFromStatus } from '../utils/csv-exports-utils';
 import { useCsvExportDetailsSuspense } from '../api/get-csv-export-details';
 import ObjectDetailField from '@/features/file-browser/components/object-detail-field';
 import { formatLastModified } from '@/features/file-browser/utils/format-utils';
 import ExportPathsDisplayTable from './export-paths-display-table';
 import DownloadButton from '@/components/ui/download-button';
+import { CsvExportStatus } from '@/types/api';
 
 const CsvExportDetailsDisplay = () => {
   const { id } = useParams();

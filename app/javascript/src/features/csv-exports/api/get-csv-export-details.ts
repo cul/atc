@@ -1,7 +1,7 @@
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { QueryConfig } from '@/lib/react-query';
 import { api } from '@/lib/api-client';
-import { CsvExportDetailsResponse } from '../utils/csv-exports-utils';
+import { CsvExportDetailsResponse } from '@/types/api';
 
 const getCsvExportDetails = (exportId: string) => {
   const endpoint = `/csv_exports/${exportId}`;

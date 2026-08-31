@@ -1,42 +1,9 @@
-// Options matching the statuses in the csv_export model
-export type CsvExportStatus =
-  | 'pending'
-  | 'processing'
-  | 'success'
-  | 'failure'
-  | 'completed_with_errors';
+import { CsvExportStatus, CsvExportSummary, ExportPath } from '@/types/api';
 
 export type BucketSelection = {
   bucket: string;
   keys: Array<string>;
   prefixes: Array<string>;
-};
-
-export type CsvExportDetails = Omit<CsvExportSummary, 'selectionSummary'> & {
-  exportPaths: Array<BucketSelection>;
-  exportErrors: Array<string>;
-};
-
-export type CsvExportSummary = {
-  id: number;
-  status: CsvExportStatus;
-  selectionSummary: {
-    sample: Array<string>;
-    totalCount: number;
-  };
-  updatedAt: string;
-};
-
-export type CsvExportSummariesResponse = {
-  csvExports: Array<CsvExportSummary>;
-  pagination: CsvExportSummariesPagination;
-};
-
-export type CsvExportSummariesPagination = {
-  currentPage: number;
-  perPage: number;
-  totalPages: number;
-  totalCount: number;
 };
 
 // Will need to transform API response into this flat object
@@ -59,20 +26,6 @@ export const transformCsvExportSummaryToRow = (
 });
 
 export const DEFAULT_CSV_EXPORT_PAGE_SIZE = 20;
-
-export type ExportPath = {
-  bucket: string;
-  keys: Array<string>;
-  prefixes: Array<string>;
-};
-
-export type CsvExportDetailsResponse = {
-  id: number;
-  exportPaths: Array<ExportPath>;
-  exportErrors: Array<string>;
-  status: string;
-  updatedAt: string;
-};
 
 export type FullExportItem = {
   number?: number;
