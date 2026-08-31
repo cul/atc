@@ -25,6 +25,8 @@ const DownloadButton = ({ endpoint, defaultFilename, styles, variant }: Download
     if (!response.ok) {
       const errorData = await parseErrorBody(response);
       notifyError(response.status, errorData);
+      setIsDownloading(false);
+      return;
     }
 
     const blob = await response.blob();
