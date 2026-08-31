@@ -17,6 +17,8 @@ AllCops:
     - 'lib/tasks/**/*'
     - 'tmp/**/*'
     - 'lib/atc/smb/csv_writer.rb' # temp
+    - 'lib/atc/smb/bag_uploader.rb' # temp
+    - 'lib/atc/smb/processor.rb' # temp
 
 Layout/LineLength:
   Exclude:
