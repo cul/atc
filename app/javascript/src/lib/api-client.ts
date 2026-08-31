@@ -14,7 +14,7 @@ const isErrorData = (data: unknown): data is ErrorData =>
   typeof (data as Record<string, unknown>).error === 'string';
 
 // Attempt to parse the response body as JSON
-const parseErrorBody = async (response: Response): Promise<ErrorData | null> => {
+export const parseErrorBody = async (response: Response): Promise<ErrorData | null> => {
   try {
     const json: unknown = await response.json();
     return isErrorData(json) ? json : null;
@@ -33,7 +33,7 @@ const shouldSilence = (silent: boolean | number[] | undefined, status: number): 
   return false;
 };
 
-const notifyError = (status: number, data: ErrorData | null) => {
+export const notifyError = (status: number, data: ErrorData | null) => {
   const message = data?.error ?? 'An unexpected error occurred.';
 
   useNotifications.getState().addNotification({
