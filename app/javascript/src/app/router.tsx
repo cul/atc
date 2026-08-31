@@ -49,6 +49,9 @@ export const createAppRouter = (queryClient: QueryClient) =>
             {
               path: ':id',
               lazy: () => import('./routes/csv-export-details').then(convert(queryClient)),
+              errorElement: (
+                <RouteErrorFallback errorMessage="Error loading details for CSV Export. Please ensure you are authorized to access this report." />
+              ),
             },
           ],
         },

@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { QueryConfig } from '@/lib/react-query';
 import { api } from '@/lib/api-client';
 import { CsvExportDetailsResponse } from '../utils/csv-exports-utils';
@@ -21,11 +21,11 @@ export const getCsvExportDetailsQueryOptions = (exportId: string) => {
   });
 };
 
-export const useCsvExportDetailsQuery = ({
+export const useCsvExportDetailsSuspense = ({
   exportId,
   queryConfig,
 }: UseCsvExportSummariesOptions) => {
-  return useQuery({
+  return useSuspenseQuery({
     ...getCsvExportDetailsQueryOptions(exportId),
     ...queryConfig,
   });
