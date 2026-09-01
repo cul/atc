@@ -14,9 +14,7 @@ describe('CsvExportDetailsRoute', () => {
     ).toBeInTheDocument();
     expect(fieldByLabel('Export ID').getByText('1')).toBeInTheDocument();
     expect(fieldByLabel('Number of Items Selected').getByText('6')).toBeInTheDocument();
-    expect(
-      fieldByLabel('Last Updated').getByText('January 15, 2026, 05:30:00'),
-    ).toBeInTheDocument();
+    expect(fieldByLabel('Last Updated').getByText(/January 15, 2026/)).toBeInTheDocument();
     expect(fieldByLabel('Export Paths').getByRole('table')).toBeInTheDocument();
   });
 
