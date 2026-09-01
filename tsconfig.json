@@ -7,11 +7,7 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "isolatedModules": true, // https://vite.dev/guide/features#isolatedmodules
     "noEmit": true,
     "allowJs": true, // remove after migrating
@@ -25,18 +21,11 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "jsx": "react-jsx",
-    "types": [
-      "vite/client"
-    ],
+    "types": ["vite/client", "vitest/globals"],
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "app/javascript/src/*"
-      ]
+      "@/*": ["app/javascript/src/*"]
     }
   },
-  "include": [
-    "./app/javascript/entrypoints",
-    "app/javascript/src"
-  ],
+  "include": ["./app/javascript/entrypoints", "app/javascript/src"]
 }

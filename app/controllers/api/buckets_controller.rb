@@ -53,7 +53,7 @@ class Api::BucketsController < Api::BaseController
       obj[:key] == prefix && obj[:size].zero?
     end
 
-    render_camelized_json({ folders: folders, objects: objects })
+    render_camelized_json({ folders: folders, files: objects })
   end
 
   # GET /api/buckets/:bucket/object?key={objectKey}

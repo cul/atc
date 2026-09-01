@@ -94,7 +94,7 @@ describe Api::BucketsController, type: :request do
         let(:expected_response) do
           {
             folders: ['test-prefix/subdir1/', 'test-prefix/subdir2/'],
-            objects: [
+            files: [
               {
                 key: 'test-prefix/object1.txt',
                 lastModified: '2026-01-01T05:00:00.000Z',
