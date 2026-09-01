@@ -1,5 +1,5 @@
 import { useNotifications } from '@/stores/notifications-store';
-import { BucketSelection } from '@/stores/selected-items-store';
+import { BucketSelection, CheckboxState } from '@/stores/selected-items-store';
 import { BucketItem } from '@/types/api';
 
 // Returns an array of the current folder or file's ancestors in order of
@@ -85,7 +85,10 @@ export const getNearestSelectedParent = (path: string, folders: Set<string>) => 
 };
 
 // Logic for determining what state a selection checkbox should be
-export const checkboxState = (currentBucket: BucketSelection | undefined, item: BucketItem) => {
+export const checkboxState = (
+  currentBucket: BucketSelection | undefined,
+  item: BucketItem,
+): CheckboxState => {
   if (currentBucket === undefined) return 'unchecked';
   const { folders, files } = currentBucket;
 
@@ -113,6 +116,16 @@ export const notifySelectionError = (errorMessage: string) => {
     type: 'error',
     title: `Error Selecting Item`,
     message: errorMessage,
+  });
+};
+
+export const notifyNewCsvExport = (exportId: string) => {
+  useNotifications.getState().addNotification({
+    type: 'success',
+    title: `Your Export has been ordered`,
+    message: `Your new CSV Export with ID ${exportId} has been ordered.`,
+    linkValue: `/csv_exports/${exportId}`,
+    linkText: 'View export details.',
   });
 };
 

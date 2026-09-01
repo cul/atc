@@ -5,6 +5,8 @@ import { RouterProvider } from 'react-router/dom';
 import { Spinner } from 'react-bootstrap';
 import MainLayout from '@/components/layouts/main-layout';
 import { RouteErrorFallback } from '@/components/errors/route-error';
+import CsvExportsLayout from '@/components/layouts/csv-exports-layout';
+import RootLayout from '@/components/layouts/root-layout';
 
 interface RouteModule {
   default: React.ComponentType;
@@ -30,10 +32,28 @@ export const createAppRouter = (queryClient: QueryClient) =>
     {
       hydrateFallbackElement: <Spinner animation="border" role="status" />,
       errorElement: <RouteErrorFallback />,
+      element: <RootLayout />,
       children: [
         {
           index: true,
           loader: () => redirect('/browse/buckets'),
+        },
+        {
+          path: 'csv_exports',
+          Component: CsvExportsLayout,
+          children: [
+            {
+              index: true,
+              lazy: () => import('./routes/csv-exports').then(convert(queryClient)),
+            },
+            {
+              path: ':id',
+              lazy: () => import('./routes/csv-export-details').then(convert(queryClient)),
+              errorElement: (
+                <RouteErrorFallback errorMessage="Error loading details for CSV Export. Please ensure you are authorized to access this report." />
+              ),
+            },
+          ],
         },
         {
           path: 'browse',

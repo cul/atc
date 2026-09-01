@@ -1,15 +1,11 @@
 import { useNotifications } from '@/stores/notifications-store';
 import { ErrorData } from '@/types/api';
 import { ApiError } from './api-error';
+import { getCsrfToken } from '@/components/utils/csrf-utils';
 
 export { ApiError };
 
 const BASE_URL = '/api';
-
-// POST, PUT, PATCH, and DELETE requests require the csrf token to be included in headers
-const getCsrfToken = () => {
-  return (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content;
-};
 
 const isErrorData = (data: unknown): data is ErrorData =>
   typeof data === 'object' &&
@@ -18,7 +14,7 @@ const isErrorData = (data: unknown): data is ErrorData =>
   typeof (data as Record<string, unknown>).error === 'string';
 
 // Attempt to parse the response body as JSON
-const parseErrorBody = async (response: Response): Promise<ErrorData | null> => {
+export const parseErrorBody = async (response: Response): Promise<ErrorData | null> => {
   try {
     const json: unknown = await response.json();
     return isErrorData(json) ? json : null;
@@ -37,7 +33,7 @@ const shouldSilence = (silent: boolean | number[] | undefined, status: number): 
   return false;
 };
 
-const notifyError = (status: number, data: ErrorData | null) => {
+export const notifyError = (status: number, data: ErrorData | null) => {
   const message = data?.error ?? 'An unexpected error occurred.';
 
   useNotifications.getState().addNotification({
@@ -92,6 +88,6 @@ export const api = {
       ...options,
       method: 'POST',
       body: JSON.stringify(data),
-      headers: { 'X-CSRF-Token': getCsrfToken() },
+      headers: { 'X-CSRF-Token': getCsrfToken() }, // CSRF Token required for POST requests
     }),
 };
