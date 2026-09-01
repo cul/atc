@@ -6,6 +6,9 @@ import type {
   CsvExportSummariesResponse,
   CsvExportSummary,
   CsvExportStatus,
+  CsvExportSummariesPagination,
+  CsvExportDetailsResponse,
+  ExportPath,
 } from '@/types/api';
 
 const BUCKET_DEFAULTS: Bucket = {
@@ -62,14 +65,14 @@ export const buildObjectDetails = (overrides?: Partial<ObjectDetails>): ObjectDe
 });
 
 // CSV Exports
-const CSV_EXPORT_SUMMARY_PAGINATION_DEFAULTS = {
+const CSV_EXPORT_SUMMARY_PAGINATION_DEFAULTS: CsvExportSummariesPagination = {
   currentPage: 1,
   perPage: 20,
   totalPages: 1,
   totalCount: 3,
 };
 
-const CSV_EXPORT_SUMMARY_DEFAULTS = {
+const CSV_EXPORT_SUMMARY_DEFAULTS: CsvExportSummary = {
   id: 1,
   status: 'success' as CsvExportStatus,
   selectionSummary: {
@@ -106,5 +109,29 @@ export const buildCsvExportSummaryResponse = (
   overrides?: Partial<CsvExportSummariesResponse>,
 ): CsvExportSummariesResponse => ({
   ...CSV_EXPORT_SUMMARIES_RESPONSE_DEFAULTS,
+  ...overrides,
+});
+
+const CSV_EXPORT_PATH_DEFAULTS: ExportPath = {
+  bucket: 'bucket-a',
+  keys: ['a/b/file1.txt', 'a/b/file2.txt'],
+  prefixes: ['a/b/c/'],
+};
+
+const buildCsvExportPath = (overrides?: Partial<ExportPath>) => ({
+  ...CSV_EXPORT_PATH_DEFAULTS,
+  ...overrides,
+});
+
+const CSV_EXPORT_DETAILS_DEFAULTS: CsvExportDetailsResponse = {
+  id: 1,
+  exportPaths: [buildCsvExportPath(), buildCsvExportPath({ bucket: 'bucket-b' })],
+  exportErrors: [],
+  status: 'success',
+  updatedAt: '2026-01-15T10:30:00.000Z',
+};
+
+export const buildCsvExportDetailsResponse = (overrides?: Partial<CsvExportDetailsResponse>) => ({
+  ...CSV_EXPORT_DETAILS_DEFAULTS,
   ...overrides,
 });
