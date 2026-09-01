@@ -8,7 +8,7 @@ import {
   extractFileExtension,
 } from '../utils/format-utils';
 import { useObjectDetailsSuspenseQuery } from '../api/get-object-details';
-import ObjectDetailField from './object-detail-field';
+import DetailField from '../../../components/ui/detail-field';
 
 const displayRetrievalTime = (archiveStatus: string | null) => {
   switch (archiveStatus) {
@@ -48,10 +48,10 @@ const ObjectDetailDisplay = () => {
         <h5 className="mb-3">Object Overview</h5>
 
         <dl className="mb-0">
-          <ObjectDetailField label="Key" value={objectDetails.key} />
-          <ObjectDetailField label="Type" value={extractFileExtension(fileName)} />
-          <ObjectDetailField label="Size" value={formatSize(size)} />
-          <ObjectDetailField label="Last modified" value={formatLastModified(lastModified)} />
+          <DetailField label="Key" value={objectDetails.key} />
+          <DetailField label="Type" value={extractFileExtension(fileName)} />
+          <DetailField label="Size" value={formatSize(size)} />
+          <DetailField label="Last modified" value={formatLastModified(lastModified)} />
         </dl>
       </section>
 
@@ -59,20 +59,17 @@ const ObjectDetailDisplay = () => {
         <h5 className="mb-3">Storage Details</h5>
 
         <dl className="mb-0">
-          <ObjectDetailField label="Storage class" value={capitalizeStr(storageClass)} />
+          <DetailField label="Storage class" value={capitalizeStr(storageClass)} />
 
           {isNonStandard && (
             <>
-              <ObjectDetailField
-                label="Access tier"
-                value={displayAccessTierLabel(archiveStatus)}
-              />
-              <ObjectDetailField
+              <DetailField label="Access tier" value={displayAccessTierLabel(archiveStatus)} />
+              <DetailField
                 label="Retrieval time"
                 value={displayRetrievalTime(archiveStatus)}
                 hint="Retrieval times depend on the access tier of an object."
               />
-              <ObjectDetailField
+              <DetailField
                 label="Restoration status"
                 value={
                   restoreStatus
