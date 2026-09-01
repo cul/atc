@@ -30,5 +30,11 @@ namespace :atc do
       processor = Atc::Smb::Processor.new(remote_dir)
       processor.upload_files
     end
+
+    task get_scanning_results: :environment do
+      remote_dir = ENV['source']
+      processor = Atc::Smb::Processor.new(remote_dir)
+      processor.get_virus_scanning_results
+    end
   end
 end

@@ -115,6 +115,7 @@ class Atc::Smb::Connector
   end
 
   def ls_output(remote_dir, auth_file_path)
+    # TODO: Validate that the output matches the format we expect so the regex doesn't break
     command = smbclient_command(remote_dir, auth_file_path, 'recurse ON; ls')
     puts "Running: #{command.join(' ')}"
     stdout, stderr, status = Open3.capture3(*command)
