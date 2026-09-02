@@ -36,5 +36,21 @@ namespace :atc do
       processor = Atc::Smb::Processor.new(remote_dir)
       processor.get_virus_scanning_results
     end
+
+    task large_files: :environment do
+      remote_dir = ENV['source']
+      processor = Atc::Smb::Processor.new(remote_dir)
+      large_files = processor.check_large_files
+
+      if large_files.any?
+        puts "Some files are larger than 100GB: #{large_files.join(', ')}"
+        
+        StabilizationMailer.with(
+          to: SMB_CONFIG[:notification_email],
+          subject: 'Large files detected',
+          body_content: large_files.join(', ')
+        ).send_mail.deliver
+      end
+    end
   end
 end

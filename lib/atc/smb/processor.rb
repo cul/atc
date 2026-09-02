@@ -15,6 +15,18 @@ class Atc::Smb::Processor
   def run
     # 1. Read from the source directory and log every file into a CSV
     add_source_files_to_csv
+    # 1a. Check if any of the added files is above 100GB
+    if check_large_files.any?
+      body_content = check_large_files.join(', ')
+
+      StabilizationMailer.with(
+        to: SMB_CONFIG[:notification_email],
+        subject: 'Large files detected',
+        body_content: body_content
+      ).send_mail.deliver
+      return
+    end
+
     # 2. Normalize the source paths so that they are suitable for uploading
     normalize_source_paths
     # 3. Download and process the files (one at a time)
@@ -77,18 +89,53 @@ class Atc::Smb::Processor
   def get_virus_scanning_results
     checker = Atc::Smb::VirusScanChecker.new(@destination_bucket)
     puts "Waiting for virus scan results for #{uploaded_object_keys.size} file(s)..."
+    # Files that never got a result stay as 'NOT SCANNED' so can still be reported as failures
+    results = uploaded_object_keys.index_with('NOT SCANNED')
 
-    still_pending = checker.each_scan_result(uploaded_object_keys) do |object_key, status|
+    checker.each_scan_result(uploaded_object_keys) do |object_key, status|
       puts "Scan result for #{object_key}: #{status}"
+      results[object_key] = status
     end
 
-    puts(still_pending.empty? ? 'Virus scanning complete' : "Scanning incomplete, some files are still pending.")
+    failures = results.reject { |key, status| status == 'NO_THREATS_FOUND' }
+    report_scan_results(failures)
+  end
+
+  def report_scan_results(failures)
+    if failures.empty?
+      puts 'All files passed the virus scan'
+      return true
+    end
+
+    puts "Some files didn't pass the virus scan:"
+    failures.each do |object_key, status|
+      puts "#{object_key}: #{status}"
+    end
+    false
   end
 
   def uploaded_object_keys
     @uploaded_object_keys ||= @csv_writer.each_normalized_file.map do |_file_path, normalized_path, _size|
       object_key_for(normalized_path)
     end
+  end
+
+  def check_large_files
+    csv_file = "#{SMB_CONFIG[:stabilization_dir]}/normalization-log.csv"
+    large_files = [] 
+
+    CSV.foreach(csv_file, headers: true) do |row|
+      skipped = row['skipped']
+      size = row['size'].to_i
+      next if skipped == 'SKIPPED'
+
+      if size > 100.gigabytes
+        puts "Warning: File #{row['file_path']} is larger than 100GB (#{size} bytes)"
+        large_files << row['file_path']
+      end
+    end
+    
+    large_files
   end
 
   # The root level of the bag is normalized and might not match the original source directory's name

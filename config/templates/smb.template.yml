@@ -4,6 +4,8 @@ development:
   domain: cul
   host: host.cul.columbia.edu
   share: folder-to-access
+  destination_bucket: destination-bucket
+  notification_email: notification-email@email.com
 
 test:
   username: testusername@email.copm
@@ -11,4 +13,5 @@ test:
   domain: cul
   host: testhost.cul.columbia.edu
   share: folder-to-access
-
+  destination_bucket: destination-bucket
+  notification_email: notification-email@email.com

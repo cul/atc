@@ -2,6 +2,7 @@
 
 class Atc::Smb::VirusScanChecker
   POLL_INTERVAL = 10.seconds
+  MAX_WAIT = 30.minutes # TBD
 
   def initialize(bucket_name, s3_client = S3_CLIENT)
     @bucket_name = bucket_name
@@ -15,9 +16,9 @@ class Atc::Smb::VirusScanChecker
 
   def each_scan_result(object_keys)
     pending = Set.new(object_keys)
+    stop_time = Time.current + MAX_WAIT
 
-    # TODO: Set a timeout
-    while pending.any?
+    while pending.any? && Time.current < stop_time
       # Iterating over a copy because pending is modified inside the loop
       pending.to_a.each do |object_key|
         status = scan_status(object_key)
