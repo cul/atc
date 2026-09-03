@@ -34,7 +34,7 @@ namespace :atc do
     task get_scanning_results: :environment do
       remote_dir = ENV['source']
       processor = Atc::Smb::Processor.new(remote_dir)
-      processor.get_virus_scanning_results
+      processor.scan_files_and_report_results
     end
 
     task large_files: :environment do

@@ -3,6 +3,8 @@
 require 'csv'
 
 class Atc::Smb::CsvWriter
+  attr_reader :csv_file
+
   # TODO: We should place this file under a folder that indicates what share folder this csv was generated for
   def initialize
     @csv_file = "#{SMB_CONFIG[:stabilization_dir]}/normalization-log.csv"

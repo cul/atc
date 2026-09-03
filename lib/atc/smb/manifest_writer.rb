@@ -3,7 +3,7 @@
 # Collects file path + checksum pairs to write to manifest-sha256.txt as files are uploaded
 # The manifest is complete once all files have been uploaded to the cloud
 class Atc::Smb::ManifestWriter
-  attr_reader :file_count, :byte_count
+  attr_reader :manifest_file, :file_count, :byte_count
 
   # TODO: This only allows us to run one stabilization process at a time
   # since files are written to a fixed manifest file. In the future, create

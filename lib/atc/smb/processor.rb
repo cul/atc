@@ -113,41 +113,20 @@ class Atc::Smb::Processor
     false
   end
 
-  # Move this logic to a separate class (BagAssembler?)
+  # Writes the five BagIt tag files and uploads them to the top level of the bag
   def assemble_final_files
-    # Files that need to be included
-    # 1. bagit.txt
-    # 2. bag-info.txt
-    # 3. manifest-sha256.txt
-    # 4. normalization-log.csv
-    # 5. tag-manifest-sha256.txt - needs to go last
-    
-    # bagit.txt
-    bagit_file_content = "BagIt-Version: 1.0\nTag-File-Character-Encoding: UTF-8\n"
-    bagit_file = File.join(SMB_CONFIG[:stabilization_dir], 'bagit.txt')
-    File.write(bagit_file, bagit_file_content)
+    assembler = Atc::Smb::BagAssembler.new(
+      source_dir: @source_dir,
+      payload_oxum: @manifest_writer.payload_oxum,
+      manifest_file: @manifest_writer.manifest_file,
+      normalization_log_file: @csv_writer.csv_file
+    )
+    assembler.write_tag_files
 
-    # bag-info.txt
-    # TODO: Virus scanning results CAN be negative
-    baginfo_file_content = "Bagging-Date: #{Date.today.strftime('%Y-%m-%d')}\nPayload-Oxum: #{@manifest_writer.payload_oxum}\nContent-Source-Type: L-Drive\nContent-Source-Path: #{@source_dir}\nVirus-Check-Result: PASS\nRepository-Name: TODO\nCollection-Name: TODO\n"
-    bag_info_file = File.join(SMB_CONFIG[:stabilization_dir], 'bag-info.txt')
-    File.write(bag_info_file, baginfo_file_content)
-    
-    # This already exists and doesn't need assembling
-    manifest_file = File.join(SMB_CONFIG[:stabilization_dir], 'manifest-sha256.txt')
-
-    # This already exists and doesn't need assembling
-    normalization_log_file = File.join(SMB_CONFIG[:stabilization_dir], 'normalization-log.csv')
-    
-    # This needs to be generated last
-    tag_manifest_file = File.join(SMB_CONFIG[:stabilization_dir], 'tag-manifest-sha256.txt')
-
-    # For now just these
-    files_to_send = [bagit_file, bag_info_file]
-    files_to_send.each do |file|
+    assembler.tag_files.each do |file|
       object_key = "#{bag_root}/#{File.basename(file)}"
       puts "Sending #{file} to #{object_key}"
-      @uploader.upload_file(file, object_key)
+      # @uploader.upload_file(file, object_key)
     end
   end
 
@@ -158,10 +137,9 @@ class Atc::Smb::Processor
   end
 
   def check_large_files
-    csv_file = "#{SMB_CONFIG[:stabilization_dir]}/normalization-log.csv"
-    large_files = [] 
+    large_files = []
 
-    CSV.foreach(csv_file, headers: true) do |row|
+    CSV.foreach(@csv_writer.csv_file, headers: true) do |row|
       skipped = row['skipped']
       size = row['size'].to_i
       next if skipped == 'SKIPPED'
