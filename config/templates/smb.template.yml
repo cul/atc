@@ -6,6 +6,7 @@ development:
   share: folder-to-access
   destination_bucket: destination-bucket
   notification_email: notification-email@email.com
+  default_sender_email_address: defaultsender@email.com
 
 test:
   username: testusername@email.copm
@@ -15,3 +16,4 @@ test:
   share: folder-to-access
   destination_bucket: destination-bucket
   notification_email: notification-email@email.com
+  default_sender_email_address: defaultsender@email.com

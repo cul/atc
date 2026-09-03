@@ -52,5 +52,11 @@ namespace :atc do
         ).send_mail.deliver
       end
     end
+
+    task assemble_files: :environment do
+      remote_dir = ENV['source']
+      processor = Atc::Smb::Processor.new(remote_dir)
+      processor.assemble_final_files
+    end
   end
 end

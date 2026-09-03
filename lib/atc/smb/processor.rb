@@ -9,6 +9,7 @@ class Atc::Smb::Processor
     @destination_bucket = SMB_CONFIG[:destination_bucket]
     @connector = Atc::Smb::Connector.new
     @csv_writer = Atc::Smb::CsvWriter.new
+    @manifest_writer = Atc::Smb::ManifestWriter.new
     @uploader = Atc::Smb::BagUploader.new(@destination_bucket) # use the arg
   end
 
@@ -31,8 +32,8 @@ class Atc::Smb::Processor
     normalize_source_paths
     # 3. Download and process the files (one at a time)
     download_and_process_source_files
-    # 4. Check for results of virus scanning
-    get_virus_scanning_results
+    # 4. Check for results of virus scanning, send BagIt files if no viruses found
+    assemble_final_files if scan_files_and_report_results
   end
 
   def add_source_files_to_csv
@@ -46,8 +47,7 @@ class Atc::Smb::Processor
   # Downloads each file that was not skipped, then generates checksum, uploads and records it
   # before moving on to the next one, so only one file is on local disk at a time
   def download_and_process_source_files
-    manifest_writer = Atc::Smb::ManifestWriter.new
-    manifest_writer.start
+    @manifest_writer.start
     files = @csv_writer.each_normalized_file
 
     @connector.each_downloaded_file(@source_dir, files) do |local_path, normalized_path, size|
@@ -56,19 +56,18 @@ class Atc::Smb::Processor
       puts "Checksum for #{normalized_path}: #{checksum}"
       @uploader.upload_file(local_path, object_key_for(normalized_path))
       puts "File #{normalized_path} uploaded successfully, checksum: #{checksum}, size: #{size}"
-      manifest_writer.add_row(checksum, normalized_path, size)
+      @manifest_writer.add_row(checksum, normalized_path, size)
       
       # TODO: Delete the local file
     end
 
-    puts "Payload-Oxum for manifest: #{manifest_writer.payload_oxum}"
+    puts "Payload-Oxum for manifest: #{@manifest_writer.payload_oxum}"
   end
 
   # Temp: assumes the file is already downloaded and CSV contains its info; doesn't connect to SMB server
   # so the upload can be tested locally
   def upload_files
-    manifest_writer = Atc::Smb::ManifestWriter.new
-    manifest_writer.start
+    @manifest_writer.start
     files = @csv_writer.each_normalized_file
 
     files.each do |file_path, normalized_path, size|
@@ -79,14 +78,14 @@ class Atc::Smb::Processor
       @uploader.upload_file(local_path, object_key_for(normalized_path))
       checksum = Digest::SHA256.file(local_path).hexdigest
       puts "File #{normalized_path} uploaded successfully, checksum: #{checksum}, size: #{size}"
-      manifest_writer.add_row(checksum, normalized_path, size)
+      @manifest_writer.add_row(checksum, normalized_path, size)
     end
 
-    puts "Payload-Oxum for manifest: #{manifest_writer.payload_oxum}"
+    puts "Payload-Oxum for manifest: #{@manifest_writer.payload_oxum}"
   end
 
-  # Waits for GuardDuty to finish scanning every file uploaded
-  def get_virus_scanning_results
+  # Waits for GuardDuty to finish scanning every file uploaded and reports the outcome
+  def scan_files_and_report_results
     checker = Atc::Smb::VirusScanChecker.new(@destination_bucket)
     puts "Waiting for virus scan results for #{uploaded_object_keys.size} file(s)..."
     # Files that never got a result stay as 'NOT SCANNED' so can still be reported as failures
@@ -98,10 +97,10 @@ class Atc::Smb::Processor
     end
 
     failures = results.reject { |key, status| status == 'NO_THREATS_FOUND' }
-    report_scan_results(failures)
+    report_scan_outcome(failures)
   end
 
-  def report_scan_results(failures)
+  def report_scan_outcome(failures)
     if failures.empty?
       puts 'All files passed the virus scan'
       return true
@@ -112,6 +111,44 @@ class Atc::Smb::Processor
       puts "#{object_key}: #{status}"
     end
     false
+  end
+
+  # Move this logic to a separate class (BagAssembler?)
+  def assemble_final_files
+    # Files that need to be included
+    # 1. bagit.txt
+    # 2. bag-info.txt
+    # 3. manifest-sha256.txt
+    # 4. normalization-log.csv
+    # 5. tag-manifest-sha256.txt - needs to go last
+    
+    # bagit.txt
+    bagit_file_content = "BagIt-Version: 1.0\nTag-File-Character-Encoding: UTF-8\n"
+    bagit_file = File.join(SMB_CONFIG[:stabilization_dir], 'bagit.txt')
+    File.write(bagit_file, bagit_file_content)
+
+    # bag-info.txt
+    # TODO: Virus scanning results CAN be negative
+    baginfo_file_content = "Bagging-Date: #{Date.today.strftime('%Y-%m-%d')}\nPayload-Oxum: #{@manifest_writer.payload_oxum}\nContent-Source-Type: L-Drive\nContent-Source-Path: #{@source_dir}\nVirus-Check-Result: PASS\nRepository-Name: TODO\nCollection-Name: TODO\n"
+    bag_info_file = File.join(SMB_CONFIG[:stabilization_dir], 'bag-info.txt')
+    File.write(bag_info_file, baginfo_file_content)
+    
+    # This already exists and doesn't need assembling
+    manifest_file = File.join(SMB_CONFIG[:stabilization_dir], 'manifest-sha256.txt')
+
+    # This already exists and doesn't need assembling
+    normalization_log_file = File.join(SMB_CONFIG[:stabilization_dir], 'normalization-log.csv')
+    
+    # This needs to be generated last
+    tag_manifest_file = File.join(SMB_CONFIG[:stabilization_dir], 'tag-manifest-sha256.txt')
+
+    # For now just these
+    files_to_send = [bagit_file, bag_info_file]
+    files_to_send.each do |file|
+      object_key = "#{bag_root}/#{File.basename(file)}"
+      puts "Sending #{file} to #{object_key}"
+      @uploader.upload_file(file, object_key)
+    end
   end
 
   def uploaded_object_keys
