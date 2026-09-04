@@ -17,13 +17,15 @@ class Atc::Smb::Connector
     share: SMB_CONFIG[:share],
     username: SMB_CONFIG[:username],
     password: SMB_CONFIG[:password],
-    domain: SMB_CONFIG[:domain]
+    domain: SMB_CONFIG[:domain],
+    stabilization_dir: SMB_CONFIG[:stabilization_dir]
   )
     @host = host
     @share = share
     @username = username
     @password = password
     @domain = domain
+    @stabilization_dir = stabilization_dir
   end
 
   # Recursively lists every file under remote_dir (a directory on the share).
@@ -77,7 +79,7 @@ class Atc::Smb::Connector
   end
 
   def temp_path_for(normalized_path)
-    local_path = File.join(SMB_CONFIG[:stabilization_dir], normalized_path)
+    local_path = File.join(@stabilization_dir, normalized_path)
     FileUtils.mkdir_p(File.dirname(local_path))
     local_path
   end

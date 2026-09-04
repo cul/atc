@@ -1,5 +1,12 @@
 namespace :atc do
   namespace :smb do
+    # WIP
+    task run: :environment do
+      remote_dir = ENV['source']
+      processor = Atc::Smb::Processor.new(remote_dir)
+      processor.run
+    end
+
     desc "Test SMB connection"
      task test: :environment do
       # TODO: Validate environment variables

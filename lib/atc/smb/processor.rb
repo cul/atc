@@ -1,19 +1,32 @@
 # frozen_string_literal: true
 
 require 'digest'
+require 'fileutils'
+require 'securerandom'
 
 class Atc::Smb::Processor
+  attr_reader :run_id, :stabilization_dir
+
   def initialize(source_dir, destination_bucket = nil)
     @source_dir = source_dir
+    @run_id = SecureRandom.uuid
+    @stabilization_dir = File.join(SMB_CONFIG[:stabilization_dir], @run_id)
+    FileUtils.mkdir_p(@stabilization_dir)
+
+    puts "Files will be stored in the local stabilization directory: #{@stabilization_dir}"
+
     # @destination_bucket = destination_bucket
     @destination_bucket = SMB_CONFIG[:destination_bucket]
-    @connector = Atc::Smb::Connector.new
-    @csv_writer = Atc::Smb::CsvWriter.new
-    @manifest_writer = Atc::Smb::ManifestWriter.new
+    @connector = Atc::Smb::Connector.new(stabilization_dir: @stabilization_dir)
+    @csv_writer = Atc::Smb::CsvWriter.new(stabilization_dir: @stabilization_dir)
+    @manifest_writer = Atc::Smb::ManifestWriter.new(stabilization_dir: @stabilization_dir)
     @uploader = Atc::Smb::BagUploader.new(@destination_bucket) # use the arg
   end
 
   def run
+    # TODO: Make sure that the destination bucket path doesn't exist
+    # If it does, we want to make sure that the user is aware and wants to overwrite it
+
     # 1. Read from the source directory and log every file into a CSV
     add_source_files_to_csv
     # 1a. Check if any of the added files is above 100GB
@@ -73,7 +86,7 @@ class Atc::Smb::Processor
     files.each do |file_path, normalized_path, size|
       puts "Preparing to upload file #{normalized_path}, size: #{size}, source path #{file_path}"
 
-      local_path = File.join(SMB_CONFIG[:stabilization_dir], normalized_path)
+      local_path = File.join(@stabilization_dir, normalized_path)
       puts "Local path #{local_path}"
       @uploader.upload_file(local_path, object_key_for(normalized_path))
       checksum = Digest::SHA256.file(local_path).hexdigest
@@ -119,14 +132,15 @@ class Atc::Smb::Processor
       source_dir: @source_dir,
       payload_oxum: @manifest_writer.payload_oxum,
       manifest_file: @manifest_writer.manifest_file,
-      normalization_log_file: @csv_writer.csv_file
+      normalization_log_file: @csv_writer.csv_file,
+      stabilization_dir: @stabilization_dir
     )
     assembler.write_tag_files
 
     assembler.tag_files.each do |file|
       object_key = "#{bag_root}/#{File.basename(file)}"
       puts "Sending #{file} to #{object_key}"
-      # @uploader.upload_file(file, object_key)
+      @uploader.upload_file(file, object_key)
     end
   end
 

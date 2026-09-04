@@ -5,11 +5,8 @@
 class Atc::Smb::ManifestWriter
   attr_reader :manifest_file, :file_count, :byte_count
 
-  # TODO: This only allows us to run one stabilization process at a time
-  # since files are written to a fixed manifest file. In the future, create
-  # subdirectories for each process.
-  def initialize(manifest_file = "#{SMB_CONFIG[:stabilization_dir]}/manifest-sha256.txt")
-    @manifest_file = manifest_file
+  def initialize(stabilization_dir: SMB_CONFIG[:stabilization_dir])
+    @manifest_file = File.join(stabilization_dir, 'manifest-sha256.txt')
     @file_count = 0
     @byte_count = 0
   end
