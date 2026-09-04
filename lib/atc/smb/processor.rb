@@ -7,20 +7,24 @@ require 'securerandom'
 class Atc::Smb::Processor
   attr_reader :run_id, :stabilization_dir
 
-  def initialize(source_dir, destination_bucket = nil)
-    @source_dir = source_dir
+  # Takes an Atc::Smb::TaskArgs which holds the validated source directory and ingest bucket target
+  def initialize(task_args)
+    @source_config = task_args.source_config
+    @source_dir = task_args.source_path
+    @prefix = task_args.prefix
+    @destination_bucket = SMB_CONFIG[:destination_bucket]
     @run_id = SecureRandom.uuid
     @stabilization_dir = File.join(SMB_CONFIG[:stabilization_dir], @run_id)
     FileUtils.mkdir_p(@stabilization_dir)
 
+    puts "Reading from //#{@source_config[:host]}/#{@source_config[:share]}#{@source_dir}"
+    puts "Writing to s3://#{@destination_bucket}/#{prefixed_key(bag_root)}"
     puts "Files will be stored in the local stabilization directory: #{@stabilization_dir}"
 
-    # @destination_bucket = destination_bucket
-    @destination_bucket = SMB_CONFIG[:destination_bucket]
-    @connector = Atc::Smb::Connector.new(stabilization_dir: @stabilization_dir)
+    @connector = Atc::Smb::Connector.new(source_config: @source_config, stabilization_dir: @stabilization_dir)
     @csv_writer = Atc::Smb::CsvWriter.new(stabilization_dir: @stabilization_dir)
     @manifest_writer = Atc::Smb::ManifestWriter.new(stabilization_dir: @stabilization_dir)
-    @uploader = Atc::Smb::BagUploader.new(@destination_bucket) # use the arg
+    @uploader = Atc::Smb::BagUploader.new(@destination_bucket)
   end
 
   def run
@@ -46,7 +50,9 @@ class Atc::Smb::Processor
     # 3. Download and process the files (one at a time)
     download_and_process_source_files
     # 4. Check for results of virus scanning, send BagIt files if no viruses found
-    assemble_final_files if scan_files_and_report_results
+    non_success_files = scan_files_and_report_results
+    # 5. Assemble tag files and finalize the BagIt package, regardless of virus scan results
+    assemble_final_files(non_success_files)
   end
 
   def add_source_files_to_csv
@@ -111,34 +117,34 @@ class Atc::Smb::Processor
 
     failures = results.reject { |key, status| status == 'NO_THREATS_FOUND' }
     report_scan_outcome(failures)
+    failures
   end
 
   def report_scan_outcome(failures)
     if failures.empty?
       puts 'All files passed the virus scan'
-      return true
+    else
+      puts "Some files didn't pass the virus scan:"
+      failures.each do |object_key, status|
+        puts "#{object_key}: #{status}"
+      end
     end
-
-    puts "Some files didn't pass the virus scan:"
-    failures.each do |object_key, status|
-      puts "#{object_key}: #{status}"
-    end
-    false
   end
 
   # Writes the five BagIt tag files and uploads them to the top level of the bag
-  def assemble_final_files
+  def assemble_final_files(non_success_files)
     assembler = Atc::Smb::BagAssembler.new(
       source_dir: @source_dir,
       payload_oxum: @manifest_writer.payload_oxum,
       manifest_file: @manifest_writer.manifest_file,
       normalization_log_file: @csv_writer.csv_file,
-      stabilization_dir: @stabilization_dir
+      stabilization_dir: @stabilization_dir,
+      non_success_files: non_success_files
     )
     assembler.write_tag_files
 
     assembler.tag_files.each do |file|
-      object_key = "#{bag_root}/#{File.basename(file)}"
+      object_key = prefixed_key(bag_root, File.basename(file))
       puts "Sending #{file} to #{object_key}"
       @uploader.upload_file(file, object_key)
     end
@@ -173,6 +179,11 @@ class Atc::Smb::Processor
   end
 
   def object_key_for(normalized_path)
-    "#{bag_root}/data/#{normalized_path}"
+    prefixed_key(bag_root, 'data', normalized_path)
+  end
+
+  # Builds an object key below the ingest bucket target which is empty when the target is the bucket root
+  def prefixed_key(*segments)
+    [@prefix, *segments].reject(&:blank?).join('/')
   end
 end

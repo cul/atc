@@ -9,7 +9,7 @@ class Atc::Smb::BagAssembler
   def initialize(
     source_dir:,
     payload_oxum:, manifest_file:, normalization_log_file:,
-    repository_name: 'TODO', collection_name: 'TODO',
+    non_success_files:, repository_name: 'TODO', collection_name: 'TODO',
     stabilization_dir: SMB_CONFIG[:stabilization_dir]
   )
     @source_dir = source_dir
@@ -19,6 +19,7 @@ class Atc::Smb::BagAssembler
     @repository_name = repository_name
     @collection_name = collection_name
     @stabilization_dir = stabilization_dir
+    @non_success_files = non_success_files
   end
 
   def write_tag_files
@@ -39,17 +40,19 @@ class Atc::Smb::BagAssembler
   end
 
   def bag_info_content
-    {
+    bag_info = {
       'Bagging-Date' => Time.zone.today.strftime('%Y-%m-%d'),
       'Payload-Oxum' => @payload_oxum,
       'Content-Source-Type' => CONTENT_SOURCE_TYPE,
       'Content-Source-Path' => @source_dir,
-      # TODO: Harcoded for now but needs to be modified so it reflects the actual virus check result
-      # (currently BagAssembler is used only when no viruses are found)
-      'Virus-Check-Result' => 'PASS',
       'Repository-Name' => @repository_name,
-      'Collection-Name' => @collection_name
-    }.map { |label, value| "#{label}: #{value}\n" }.join
+      'Collection-Name' => @collection_name,
+      'Virus-Check-Result' => @non_success_files.empty? ? 'PASS' : 'FAIL'
+    }
+
+    content = bag_info.map { |label, value| "#{label}: #{value}\n" }
+    content.concat(@non_success_files.keys.map { |file| "Virus-Check-Failed-File: #{file}\n" })
+    content.join
   end
 
   def tag_manifest_content

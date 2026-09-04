@@ -11,20 +11,12 @@ class Atc::Smb::Connector
   # Matches the header line that smbclient prints before going intothe contents of each subdirectory
   DIR_HEADER_REGEX = /\A\\(?<path>.*\S)\s*\z/
 
-  # TODO: Store the share folder for later use
-  def initialize(
-    host: SMB_CONFIG[:host],
-    share: SMB_CONFIG[:share],
-    username: SMB_CONFIG[:username],
-    password: SMB_CONFIG[:password],
-    domain: SMB_CONFIG[:domain],
-    stabilization_dir: SMB_CONFIG[:stabilization_dir]
-  )
-    @host = host
-    @share = share
-    @username = username
-    @password = password
-    @domain = domain
+  def initialize(source_config:, stabilization_dir: SMB_CONFIG[:stabilization_dir])
+    @host = source_config[:host]
+    @share = source_config[:share]
+    @username = source_config[:username]
+    @password = source_config[:password]
+    @domain = source_config[:domain]
     @stabilization_dir = stabilization_dir
   end
 

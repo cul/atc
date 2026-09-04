@@ -1,19 +1,25 @@
 development:
-  username: username@email.copm
-  password: pass123456789
-  domain: cul
-  host: host.cul.columbia.edu
-  share: folder-to-access
   destination_bucket: destination-bucket
   notification_email: notification-email@email.com
   default_sender_email_address: defaultsender@email.com
+  # Currently the stabilization script supports only one source
+  sources:
+    C:
+      username: username@email.copm
+      password: pass123456789
+      domain: cul
+      host: host.cul.columbia.edu
+      share: folder-to-access
 
 test:
-  username: testusername@email.copm
-  password: testpass123456789
-  domain: cul
-  host: testhost.cul.columbia.edu
-  share: folder-to-access
   destination_bucket: destination-bucket
   notification_email: notification-email@email.com
   default_sender_email_address: defaultsender@email.com
+  # Currently the stabilization script supports only one source
+  sources:
+    C:
+      username: testusername@email.copm
+      password: testpass123456789
+      domain: cul
+      host: testhost.cul.columbia.edu
+      share: folder-to-access
