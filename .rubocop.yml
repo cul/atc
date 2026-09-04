@@ -19,6 +19,7 @@ AllCops:
     - 'lib/atc/smb/csv_writer.rb' # temp
     - 'lib/atc/smb/bag_uploader.rb' # temp
     - 'lib/atc/smb/processor.rb' # temp
+    - 'lib/atc/smb/bag_assembler.rb' # temp
 
 Layout/LineLength:
   Exclude:
