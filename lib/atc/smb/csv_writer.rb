@@ -20,12 +20,13 @@ class Atc::Smb::CsvWriter
 
   def normalize_paths
     rows = CSV.read(@csv_file, headers: true)
+    assigned_paths = Set.new
 
     CSV.open(@csv_file, 'w') do |csv|
       csv << ['file_path', 'size', 'skipped', 'normalized_path']
       rows.each do |row|
         skipped = row['skipped']
-        normalized_path = skipped ? nil : normalized_path_for(row['file_path'])
+        normalized_path = skipped ? nil : normalized_path_for(row['file_path'], assigned_paths)
         csv << [row['file_path'], row['size'], skipped, normalized_path]
       end
     end
@@ -43,10 +44,11 @@ class Atc::Smb::CsvWriter
 
   private
 
-  def normalized_path_for(file_path)
-    # ? Should we use this method?
-    # ? Is it possible that the path will be normalized to the same value as another file?
-    normalized_path = Atc::Utils::ObjectKeyNameUtils.remediate_key_name(file_path.delete_prefix('/'))
+  def normalized_path_for(file_path, assigned_paths)
+    normalized_path = Atc::Utils::ObjectKeyNameUtils.remediate_key_name(
+      file_path.delete_prefix('/'), assigned_paths
+    )
+    assigned_paths << normalized_path
     puts "Normalized path for #{file_path}: #{normalized_path}"
     normalized_path
   end

@@ -83,26 +83,6 @@ class Atc::Smb::Processor
     puts "Payload-Oxum for manifest: #{@manifest_writer.payload_oxum}"
   end
 
-  # Temp: assumes the file is already downloaded and CSV contains its info; doesn't connect to SMB server
-  # so the upload can be tested locally
-  def upload_files
-    @manifest_writer.start
-    files = @csv_writer.each_normalized_file
-
-    files.each do |file_path, normalized_path, size|
-      puts "Preparing to upload file #{normalized_path}, size: #{size}, source path #{file_path}"
-
-      local_path = File.join(@stabilization_dir, normalized_path)
-      puts "Local path #{local_path}"
-      @uploader.upload_file(local_path, object_key_for(normalized_path))
-      checksum = Digest::SHA256.file(local_path).hexdigest
-      puts "File #{normalized_path} uploaded successfully, checksum: #{checksum}, size: #{size}"
-      @manifest_writer.add_row(checksum, normalized_path, size)
-    end
-
-    puts "Payload-Oxum for manifest: #{@manifest_writer.payload_oxum}"
-  end
-
   # Waits for GuardDuty to finish scanning every file uploaded and reports the outcome
   def scan_files_and_report_results
     checker = Atc::Smb::VirusScanChecker.new(@destination_bucket)

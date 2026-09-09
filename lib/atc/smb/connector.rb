@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'fileutils'
 require 'open3'
 require 'tempfile'
 
@@ -32,8 +31,8 @@ class Atc::Smb::Connector
   # Downloads files from remote_dir (a directory on the share) one at a time
   def each_downloaded_file(remote_dir, files)
     with_auth_file do |auth_file_path|
-      files.each do |file_path, normalized_path, size|
-        local_path = download_file(remote_dir, file_path, normalized_path, auth_file_path)
+      files.each_with_index do |(file_path, normalized_path, size), index|
+        local_path = download_file(remote_dir, file_path, staging_path(index, normalized_path), auth_file_path)
         verify_download_size(file_path, local_path, size)
         yield local_path, normalized_path, size
       end
@@ -41,6 +40,13 @@ class Atc::Smb::Connector
   end
 
   private
+
+  # Files are written to the root of the stabilization directory for easier cleanup (no empty directories)
+  # and to avoid running past filesystem's length limit.
+  def staging_path(index, normalized_path)
+    file_number = (index + 1).to_s.rjust(6, '0')
+    File.join(@stabilization_dir, "#{file_number}#{File.extname(normalized_path)}")
+  end
 
   # Verify size since smbclient can exit successfully even if the file is incomplete
   def verify_download_size(file_path, local_path, expected_size)
@@ -50,11 +56,10 @@ class Atc::Smb::Connector
     raise "size mismatch for #{file_path}: expected #{expected_size} bytes, downloaded #{actual_size}"
   end
 
-  # Downloads a file under its normalized path
-  def download_file(remote_dir, file_path, normalized_path, auth_file_path)
+  # Downloads a file to the given local_path
+  def download_file(remote_dir, file_path, local_path, auth_file_path)
     path_with_share = "#{remote_dir}#{File.dirname(file_path)}"
     source_filename = File.basename(file_path)
-    local_path = temp_path_for(normalized_path)
 
     puts "Path with share: #{path_with_share}"
     puts "Source filename: #{source_filename}"
@@ -67,12 +72,6 @@ class Atc::Smb::Connector
 
     raise "error retrieving #{file_path}: #{stderr.strip}" unless status.success?
 
-    local_path
-  end
-
-  def temp_path_for(normalized_path)
-    local_path = File.join(@stabilization_dir, normalized_path)
-    FileUtils.mkdir_p(File.dirname(local_path))
     local_path
   end
 

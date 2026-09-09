@@ -46,10 +46,10 @@ namespace :atc do
 
     # Assumes CSV file already contains the list of files to upload and those files
     # are present in the local stabilization directory
-    desc 'Upload files that are already present in the local stabilization directory'
-    task test_upload: :environment do
-      Atc::Smb::Processor.new(smb_args).upload_files
-    end
+    # desc 'Upload files that are already present in the local stabilization directory'
+    # task test_upload: :environment do
+    #   Atc::Smb::Processor.new(smb_args).upload_files
+    # end
 
     desc 'Wait for virus scan results for the uploaded files and report the outcome'
     task get_scanning_results: :environment do
