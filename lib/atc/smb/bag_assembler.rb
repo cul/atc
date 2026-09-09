@@ -9,7 +9,7 @@ class Atc::Smb::BagAssembler
   def initialize(
     source_dir:,
     payload_oxum:, manifest_file:, normalization_log_file:,
-    non_success_files:, repository_name: 'TODO', collection_name: 'TODO',
+    virus_check_passed:, repository_name: 'TODO', collection_name: 'TODO',
     stabilization_dir: SMB_CONFIG[:stabilization_dir]
   )
     @source_dir = source_dir
@@ -19,7 +19,7 @@ class Atc::Smb::BagAssembler
     @repository_name = repository_name
     @collection_name = collection_name
     @stabilization_dir = stabilization_dir
-    @non_success_files = non_success_files
+    @virus_check_passed = virus_check_passed
   end
 
   def write_tag_files
@@ -47,12 +47,16 @@ class Atc::Smb::BagAssembler
       'Content-Source-Path' => @source_dir,
       'Repository-Name' => @repository_name,
       'Collection-Name' => @collection_name,
-      'Virus-Check-Result' => @non_success_files.empty? ? 'PASS' : 'FAIL'
+      'Virus-Check-Result' => virus_check_result
     }
 
-    content = bag_info.map { |label, value| "#{label}: #{value}\n" }
-    content.concat(@non_success_files.keys.map { |file| "Virus-Check-Failed-File: #{file}\n" })
-    content.join
+    bag_info.map { |label, value| "#{label}: #{value}\n" }.join
+  end
+
+  def virus_check_result
+    return 'PASS' if @virus_check_passed
+
+    "FAIL - See #{File.basename(@normalization_log_file)} for additional details."
   end
 
   def tag_manifest_content

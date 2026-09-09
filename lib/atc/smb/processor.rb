@@ -49,10 +49,10 @@ class Atc::Smb::Processor
     normalize_source_paths
     # 3. Download and process the files (one at a time)
     download_and_process_source_files
-    # 4. Check for results of virus scanning, send BagIt files if no viruses found
-    non_success_files = scan_files_and_report_results
+    # 4. Check for results of virus scanning and record them in the CSV
+    failures = scan_files_and_report_results
     # 5. Assemble tag files and finalize the BagIt package, regardless of virus scan results
-    assemble_final_files(non_success_files)
+    assemble_final_files(virus_check_passed: failures.empty?)
   end
 
   def add_source_files_to_csv
@@ -83,19 +83,21 @@ class Atc::Smb::Processor
     puts "Payload-Oxum for manifest: #{@manifest_writer.payload_oxum}"
   end
 
-  # Waits for GuardDuty to finish scanning every file uploaded and reports the outcome
+  # Waits for GuardDuty to finish scanning every file uploaded and records the outcome in the CSV
   def scan_files_and_report_results
     checker = Atc::Smb::VirusScanChecker.new(@destination_bucket)
-    puts "Waiting for virus scan results for #{uploaded_object_keys.size} file(s)..."
+    puts "Waiting for virus scan results for #{normalized_paths_by_object_key.size} file(s)..."
     # Files that never got a result stay as 'NOT SCANNED' so can still be reported as failures
-    results = uploaded_object_keys.index_with('NOT SCANNED')
+    results = normalized_paths_by_object_key.values.index_with('NOT SCANNED')
 
-    checker.each_scan_result(uploaded_object_keys) do |object_key, status|
+    checker.each_scan_result(normalized_paths_by_object_key.keys) do |object_key, status|
       puts "Scan result for #{object_key}: #{status}"
-      results[object_key] = status
+      results[normalized_paths_by_object_key[object_key]] = status
     end
 
-    failures = results.reject { |key, status| status == 'NO_THREATS_FOUND' }
+    @csv_writer.write_scan_results(results)
+
+    failures = results.reject { |_normalized_path, status| status == 'NO_THREATS_FOUND' }
     report_scan_outcome(failures)
     failures
   end
@@ -105,21 +107,21 @@ class Atc::Smb::Processor
       puts 'All files passed the virus scan'
     else
       puts "Some files didn't pass the virus scan:"
-      failures.each do |object_key, status|
-        puts "#{object_key}: #{status}"
+      failures.each do |normalized_path, status|
+        puts "#{normalized_path}: #{status}"
       end
     end
   end
 
   # Writes the five BagIt tag files and uploads them to the top level of the bag
-  def assemble_final_files(non_success_files)
+  def assemble_final_files(virus_check_passed:)
     assembler = Atc::Smb::BagAssembler.new(
       source_dir: @source_dir,
       payload_oxum: @manifest_writer.payload_oxum,
       manifest_file: @manifest_writer.manifest_file,
       normalization_log_file: @csv_writer.csv_file,
       stabilization_dir: @stabilization_dir,
-      non_success_files: non_success_files
+      virus_check_passed: virus_check_passed
     )
     assembler.write_tag_files
 
@@ -130,9 +132,13 @@ class Atc::Smb::Processor
     end
   end
 
-  def uploaded_object_keys
-    @uploaded_object_keys ||= @csv_writer.each_normalized_file.map do |_file_path, normalized_path, _size|
-      object_key_for(normalized_path)
+  # Maps the object key of every uploaded file to its normalized path so we can record a scan
+  # result in a CSV file
+  def normalized_paths_by_object_key
+    @normalized_paths_by_object_key ||= @csv_writer.each_normalized_file.to_h do |_path, normalized_path, _size|
+      object_key = object_key_for(normalized_path)
+      puts "Object key for #{normalized_path} is #{object_key}"
+      [object_key, normalized_path]
     end
   end
 
