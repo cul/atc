@@ -10,26 +10,40 @@ class Atc::Smb::Processor
   # Takes an Atc::Smb::TaskArgs which holds the validated source directory and ingest bucket target
   def initialize(task_args)
     @source_config = task_args.source_config
+    
+    # Path to the source directory we're syncing from
     @source_dir = task_args.source_path
-    @prefix = task_args.prefix
-    @destination_bucket = SMB_CONFIG[:destination_bucket]
+
+    # The bag will be uploaded to the root of the stabilization bucket
+    @stabilization_bucket = SMB_CONFIG[:stabilization_bucket]
+    @stabilization_root = task_args.stabilization_path
+
+    # Where the bag will eventually go in the ingest bucket (not yet implemented)
+    @ingest_bucket = SMB_CONFIG[:ingest_bucket]
+    @ingest_root = task_args.ingest_path
+
     @run_id = SecureRandom.uuid
-    @stabilization_dir = File.join(SMB_CONFIG[:stabilization_dir], @run_id)
+    @stabilization_dir = File.join(SMB_CONFIG[:stabilization_dir], @run_id) # Needs a better name
     FileUtils.mkdir_p(@stabilization_dir)
 
     puts "Reading from //#{@source_config[:host]}/#{@source_config[:share]}#{@source_dir}"
-    puts "Writing to s3://#{@destination_bucket}/#{prefixed_key(bag_root)}"
+    puts "Writing to s3://#{@stabilization_bucket}/#{@stabilization_root}"
+    puts "Later sending to s3://#{@ingest_bucket}/#{@ingest_root}"
     puts "Files will be stored in the local stabilization directory: #{@stabilization_dir}"
 
     @connector = Atc::Smb::Connector.new(source_config: @source_config, stabilization_dir: @stabilization_dir)
     @csv_writer = Atc::Smb::CsvWriter.new(stabilization_dir: @stabilization_dir)
     @manifest_writer = Atc::Smb::ManifestWriter.new(stabilization_dir: @stabilization_dir)
-    @uploader = Atc::Smb::BagUploader.new(@destination_bucket)
+    @uploader = Atc::Smb::BagUploader.new(@stabilization_bucket)
+    @ingest_uploader = Atc::Smb::BagUploader.new(@ingest_bucket)
   end
 
   def run
-    # TODO: Make sure that the destination bucket path doesn't exist
-    # If it does, we want to make sure that the user is aware and wants to overwrite it
+    # TODO: If directories exist, present 2 options:
+    # 1. Rename the target path
+    # 2. Accept an overwrite flag
+    existing_path = check_if_directories_exist
+    abort "Path already exists: #{existing_path}" if existing_path
 
     # 1. Read from the source directory and log every file into a CSV
     add_source_files_to_csv
@@ -53,6 +67,20 @@ class Atc::Smb::Processor
     failures = scan_files_and_report_results
     # 5. Assemble tag files and finalize the BagIt package, regardless of virus scan results
     assemble_final_files(virus_check_passed: failures.empty?)
+  end
+
+  def check_if_directories_exist
+    destinations = [
+      [@stabilization_root, @uploader],
+      [@ingest_root, @ingest_uploader]
+    ]
+
+    destinations.each do |dir, uploader|
+      puts "Checking if directory exists: #{dir}"
+      return "s3://#{uploader.bucket_name}/#{dir}" if uploader.directory_exists(dir)
+    end
+
+    nil
   end
 
   def add_source_files_to_csv
@@ -85,7 +113,7 @@ class Atc::Smb::Processor
 
   # Waits for GuardDuty to finish scanning every file uploaded and records the outcome in the CSV
   def scan_files_and_report_results
-    checker = Atc::Smb::VirusScanChecker.new(@destination_bucket)
+    checker = Atc::Smb::VirusScanChecker.new(@stabilization_bucket)
     puts "Waiting for virus scan results for #{normalized_paths_by_object_key.size} file(s)..."
     # Files that never got a result stay as 'NOT SCANNED' so can still be reported as failures
     results = normalized_paths_by_object_key.values.index_with('NOT SCANNED')
@@ -126,7 +154,7 @@ class Atc::Smb::Processor
     assembler.write_tag_files
 
     assembler.tag_files.each do |file|
-      object_key = prefixed_key(bag_root, File.basename(file))
+      object_key = stabilization_key(File.basename(file))
       puts "Sending #{file} to #{object_key}"
       @uploader.upload_file(file, object_key)
     end
@@ -159,17 +187,11 @@ class Atc::Smb::Processor
     large_files
   end
 
-  # The root level of the bag is normalized and might not match the original source directory's name
-  def bag_root
-    @bag_root ||= Atc::Utils::ObjectKeyNameUtils.remediate_key_name(File.basename(@source_dir))
-  end
-
   def object_key_for(normalized_path)
-    prefixed_key(bag_root, 'data', normalized_path)
+    stabilization_key('data', normalized_path)
   end
 
-  # Builds an object key below the ingest bucket target which is empty when the target is the bucket root
-  def prefixed_key(*segments)
-    [@prefix, *segments].reject(&:blank?).join('/')
+  def stabilization_key(*segments)
+    [@stabilization_root, *segments].join('/')
   end
 end

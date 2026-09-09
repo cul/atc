@@ -7,13 +7,14 @@ class Atc::Smb::TaskArgs
   SOURCE_REGEX = %r{\A(?<drive>[A-Za-z]:)[\\/](?<path>.+)\z}
 
   SOURCE_EXAMPLE = 'source=L:/existing-dir/subdir'
-  INGEST_BUCKET_TARGET_EXAMPLE = 'ingest_bucket_target=path/within/bucket (or ingest_bucket_target=/ for the ' \
-                                 'root of the ingest bucket)'
+  INGEST_BUCKET_TARGET_EXAMPLE = 'ingest_bucket_target=folder1/folder2'
 
   # - drive is a key in the sources section of smb.yml (eg. 'L')
   # - source_path is the path on that drive in "/existing-dir/subdir" format
-  # - prefix is the ingest bucket target path ('' when it's the bucket root).
-  attr_reader :drive, :source_path, :prefix
+  # - ingest_path is the ingest bucket target path ("folder1/folder2")
+  # - stabilization_path is the hyphenated form of that target, used at the root of the stabilization
+  #   bucket ("folder1-folder2")
+  attr_reader :drive, :source_path, :ingest_path, :stabilization_path
 
   def self.from_env(env = ENV)
     Atc::Smb::TaskArgs.new(
@@ -24,7 +25,9 @@ class Atc::Smb::TaskArgs
 
   def initialize(source:, ingest_bucket_target:)
     @drive, @source_path = parse_source(source)
-    @prefix = parse_ingest_bucket_target(ingest_bucket_target)
+    segments = parse_ingest_bucket_target(ingest_bucket_target)
+    @ingest_path = segments.join('/')
+    @stabilization_path = segments.join('-')
   end
 
   # The host, share and credentials configured for this source's drive
@@ -59,12 +62,19 @@ class Atc::Smb::TaskArgs
     "/#{segments.join('/')}"
   end
 
-  # Converts a path relative to the ingest bucket into an object key prefix.
-  # A target of '/' means the root of the bucket, which is an empty prefix.
+  # Splits a path relative to the ingest bucket into the segments that both destination paths are built from
   def parse_ingest_bucket_target(target)
     raise ArgumentError, "Missing required argument: #{INGEST_BUCKET_TARGET_EXAMPLE}" if target.blank?
 
-    path_segments(target).join('/')
+    segments = path_segments(target)
+    raise ArgumentError, invalid_target_message(target) unless valid_target?(segments)
+
+    segments
+  end
+
+  # Every segment has to be usable as part of an object key
+  def valid_target?(segments)
+    segments.any? && Atc::Utils::ObjectKeyNameUtils.valid_key_name?(segments.join('/'))
   end
 
   # Splits on slashes, dropping empty segments and rejecting anything that could escape the given path
@@ -86,5 +96,10 @@ class Atc::Smb::TaskArgs
 
   def invalid_source_message(source)
     "Invalid source: #{source.inspect}. Expected a drive letter followed by a path, e.g. #{SOURCE_EXAMPLE}"
+  end
+
+  def invalid_target_message(target)
+    "Invalid ingest_bucket_target: #{target.inspect}. Expected a path within the ingest bucket containing only " \
+      "letters, numbers and the characters - _ . ( ), e.g. #{INGEST_BUCKET_TARGET_EXAMPLE}"
   end
 end

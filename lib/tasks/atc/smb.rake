@@ -3,7 +3,9 @@ namespace :atc do
     # Every task that starts with Processor invocation requires the following environment variables:
     #   source=L:/existing-dir/subdir          A configured source drive (see the sources section of smb.yml)
     #                                          followed by the directory to stabilize
-    #   ingest_bucket_target=path/in/bucket    Where the bag goes within the ingest bucket ('/' for the bucket root)
+    #   ingest_bucket_target=folder1/folder2   Where the bag goes within the ingest bucket. Also used to name 
+    #                                          the bag at the root of the stabilization bucket, using a hyphenated form 
+    #                                          of the ingest bucket target.
     def smb_args
       Atc::Smb::TaskArgs.from_env
     rescue ArgumentError => e
@@ -12,13 +14,16 @@ namespace :atc do
 
     desc 'Run the full stabilization process'
     task run: :environment do
-      destination = if smb_args.prefix.empty?
-                      Rainbow('the root of the ingest bucket').yellow.bold
-                    else
-                      "the ingest bucket path '#{Rainbow(smb_args.prefix).yellow.bold}'"
-                    end
+      destination = "the ingest bucket path '#{Rainbow(smb_args.ingest_path).yellow.bold}'"
       puts Rainbow("This process will copy files from #{Rainbow(smb_args.source_path).yellow.bold} on the #{Rainbow(smb_args.drive).yellow.bold} drive to #{destination}")
       Atc::Smb::Processor.new(smb_args).run
+    end
+
+    task check_directories: :environment do
+      destination = "the ingest bucket path '#{Rainbow(smb_args.ingest_path).yellow.bold}'"
+      puts Rainbow("This process will copy files from #{Rainbow(smb_args.source_path).yellow.bold} on the #{Rainbow(smb_args.drive).yellow.bold} drive to #{destination}")
+      processor = Atc::Smb::Processor.new(smb_args)
+      processor.check_if_directories_exist
     end
 
 
