@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Atc::Smb::BagUploader
+class Atc::Stabilization::BagUploader
   attr_reader :bucket_name
 
   def initialize(bucket_name, s3_client = S3_CLIENT)

@@ -3,7 +3,7 @@
 # Parses and validates the environment variables passed to the atc:smb rake tasks:
 # bundle exec rake atc:smb:run source=L:/existing-dir/subdir ingest_bucket_target=path/within/bucket
 # TODO: Add "overwrite" arg
-class Atc::Smb::TaskArgs
+class Atc::Stabilization::TaskArgs
   SOURCE_REGEX = %r{\A(?<drive>[A-Za-z]:)[\\/](?<path>.+)\z}
 
   SOURCE_EXAMPLE = 'source=L:/existing-dir/subdir'
@@ -18,7 +18,7 @@ class Atc::Smb::TaskArgs
 
   # TODO: overwrite flag
   def self.from_env(env = ENV)
-    Atc::Smb::TaskArgs.new(
+    Atc::Stabilization::TaskArgs.new(
       source: env['source'],
       ingest_bucket_target: env['ingest_bucket_target']
     )

@@ -4,13 +4,13 @@ require 'digest'
 require 'fileutils'
 require 'securerandom'
 
-class Atc::Smb::Processor
+class Atc::Stabilization::Processor
   attr_reader :run_id, :stabilization_dir
 
-  # Takes an Atc::Smb::TaskArgs which holds the validated source directory and ingest bucket target
+  # Takes an Atc::Stabilization::TaskArgs which holds the validated source directory and ingest bucket target
   def initialize(task_args)
     @source_config = task_args.source_config
-    
+
     # Path to the source directory we're syncing from
     @source_dir = task_args.source_path
 
@@ -32,11 +32,11 @@ class Atc::Smb::Processor
     puts "Later sending to s3://#{@ingest_bucket}/#{@ingest_root}"
     puts "Files will be stored in the local stabilization directory: #{@stabilization_dir}"
 
-    @connector = Atc::Smb::Connector.new(source_config: @source_config, stabilization_dir: @stabilization_dir)
-    @csv_writer = Atc::Smb::CsvWriter.new(stabilization_dir: @stabilization_dir)
+    @connector = Atc::Stabilization::Connector.new(source_config: @source_config, stabilization_dir: @stabilization_dir)
+    @csv_writer = Atc::Stabilization::CsvWriter.new(stabilization_dir: @stabilization_dir)
     @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @stabilization_dir, layout: @layout)
-    @uploader = Atc::Smb::BagUploader.new(@stabilization_bucket)
-    @ingest_uploader = Atc::Smb::BagUploader.new(@ingest_bucket)
+    @uploader = Atc::Stabilization::BagUploader.new(@stabilization_bucket)
+    @ingest_uploader = Atc::Stabilization::BagUploader.new(@ingest_bucket)
   end
 
   def run
@@ -107,7 +107,7 @@ class Atc::Smb::Processor
       @uploader.upload_file(local_path, @layout.payload_object_key(normalized_path))
       puts "File #{normalized_path} uploaded successfully, checksum: #{checksum}, size: #{size}"
       @payload_manifest.add_row(checksum, normalized_path, size)
-      
+
       # TODO: Delete the local file
     end
 
@@ -204,7 +204,7 @@ class Atc::Smb::Processor
       validator.errors.each { |error| puts error }
       StabilizationMailer.with(
         to: SMB_CONFIG[:notification_email],
-        subject: "Failed to download bag",
+        subject: 'Failed to download bag',
         body_content: "The bag downloaded to #{final_bag_path} is not valid:\n#{validator.errors.join("\n")}"
       ).send_mail.deliver
     end
@@ -233,7 +233,7 @@ class Atc::Smb::Processor
         large_files << row['file_path']
       end
     end
-    
+
     large_files
   end
 end

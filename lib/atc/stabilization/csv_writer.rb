@@ -2,7 +2,7 @@
 
 require 'csv'
 
-class Atc::Smb::CsvWriter
+class Atc::Stabilization::CsvWriter
   HEADERS = %w[file_path size skipped normalized_path virus_scan_result].freeze
 
   attr_reader :csv_file
