@@ -6,8 +6,10 @@ class Atc::Bag::PayloadManifest
   attr_reader :manifest_file, :file_count, :byte_count
 
   # bag_dir is the local directory that the bag's tag files are written to
-  def initialize(bag_dir:)
+  # layout determines file paths recorded by the manifest
+  def initialize(bag_dir:, layout:)
     @manifest_file = File.join(bag_dir, 'manifest-sha256.txt')
+    @layout = layout
     @file_count = 0
     @byte_count = 0
   end
@@ -20,7 +22,7 @@ class Atc::Bag::PayloadManifest
 
   def add_row(checksum, normalized_path, size)
     File.open(@manifest_file, 'a') do |file|
-      file.puts("#{checksum}  data/#{normalized_path}")
+      file.puts("#{checksum}  #{@layout.payload_path(normalized_path)}")
     end
 
     @file_count += 1

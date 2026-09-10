@@ -19,7 +19,6 @@ AllCops:
     - 'lib/atc/smb/csv_writer.rb' # temp
     - 'lib/atc/smb/bag_uploader.rb' # temp
     - 'lib/atc/smb/processor.rb' # temp
-    - 'lib/atc/smb/bag_assembler.rb' # temp
     - 'lib/atc/aws/s3_downloader.rb' # temp
     - 'lib/atc/bag/*' # temp
 

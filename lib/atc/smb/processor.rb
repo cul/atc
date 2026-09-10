@@ -16,7 +16,8 @@ class Atc::Smb::Processor
 
     # The bag will be uploaded to the root of the stabilization bucket
     @stabilization_bucket = SMB_CONFIG[:stabilization_bucket]
-    @stabilization_root = task_args.stabilization_path
+    # The layout object helps determine the structure of the bag within the stabilization bucket
+    @layout = Atc::Bag::Layout.new(task_args.stabilization_path)
 
     # Where the bag will eventually go in the ingest bucket (not yet implemented)
     @ingest_bucket = SMB_CONFIG[:ingest_bucket]
@@ -27,13 +28,13 @@ class Atc::Smb::Processor
     FileUtils.mkdir_p(@stabilization_dir)
 
     puts "Reading from //#{@source_config[:host]}/#{@source_config[:share]}#{@source_dir}"
-    puts "Writing to s3://#{@stabilization_bucket}/#{@stabilization_root}"
+    puts "Writing to s3://#{@stabilization_bucket}/#{@layout.bag_root_prefix}"
     puts "Later sending to s3://#{@ingest_bucket}/#{@ingest_root}"
     puts "Files will be stored in the local stabilization directory: #{@stabilization_dir}"
 
     @connector = Atc::Smb::Connector.new(source_config: @source_config, stabilization_dir: @stabilization_dir)
     @csv_writer = Atc::Smb::CsvWriter.new(stabilization_dir: @stabilization_dir)
-    @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @stabilization_dir)
+    @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @stabilization_dir, layout: @layout)
     @uploader = Atc::Smb::BagUploader.new(@stabilization_bucket)
     @ingest_uploader = Atc::Smb::BagUploader.new(@ingest_bucket)
   end
@@ -73,7 +74,7 @@ class Atc::Smb::Processor
 
   def check_if_directories_exist
     destinations = [
-      [@stabilization_root, @uploader],
+      [@layout.bag_root_prefix, @uploader],
       [@ingest_root, @ingest_uploader]
     ]
 
@@ -103,7 +104,7 @@ class Atc::Smb::Processor
       # Generated from the downloaded file, in the same form the BagIt manifest needs
       checksum = Digest::SHA256.file(local_path).hexdigest
       puts "Checksum for #{normalized_path}: #{checksum}"
-      @uploader.upload_file(local_path, object_key_for(normalized_path))
+      @uploader.upload_file(local_path, @layout.payload_object_key(normalized_path))
       puts "File #{normalized_path} uploaded successfully, checksum: #{checksum}, size: #{size}"
       @payload_manifest.add_row(checksum, normalized_path, size)
       
@@ -157,7 +158,7 @@ class Atc::Smb::Processor
     tag_file_writer.write_tag_files
 
     tag_file_writer.tag_files.each do |file|
-      object_key = stabilization_key(File.basename(file))
+      object_key = @layout.tag_file_object_key(file)
       puts "Sending #{file} to #{object_key}"
       @uploader.upload_file(file, object_key)
     end
@@ -167,8 +168,8 @@ class Atc::Smb::Processor
   def download_and_validate_bag
     # 1. Check if there is same-name directory at the target cul path, name it after stabilization root
 
-    # download_dir = File.join(SMB_CONFIG[:cul_volume_download_dir], stabilization_key) # this will be used on the server
-    final_bag_path = File.join(SMB_CONFIG[:stabilization_dir], stabilization_key)
+    # download_dir = File.join(SMB_CONFIG[:cul_volume_download_dir], @layout.bag_root_prefix) # this will be used on the server
+    final_bag_path = File.join(SMB_CONFIG[:stabilization_dir], @layout.bag_root_prefix)
     parent_path = SMB_CONFIG[:stabilization_dir]
     puts "Downloading to #{parent_path}"
 
@@ -184,7 +185,7 @@ class Atc::Smb::Processor
     # 2. Download the finalized bag from the ingest bucket to the local stabilization directory
     # The directory will be downloaded as its basename under the parent path
     s3_downloader = Atc::Aws::S3Downloader.new(@stabilization_bucket, parent_path)
-    s3_downloader.download_directory(stabilization_key)
+    s3_downloader.download_directory(@layout.bag_root_prefix)
 
     # 3. Validate the bag (e.g., check for the presence of all expected files and tag files)
     puts "Checking downloaded bag under #{final_bag_path}"
@@ -213,7 +214,7 @@ class Atc::Smb::Processor
   # result in a CSV file
   def normalized_paths_by_object_key
     @normalized_paths_by_object_key ||= @csv_writer.each_normalized_file.to_h do |_path, normalized_path, _size|
-      object_key = object_key_for(normalized_path)
+      object_key = @layout.payload_object_key(normalized_path)
       puts "Object key for #{normalized_path} is #{object_key}"
       [object_key, normalized_path]
     end
@@ -234,13 +235,5 @@ class Atc::Smb::Processor
     end
     
     large_files
-  end
-
-  def object_key_for(normalized_path)
-    stabilization_key('data', normalized_path)
-  end
-
-  def stabilization_key(*segments)
-    [@stabilization_root, *segments].join('/')
   end
 end
