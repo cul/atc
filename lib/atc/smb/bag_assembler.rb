@@ -2,6 +2,7 @@
 
 require 'digest'
 
+# Assembles the BagIt tag files
 class Atc::Smb::BagAssembler
   # Everything transferred by this process comes from the L Drive for now
   CONTENT_SOURCE_TYPE = 'L-Drive'
@@ -10,7 +11,8 @@ class Atc::Smb::BagAssembler
     source_dir:,
     payload_oxum:, manifest_file:, normalization_log_file:,
     virus_check_passed:, repository_name: 'TODO', collection_name: 'TODO',
-    stabilization_dir: SMB_CONFIG[:stabilization_dir]
+    stabilization_dir: SMB_CONFIG[:stabilization_dir],
+    ingest_bucket_path:
   )
     @source_dir = source_dir
     @payload_oxum = payload_oxum
@@ -20,6 +22,7 @@ class Atc::Smb::BagAssembler
     @collection_name = collection_name
     @stabilization_dir = stabilization_dir
     @virus_check_passed = virus_check_passed
+    @ingest_bucket_path = ingest_bucket_path
   end
 
   def write_tag_files
@@ -45,6 +48,7 @@ class Atc::Smb::BagAssembler
       'Payload-Oxum' => @payload_oxum,
       'Content-Source-Type' => CONTENT_SOURCE_TYPE,
       'Content-Source-Path' => @source_dir,
+      'Content-Ingest-Bucket-Path' => @ingest_bucket_path,
       'Repository-Name' => @repository_name,
       'Collection-Name' => @collection_name,
       'Virus-Check-Result' => virus_check_result

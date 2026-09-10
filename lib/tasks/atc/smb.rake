@@ -79,7 +79,11 @@ namespace :atc do
 
     desc 'Write the BagIt tag files and upload them to the top level of the bag'
     task assemble_files: :environment do
-      Atc::Smb::Processor.new(smb_args).assemble_final_files({})
+      Atc::Smb::Processor.new(smb_args).assemble_final_files(virus_check_passed: true)
+    end
+
+    task download_finalized_bag: :environment do
+      Atc::Smb::Processor.new(smb_args).download_and_validate_bag
     end
   end
 end

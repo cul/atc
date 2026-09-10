@@ -67,6 +67,8 @@ class Atc::Smb::Processor
     failures = scan_files_and_report_results
     # 5. Assemble tag files and finalize the BagIt package, regardless of virus scan results
     assemble_final_files(virus_check_passed: failures.empty?)
+    # 6. If everything was successful, download the finalized bag
+    # download_and_validate_bag
   end
 
   def check_if_directories_exist
@@ -149,15 +151,28 @@ class Atc::Smb::Processor
       manifest_file: @manifest_writer.manifest_file,
       normalization_log_file: @csv_writer.csv_file,
       stabilization_dir: @stabilization_dir,
-      virus_check_passed: virus_check_passed
+      virus_check_passed: virus_check_passed,
+      ingest_bucket_path: @ingest_root
     )
     assembler.write_tag_files
 
     assembler.tag_files.each do |file|
       object_key = stabilization_key(File.basename(file))
       puts "Sending #{file} to #{object_key}"
-      @uploader.upload_file(file, object_key)
+      # @uploader.upload_file(file, object_key)
     end
+  end
+
+  def download_and_validate_bag
+    # 1. Check if there is same-name directory at the target cul path, name it after stabilization root
+  
+    # 2. Download the finalized bag from the ingest bucket to the local stabilization directory
+    # s3_downloader = Atc::Aws::S3Downloader.new(
+    #   @ingest_bucket,
+    #   @stabilization_dir
+    # )
+    # s3_downloader.download_directory(stabilization_key)
+    # 3. Validate the bag (e.g., check for the presence of all expected files and tag files)
   end
 
   # Maps the object key of every uploaded file to its normalized path so we can record a scan

@@ -16,6 +16,7 @@ class Atc::Smb::TaskArgs
   #   bucket ("folder1-folder2")
   attr_reader :drive, :source_path, :ingest_path, :stabilization_path
 
+  # TODO: overwrite flag
   def self.from_env(env = ENV)
     Atc::Smb::TaskArgs.new(
       source: env['source'],
