@@ -159,20 +159,54 @@ class Atc::Smb::Processor
     assembler.tag_files.each do |file|
       object_key = stabilization_key(File.basename(file))
       puts "Sending #{file} to #{object_key}"
-      # @uploader.upload_file(file, object_key)
+      @uploader.upload_file(file, object_key)
     end
   end
 
+  # TODO: Move to a separate class and clean up
   def download_and_validate_bag
     # 1. Check if there is same-name directory at the target cul path, name it after stabilization root
-  
+
+    # download_dir = File.join(SMB_CONFIG[:cul_volume_download_dir], stabilization_key) # this will be used on the server
+    final_bag_path = File.join(SMB_CONFIG[:stabilization_dir], stabilization_key)
+    parent_path = SMB_CONFIG[:stabilization_dir]
+    puts "Downloading to #{parent_path}"
+
+    if Dir.exist?(final_bag_path)
+      StabilizationMailer.with(
+        to: SMB_CONFIG[:notification_email],
+        subject: "Couldn't download bag",
+        body_content: "The directory #{final_bag_path} already exists."
+      ).send_mail.deliver
+      throw "Target directory #{final_bag_path} already exists."
+    end
+
     # 2. Download the finalized bag from the ingest bucket to the local stabilization directory
-    # s3_downloader = Atc::Aws::S3Downloader.new(
-    #   @ingest_bucket,
-    #   @stabilization_dir
-    # )
-    # s3_downloader.download_directory(stabilization_key)
+    # The directory will be downloaded as its basename under the parent path
+    s3_downloader = Atc::Aws::S3Downloader.new(@stabilization_bucket, parent_path)
+    s3_downloader.download_directory(stabilization_key)
+
     # 3. Validate the bag (e.g., check for the presence of all expected files and tag files)
+    puts "Checking downloaded bag under #{final_bag_path}"
+    bag = BagIt::Bag.new(final_bag_path)
+    puts "Bag is #{bag}"
+
+    if bag.valid?
+      puts "#{final_bag_path} is valid"
+      StabilizationMailer.with(
+        to: SMB_CONFIG[:notification_email],
+        subject: "Successfully downloaded bag",
+        body_content: "The bag was successfully downloaded to #{final_bag_path}."
+      ).send_mail.deliver
+      # TODO: Delete the bag from AWS stabilization directory
+    else
+      puts "#{final_bag_path} is not valid"
+      StabilizationMailer.with(
+        to: SMB_CONFIG[:notification_email],
+        subject: "Failed to download bag",
+        body_content: "The bag downloaded to #{final_bag_path} is not valid."
+      ).send_mail.deliver
+    end
   end
 
   # Maps the object key of every uploaded file to its normalized path so we can record a scan
