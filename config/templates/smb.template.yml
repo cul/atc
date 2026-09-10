@@ -1,6 +1,8 @@
 development:
+  stabilization_dir: <%= Rails.root.join('tmp', 'stabilization') %>
   stabilization_bucket: stabilization-bucket
   ingest_bucket: ingest-bucket
+  cul_volume_download_dir: path-to-dir-on-cul
   notification_email: notification-email@email.com
   default_sender_email_address: defaultsender@email.com
   # Currently the stabilization script supports only one source
@@ -13,8 +15,10 @@ development:
       share: folder-to-access
 
 test:
+  stabilization_dir: <%= Rails.root.join('tmp', 'stabilization') %>
   stabilization_bucket: stabilization-bucket
   ingest_bucket: ingest-bucket
+  cul_volume_download_dir: path-to-dir-on-cul
   notification_email: notification-email@email.com
   default_sender_email_address: defaultsender@email.com
   # Currently the stabilization script supports only one source

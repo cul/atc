@@ -113,7 +113,9 @@ class Atc::Smb::Connector
     puts "Running: #{command.join(' ')}"
     stdout, stderr, status = Open3.capture3(*command)
 
-    raise "error while listing #{remote_dir}: #{stderr.strip}" unless status.success?
+    unless status.success?
+      raise "error while listing #{remote_dir}: #{stderr.strip}. Are you sure the directory exists?"
+    end
 
     stdout
   end
