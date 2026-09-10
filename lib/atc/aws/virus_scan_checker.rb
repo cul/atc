@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Atc::Smb::VirusScanChecker
+class Atc::Aws::VirusScanChecker
   POLL_INTERVAL = 10.seconds
   MAX_WAIT = 30.minutes # TBD
 

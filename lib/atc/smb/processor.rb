@@ -116,7 +116,7 @@ class Atc::Smb::Processor
 
   # Waits for GuardDuty to finish scanning every file uploaded and records the outcome in the CSV
   def scan_files_and_report_results
-    checker = Atc::Smb::VirusScanChecker.new(@stabilization_bucket)
+    checker = Atc::Aws::VirusScanChecker.new(@stabilization_bucket)
     puts "Waiting for virus scan results for #{normalized_paths_by_object_key.size} file(s)..."
     # Files that never got a result stay as 'NOT SCANNED' so can still be reported as failures
     results = normalized_paths_by_object_key.values.index_with('NOT SCANNED')
