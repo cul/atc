@@ -2,11 +2,12 @@
 
 # Collects file path + checksum pairs to write to manifest-sha256.txt as files are uploaded
 # The manifest is complete once all files have been uploaded to the cloud
-class Atc::Smb::ManifestWriter
+class Atc::Bag::PayloadManifest
   attr_reader :manifest_file, :file_count, :byte_count
 
-  def initialize(stabilization_dir: SMB_CONFIG[:stabilization_dir])
-    @manifest_file = File.join(stabilization_dir, 'manifest-sha256.txt')
+  # bag_dir is the local directory that the bag's tag files are written to
+  def initialize(bag_dir:)
+    @manifest_file = File.join(bag_dir, 'manifest-sha256.txt')
     @file_count = 0
     @byte_count = 0
   end

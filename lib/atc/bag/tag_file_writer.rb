@@ -3,16 +3,16 @@
 require 'digest'
 
 # Assembles the BagIt tag files
-class Atc::Smb::BagAssembler
+class Atc::Bag::TagFileWriter
   # Everything transferred by this process comes from the L Drive for now
   CONTENT_SOURCE_TYPE = 'L-Drive'
 
+  # bag_dir is the local directory that the bag's tag files are written to
   def initialize(
     source_dir:,
     payload_oxum:, manifest_file:, normalization_log_file:,
-    virus_check_passed:, repository_name: 'TODO', collection_name: 'TODO',
-    stabilization_dir: SMB_CONFIG[:stabilization_dir],
-    ingest_bucket_path:
+    virus_check_passed:, ingest_bucket_path:, bag_dir:,
+    repository_name: 'TODO', collection_name: 'TODO'
   )
     @source_dir = source_dir
     @payload_oxum = payload_oxum
@@ -20,7 +20,7 @@ class Atc::Smb::BagAssembler
     @normalization_log_file = normalization_log_file
     @repository_name = repository_name
     @collection_name = collection_name
-    @stabilization_dir = stabilization_dir
+    @bag_dir = bag_dir
     @virus_check_passed = virus_check_passed
     @ingest_bucket_path = ingest_bucket_path
   end
@@ -68,14 +68,14 @@ class Atc::Smb::BagAssembler
   end
 
   def bagit_file
-    File.join(@stabilization_dir, 'bagit.txt')
+    File.join(@bag_dir, 'bagit.txt')
   end
 
   def bag_info_file
-    File.join(@stabilization_dir, 'bag-info.txt')
+    File.join(@bag_dir, 'bag-info.txt')
   end
 
   def tag_manifest_file
-    File.join(@stabilization_dir, 'tagmanifest-sha256.txt')
+    File.join(@bag_dir, 'tagmanifest-sha256.txt')
   end
 end

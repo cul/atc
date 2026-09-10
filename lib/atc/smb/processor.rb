@@ -33,7 +33,7 @@ class Atc::Smb::Processor
 
     @connector = Atc::Smb::Connector.new(source_config: @source_config, stabilization_dir: @stabilization_dir)
     @csv_writer = Atc::Smb::CsvWriter.new(stabilization_dir: @stabilization_dir)
-    @manifest_writer = Atc::Smb::ManifestWriter.new(stabilization_dir: @stabilization_dir)
+    @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @stabilization_dir)
     @uploader = Atc::Smb::BagUploader.new(@stabilization_bucket)
     @ingest_uploader = Atc::Smb::BagUploader.new(@ingest_bucket)
   end
@@ -96,7 +96,7 @@ class Atc::Smb::Processor
   # Downloads each file that was not skipped, then generates checksum, uploads and records it
   # before moving on to the next one, so only one file is on local disk at a time
   def download_and_process_source_files
-    @manifest_writer.start
+    @payload_manifest.start
     files = @csv_writer.each_normalized_file
 
     @connector.each_downloaded_file(@source_dir, files) do |local_path, normalized_path, size|
@@ -105,12 +105,12 @@ class Atc::Smb::Processor
       puts "Checksum for #{normalized_path}: #{checksum}"
       @uploader.upload_file(local_path, object_key_for(normalized_path))
       puts "File #{normalized_path} uploaded successfully, checksum: #{checksum}, size: #{size}"
-      @manifest_writer.add_row(checksum, normalized_path, size)
+      @payload_manifest.add_row(checksum, normalized_path, size)
       
       # TODO: Delete the local file
     end
 
-    puts "Payload-Oxum for manifest: #{@manifest_writer.payload_oxum}"
+    puts "Payload-Oxum for manifest: #{@payload_manifest.payload_oxum}"
   end
 
   # Waits for GuardDuty to finish scanning every file uploaded and records the outcome in the CSV
@@ -145,18 +145,18 @@ class Atc::Smb::Processor
 
   # Writes the five BagIt tag files and uploads them to the top level of the bag
   def assemble_final_files(virus_check_passed:)
-    assembler = Atc::Smb::BagAssembler.new(
+    tag_file_writer = Atc::Bag::TagFileWriter.new(
       source_dir: @source_dir,
-      payload_oxum: @manifest_writer.payload_oxum,
-      manifest_file: @manifest_writer.manifest_file,
+      payload_oxum: @payload_manifest.payload_oxum,
+      manifest_file: @payload_manifest.manifest_file,
       normalization_log_file: @csv_writer.csv_file,
-      stabilization_dir: @stabilization_dir,
+      bag_dir: @stabilization_dir,
       virus_check_passed: virus_check_passed,
       ingest_bucket_path: @ingest_root
     )
-    assembler.write_tag_files
+    tag_file_writer.write_tag_files
 
-    assembler.tag_files.each do |file|
+    tag_file_writer.tag_files.each do |file|
       object_key = stabilization_key(File.basename(file))
       puts "Sending #{file} to #{object_key}"
       @uploader.upload_file(file, object_key)
@@ -178,7 +178,7 @@ class Atc::Smb::Processor
         subject: "Couldn't download bag",
         body_content: "The directory #{final_bag_path} already exists."
       ).send_mail.deliver
-      throw "Target directory #{final_bag_path} already exists."
+      raise "Target directory #{final_bag_path} already exists."
     end
 
     # 2. Download the finalized bag from the ingest bucket to the local stabilization directory
@@ -188,23 +188,23 @@ class Atc::Smb::Processor
 
     # 3. Validate the bag (e.g., check for the presence of all expected files and tag files)
     puts "Checking downloaded bag under #{final_bag_path}"
-    bag = BagIt::Bag.new(final_bag_path)
-    puts "Bag is #{bag}"
+    validator = Atc::Bag::Validator.new(final_bag_path)
 
-    if bag.valid?
+    if validator.valid?
       puts "#{final_bag_path} is valid"
       StabilizationMailer.with(
         to: SMB_CONFIG[:notification_email],
-        subject: "Successfully downloaded bag",
+        subject: 'Successfully downloaded bag',
         body_content: "The bag was successfully downloaded to #{final_bag_path}."
       ).send_mail.deliver
       # TODO: Delete the bag from AWS stabilization directory
     else
-      puts "#{final_bag_path} is not valid"
+      puts "#{final_bag_path} is not valid:"
+      validator.errors.each { |error| puts error }
       StabilizationMailer.with(
         to: SMB_CONFIG[:notification_email],
         subject: "Failed to download bag",
-        body_content: "The bag downloaded to #{final_bag_path} is not valid."
+        body_content: "The bag downloaded to #{final_bag_path} is not valid:\n#{validator.errors.join("\n")}"
       ).send_mail.deliver
     end
   end
