@@ -3,7 +3,7 @@
 require 'open3'
 require 'tempfile'
 
-class Atc::Stabilization::Connector
+class Atc::Smb::Connector
   # Matches a single entry in the output of smbclient's `ls` command
   LS_ENTRY_REGEX = /\A {2}(?<name>.+?) +(?<attributes>[A-Z]+) +(?<size>\d+) +(?<modified_at>\w{3} \w{3} +\d{1,2} \d{2}:\d{2}:\d{2} \d{4})\s*\z/ # rubocop:disable Layout/LineLength
 

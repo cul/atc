@@ -32,7 +32,7 @@ class Atc::Stabilization::Processor
     puts "Later sending to s3://#{@ingest_bucket}/#{@ingest_root}"
     puts "Files will be stored in the local stabilization directory: #{@stabilization_dir}"
 
-    @connector = Atc::Stabilization::Connector.new(source_config: @source_config, stabilization_dir: @stabilization_dir)
+    @connector = Atc::Smb::Connector.new(source_config: @source_config, stabilization_dir: @stabilization_dir)
     @csv_writer = Atc::Stabilization::CsvWriter.new(stabilization_dir: @stabilization_dir)
     @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @stabilization_dir, layout: @layout)
     @uploader = Atc::Stabilization::BagUploader.new(@stabilization_bucket)
