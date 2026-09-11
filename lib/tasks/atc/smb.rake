@@ -40,8 +40,7 @@ namespace :atc do
 
     desc 'Normalizes the paths in the CSV file'
     task normalize_paths: :environment do
-      csv_writer = Atc::Stabilization::CsvWriter.new
-      csv_writer.normalize_paths
+      Atc::Stabilization::Processor.new(smb_args).normalize_source_paths
     end
 
     desc 'Download each source file and upload it to the ingest bucket'

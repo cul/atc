@@ -26,7 +26,7 @@ class Atc::Stabilization::Processor
     FileUtils.mkdir_p(@stabilization_dir)
 
     @connector = Atc::Smb::Connector.new
-    @csv_writer = Atc::Stabilization::CsvWriter.new(stabilization_dir: @stabilization_dir)
+    @inventory = Atc::Stabilization::Inventory.new(stabilization_dir: @stabilization_dir)
     @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @stabilization_dir, layout: @layout)
     @uploader = Atc::Stabilization::BagUploader.new(@stabilization_bucket)
     @ingest_uploader = Atc::Stabilization::BagUploader.new(@ingest_bucket)
@@ -47,13 +47,12 @@ class Atc::Stabilization::Processor
     # 1. Read from the source directory and log every file into a CSV
     add_source_files_to_csv
     # 1a. Check if any of the added files is above 100GB
-    if check_large_files.any?
-      body_content = check_large_files.join(', ')
-
+    large_files = check_large_files
+    if large_files.any?
       StabilizationMailer.with(
         to: SMB_CONFIG[:notification_email],
         subject: 'Large files detected',
-        body_content: body_content
+        body_content: large_files.join(', ')
       ).send_mail.deliver
       return
     end
@@ -67,7 +66,7 @@ class Atc::Stabilization::Processor
     # 5. Assemble tag files and finalize the BagIt package, regardless of virus scan results
     assemble_final_files(virus_check_passed: failures.empty?)
     # 6. If everything was successful, download the finalized bag
-    # download_and_validate_bag
+    download_and_validate_bag
   end
 
   def check_if_directories_exist
@@ -85,11 +84,11 @@ class Atc::Stabilization::Processor
   end
 
   def add_source_files_to_csv
-    @csv_writer.write_files(@connector.list_files(@source_dir))
+    @inventory.write_files(@connector.list_files(@source_dir))
   end
 
   def normalize_source_paths
-    @csv_writer.normalize_paths
+    @inventory.normalize_paths
   end
 
   # Downloads each file that was not skipped, then generates checksum, uploads and records it
@@ -97,16 +96,17 @@ class Atc::Stabilization::Processor
   def download_and_process_source_files
     @payload_manifest.start
 
-    @csv_writer.each_normalized_file.with_index do |(file_path, normalized_path, size), index|
+    @inventory.each_transferable.with_index do |entry, index|
+      normalized_path = entry.normalized_path
       local_path = @connector.download_file(
-        @source_dir, file_path, staging_path(index, normalized_path), expected_size: size
+        @source_dir, entry.file_path, staging_path(index, normalized_path), expected_size: entry.size
       )
       # Generated from the downloaded file, in the same form the BagIt manifest needs
       checksum = Digest::SHA256.file(local_path).hexdigest
       puts "Checksum for #{normalized_path}: #{checksum}"
       @uploader.upload_file(local_path, @layout.payload_object_key(normalized_path))
-      puts "File #{normalized_path} uploaded successfully, checksum: #{checksum}, size: #{size}"
-      @payload_manifest.add_row(checksum, normalized_path, size)
+      puts "File #{normalized_path} uploaded successfully, checksum: #{checksum}, size: #{entry.size}"
+      @payload_manifest.add_row(checksum, normalized_path, entry.size)
 
       # TODO: Delete the local file
     end
@@ -133,7 +133,7 @@ class Atc::Stabilization::Processor
       results[normalized_paths_by_object_key[object_key]] = status
     end
 
-    @csv_writer.write_scan_results(results)
+    @inventory.record_scan_results(results)
 
     failures = results.reject { |_normalized_path, status| status == 'NO_THREATS_FOUND' }
     report_scan_outcome(failures)
@@ -157,7 +157,7 @@ class Atc::Stabilization::Processor
       source_dir: @source_dir,
       payload_oxum: @payload_manifest.payload_oxum,
       manifest_file: @payload_manifest.manifest_file,
-      normalization_log_file: @csv_writer.csv_file,
+      normalization_log_file: @inventory.csv_file,
       bag_dir: @stabilization_dir,
       virus_check_passed: virus_check_passed,
       ingest_bucket_path: @ingest_root
@@ -220,27 +220,17 @@ class Atc::Stabilization::Processor
   # Maps the object key of every uploaded file to its normalized path so we can record a scan
   # result in a CSV file
   def normalized_paths_by_object_key
-    @normalized_paths_by_object_key ||= @csv_writer.each_normalized_file.to_h do |_path, normalized_path, _size|
-      object_key = @layout.payload_object_key(normalized_path)
-      puts "Object key for #{normalized_path} is #{object_key}"
-      [object_key, normalized_path]
+    @normalized_paths_by_object_key ||= @inventory.each_transferable.to_h do |entry|
+      object_key = @layout.payload_object_key(entry.normalized_path)
+      puts "Object key for #{entry.normalized_path} is #{object_key}"
+      [object_key, entry.normalized_path]
     end
   end
 
   def check_large_files
-    large_files = []
-
-    CSV.foreach(@csv_writer.csv_file, headers: true) do |row|
-      skipped = row['skipped']
-      size = row['size'].to_i
-      next if skipped == 'SKIPPED'
-
-      if size > 100.gigabytes
-        puts "Warning: File #{row['file_path']} is larger than 100GB (#{size} bytes)"
-        large_files << row['file_path']
-      end
+    @inventory.oversized.map do |entry|
+      puts "Warning: File #{entry.file_path} is larger than 100GB (#{entry.size} bytes)"
+      entry.file_path
     end
-
-    large_files
   end
 end
