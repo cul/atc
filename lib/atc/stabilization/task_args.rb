@@ -9,7 +9,7 @@ class Atc::Stabilization::TaskArgs
   SOURCE_EXAMPLE = 'source=L:/existing-dir/subdir'
   INGEST_BUCKET_TARGET_EXAMPLE = 'ingest_bucket_target=folder1/folder2'
 
-  # - drive is a key in the sources section of smb.yml (eg. 'L')
+  # - drive is the drive configured as the source in smb.yml (eg. 'L')
   # - source_path is the path on that drive in "/existing-dir/subdir" format
   # - ingest_path is the ingest bucket target path ("folder1/folder2")
   # - stabilization_path is the hyphenated form of that target, used at the root of the stabilization
@@ -31,11 +31,6 @@ class Atc::Stabilization::TaskArgs
     @stabilization_path = segments.join('-')
   end
 
-  # The host, share and credentials configured for this source's drive
-  def source_config
-    configured_sources[@drive]
-  end
-
   private
 
   # Splits "L:/dir/subdir" into its two components: the source drive and a "/dir/subdir" path
@@ -50,7 +45,7 @@ class Atc::Stabilization::TaskArgs
 
   def parse_drive(drive)
     normalized_drive = normalize_drive(drive)
-    return normalized_drive if configured_sources.key?(normalized_drive)
+    return normalized_drive if normalized_drive == normalize_drive(Atc::Smb::Connector.drive)
 
     raise ArgumentError, "Unknown source: #{drive.upcase}"
   end
@@ -84,11 +79,6 @@ class Atc::Stabilization::TaskArgs
     raise ArgumentError, "Invalid path: #{path.inspect}. It cannot contain '..' segments" if segments.include?('..')
 
     segments
-  end
-
-  # The sources section of smb.yml, keyed by source
-  def configured_sources
-    @configured_sources ||= (SMB_CONFIG[:sources] || {}).transform_keys { |drive| normalize_drive(drive) }
   end
 
   def normalize_drive(drive)

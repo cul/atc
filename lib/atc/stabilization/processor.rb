@@ -9,8 +9,6 @@ class Atc::Stabilization::Processor
 
   # Takes an Atc::Stabilization::TaskArgs which holds the validated source directory and ingest bucket target
   def initialize(task_args)
-    @source_config = task_args.source_config
-
     # Path to the source directory we're syncing from
     @source_dir = task_args.source_path
 
@@ -27,16 +25,16 @@ class Atc::Stabilization::Processor
     @stabilization_dir = File.join(SMB_CONFIG[:stabilization_dir], @run_id) # Needs a better name
     FileUtils.mkdir_p(@stabilization_dir)
 
-    puts "Reading from //#{@source_config[:host]}/#{@source_config[:share]}#{@source_dir}"
-    puts "Writing to s3://#{@stabilization_bucket}/#{@layout.bag_root_prefix}"
-    puts "Later sending to s3://#{@ingest_bucket}/#{@ingest_root}"
-    puts "Files will be stored in the local stabilization directory: #{@stabilization_dir}"
-
-    @connector = Atc::Smb::Connector.new(source_config: @source_config, stabilization_dir: @stabilization_dir)
+    @connector = Atc::Smb::Connector.new(stabilization_dir: @stabilization_dir)
     @csv_writer = Atc::Stabilization::CsvWriter.new(stabilization_dir: @stabilization_dir)
     @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @stabilization_dir, layout: @layout)
     @uploader = Atc::Stabilization::BagUploader.new(@stabilization_bucket)
     @ingest_uploader = Atc::Stabilization::BagUploader.new(@ingest_bucket)
+
+    puts "Reading from #{@connector.smb_address}#{@source_dir}"
+    puts "Writing to s3://#{@stabilization_bucket}/#{@layout.bag_root_prefix}"
+    puts "Later sending to s3://#{@ingest_bucket}/#{@ingest_root}"
+    puts "Files will be stored in the local stabilization directory: #{@stabilization_dir}"
   end
 
   def run

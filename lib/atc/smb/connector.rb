@@ -10,13 +10,22 @@ class Atc::Smb::Connector
   # Matches the header line that smbclient prints before going intothe contents of each subdirectory
   DIR_HEADER_REGEX = /\A\\(?<path>.*\S)\s*\z/
 
-  def initialize(source_config:, stabilization_dir: SMB_CONFIG[:stabilization_dir])
+  # The drive letter (eg. 'L')
+  def self.drive
+    SMB_CONFIG[:source][:drive]
+  end
+
+  def initialize(stabilization_dir: SMB_CONFIG[:stabilization_dir], source_config: SMB_CONFIG[:source])
     @host = source_config[:host]
     @share = source_config[:share]
     @username = source_config[:username]
     @password = source_config[:password]
     @domain = source_config[:domain]
     @stabilization_dir = stabilization_dir
+  end
+
+  def smb_address
+    "//#{@host}/#{@share}"
   end
 
   # Recursively lists every file under remote_dir (a directory on the share).
