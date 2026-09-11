@@ -15,13 +15,12 @@ class Atc::Smb::Connector
     SMB_CONFIG[:source][:drive]
   end
 
-  def initialize(stabilization_dir: SMB_CONFIG[:stabilization_dir], source_config: SMB_CONFIG[:source])
+  def initialize(source_config: SMB_CONFIG[:source])
     @host = source_config[:host]
     @share = source_config[:share]
     @username = source_config[:username]
     @password = source_config[:password]
     @domain = source_config[:domain]
-    @stabilization_dir = stabilization_dir
   end
 
   def smb_address
@@ -37,25 +36,17 @@ class Atc::Smb::Connector
     end
   end
 
-  # Downloads files from remote_dir (a directory on the share) one at a time
-  def each_downloaded_file(remote_dir, files)
+  # Downloads a single file from remote_dir (a directory on the share) to local_path,
+  # verifies that the whole file arrived and returns local_path
+  def download_file(remote_dir, file_path, local_path, expected_size:)
     with_auth_file do |auth_file_path|
-      files.each_with_index do |(file_path, normalized_path, size), index|
-        local_path = download_file(remote_dir, file_path, staging_path(index, normalized_path), auth_file_path)
-        verify_download_size(file_path, local_path, size)
-        yield local_path, normalized_path, size
-      end
+      smbclient_get(remote_dir, file_path, local_path, auth_file_path)
     end
+    verify_download_size(file_path, local_path, expected_size)
+    local_path
   end
 
   private
-
-  # Files are written to the root of the stabilization directory for easier cleanup (no empty directories)
-  # and to avoid running past filesystem's length limit.
-  def staging_path(index, normalized_path)
-    file_number = (index + 1).to_s.rjust(6, '0')
-    File.join(@stabilization_dir, "#{file_number}#{File.extname(normalized_path)}")
-  end
 
   # Verify size since smbclient can exit successfully even if the file is incomplete
   def verify_download_size(file_path, local_path, expected_size)
@@ -65,8 +56,8 @@ class Atc::Smb::Connector
     raise "size mismatch for #{file_path}: expected #{expected_size} bytes, downloaded #{actual_size}"
   end
 
-  # Downloads a file to the given local_path
-  def download_file(remote_dir, file_path, local_path, auth_file_path)
+  # Runs smbclient's `get` command to copy a single file to the given local_path
+  def smbclient_get(remote_dir, file_path, local_path, auth_file_path)
     path_with_share = "#{remote_dir}#{File.dirname(file_path)}"
     source_filename = File.basename(file_path)
 

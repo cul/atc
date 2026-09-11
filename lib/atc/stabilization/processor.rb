@@ -25,7 +25,7 @@ class Atc::Stabilization::Processor
     @stabilization_dir = File.join(SMB_CONFIG[:stabilization_dir], @run_id) # Needs a better name
     FileUtils.mkdir_p(@stabilization_dir)
 
-    @connector = Atc::Smb::Connector.new(stabilization_dir: @stabilization_dir)
+    @connector = Atc::Smb::Connector.new
     @csv_writer = Atc::Stabilization::CsvWriter.new(stabilization_dir: @stabilization_dir)
     @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @stabilization_dir, layout: @layout)
     @uploader = Atc::Stabilization::BagUploader.new(@stabilization_bucket)
@@ -96,9 +96,11 @@ class Atc::Stabilization::Processor
   # before moving on to the next one, so only one file is on local disk at a time
   def download_and_process_source_files
     @payload_manifest.start
-    files = @csv_writer.each_normalized_file
 
-    @connector.each_downloaded_file(@source_dir, files) do |local_path, normalized_path, size|
+    @csv_writer.each_normalized_file.with_index do |(file_path, normalized_path, size), index|
+      local_path = @connector.download_file(
+        @source_dir, file_path, staging_path(index, normalized_path), expected_size: size
+      )
       # Generated from the downloaded file, in the same form the BagIt manifest needs
       checksum = Digest::SHA256.file(local_path).hexdigest
       puts "Checksum for #{normalized_path}: #{checksum}"
@@ -110,6 +112,13 @@ class Atc::Stabilization::Processor
     end
 
     puts "Payload-Oxum for manifest: #{@payload_manifest.payload_oxum}"
+  end
+
+  # Files are written to the root of the stabilization directory for easier cleanup (no empty directories)
+  # and to avoid running past filesystem's length limit.
+  def staging_path(index, normalized_path)
+    file_number = (index + 1).to_s.rjust(6, '0')
+    File.join(@stabilization_dir, "#{file_number}#{File.extname(normalized_path)}")
   end
 
   # Waits for GuardDuty to finish scanning every file uploaded and records the outcome in the CSV
