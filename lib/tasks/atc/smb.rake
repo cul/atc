@@ -14,8 +14,8 @@ namespace :atc do
 
     desc 'Run the full stabilization process'
     task run: :environment do
-      destination = "the ingest bucket path '#{Rainbow(smb_args.ingest_path).yellow.bold}'"
-      puts Rainbow("This process will copy files from #{Rainbow(smb_args.source_path).yellow.bold} on the #{Rainbow(smb_args.drive).yellow.bold} drive to #{destination}")
+      puts Rainbow("This process will copy files from #{Rainbow(smb_args.source_path).yellow.bold} on the #{Rainbow(smb_args.drive).yellow.bold} drive \
+      to a newly created #{Rainbow(smb_args.bag_name).yellow.bold} directory in the stabilization bucket.")
       Atc::Stabilization::Processor.new(smb_args).run
     end
 

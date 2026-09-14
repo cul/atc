@@ -11,8 +11,8 @@ class Atc::Bag::TagFileWriter
   def initialize(
     source_dir:,
     payload_oxum:, manifest_file:, normalization_log_file:,
-    virus_check_passed:, ingest_bucket_path:, bag_dir:,
-    repository_name: 'TODO', collection_name: 'TODO'
+    virus_check_passed:, bag_dir:,
+    repository_name:, collection_name:
   )
     @source_dir = source_dir
     @payload_oxum = payload_oxum
@@ -22,7 +22,6 @@ class Atc::Bag::TagFileWriter
     @collection_name = collection_name
     @bag_dir = bag_dir
     @virus_check_passed = virus_check_passed
-    @ingest_bucket_path = ingest_bucket_path
   end
 
   def write_tag_files
@@ -48,7 +47,6 @@ class Atc::Bag::TagFileWriter
       'Payload-Oxum' => @payload_oxum,
       'Content-Source-Type' => CONTENT_SOURCE_TYPE,
       'Content-Source-Path' => @source_dir,
-      'Content-Ingest-Bucket-Path' => @ingest_bucket_path,
       'Repository-Name' => @repository_name,
       'Collection-Name' => @collection_name,
       'Virus-Check-Result' => virus_check_result

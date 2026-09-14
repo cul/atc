@@ -23,8 +23,8 @@ class Atc::Stabilization::Inventory
 
   attr_reader :csv_file
 
-  def initialize(stabilization_dir:)
-    @csv_file = File.join(stabilization_dir, 'normalization-log.csv')
+  def initialize(run_dir:)
+    @csv_file = File.join(run_dir, 'normalization-log.csv')
   end
 
   # files is an array of [file_path, size] pairs returned by the source connector (what we get from Smb::Connector)

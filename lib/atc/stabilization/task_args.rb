@@ -1,37 +1,52 @@
 # frozen_string_literal: true
 
 # Parses and validates the environment variables passed to the atc:smb rake tasks:
-# bundle exec rake atc:smb:run source=L:/existing-dir/subdir ingest_bucket_target=path/within/bucket
-# TODO: Add "overwrite" arg
+# bundle exec rake atc:smb:run source=L:/existing-dir/subdir repository_name="RBML" collection_name="David Byrne Papers"
 class Atc::Stabilization::TaskArgs
   SOURCE_REGEX = %r{\A(?<drive>[A-Za-z]:)[\\/](?<path>.+)\z}
 
   SOURCE_EXAMPLE = 'source=L:/existing-dir/subdir'
-  INGEST_BUCKET_TARGET_EXAMPLE = 'ingest_bucket_target=folder1/folder2'
+  REPOSITORY_NAME_EXAMPLE = 'repository_name="RBML"'
+  COLLECTION_NAME_EXAMPLE = 'collection_name="David Byrne Papers"'
 
   # - drive is the drive configured as the source in smb.yml (eg. 'L')
   # - source_path is the path on that drive in "/existing-dir/subdir" format
-  # - ingest_path is the ingest bucket target path ("folder1/folder2")
-  # - stabilization_path is the hyphenated form of that target, used at the root of the stabilization
-  #   bucket ("folder1-folder2")
-  attr_reader :drive, :source_path, :ingest_path, :stabilization_path
+  # - repository_name is the name of the repository (eg. "RBML")
+  # - collection_name is the name of the collection within the repository (eg. "David Byrne Papers")
+  # - bag_name is the name of the bag assembled from the repository name, collection name and current date located
+  #   at the root of the stabilization bucket
+  attr_reader :drive, :source_path, :repository_name, :collection_name, :bag_name
 
-  # TODO: overwrite flag
   def self.from_env(env = ENV)
     Atc::Stabilization::TaskArgs.new(
       source: env['source'],
-      ingest_bucket_target: env['ingest_bucket_target']
+      repository_name: env['repository_name'],
+      collection_name: env['collection_name']
     )
   end
 
-  def initialize(source:, ingest_bucket_target:)
+  def initialize(source:, repository_name:, collection_name:)
     @drive, @source_path = parse_source(source)
-    segments = parse_ingest_bucket_target(ingest_bucket_target)
-    @ingest_path = segments.join('/')
-    @stabilization_path = segments.join('-')
+    @repository_name = parse_name(repository_name)
+    @collection_name = parse_name(collection_name)
+    @bag_name = assemble_bag_name
   end
 
   private
+
+  def assemble_bag_name
+    normalized_repository_name = Atc::Utils::ObjectKeyNameUtils.remediate_key_name(@repository_name)
+    normalized_collection_name = Atc::Utils::ObjectKeyNameUtils.remediate_key_name(@collection_name)
+    current_date = Time.current.strftime('%Y%m%d_%H%M%S')
+
+    "#{normalized_repository_name}_#{normalized_collection_name}_#{current_date}"
+  end
+
+  # TODO: Fix validation for repository_name and collection_name
+  def parse_name(name)
+    raise ArgumentError, "Missing required argument: #{name}" if name.blank?
+    name
+  end
 
   # Splits "L:/dir/subdir" into its two components: the source drive and a "/dir/subdir" path
   def parse_source(source)
@@ -58,21 +73,6 @@ class Atc::Stabilization::TaskArgs
     "/#{segments.join('/')}"
   end
 
-  # Splits a path relative to the ingest bucket into the segments that both destination paths are built from
-  def parse_ingest_bucket_target(target)
-    raise ArgumentError, "Missing required argument: #{INGEST_BUCKET_TARGET_EXAMPLE}" if target.blank?
-
-    segments = path_segments(target)
-    raise ArgumentError, invalid_target_message(target) unless valid_target?(segments)
-
-    segments
-  end
-
-  # Every segment has to be usable as part of an object key
-  def valid_target?(segments)
-    segments.any? && Atc::Utils::ObjectKeyNameUtils.valid_key_name?(segments.join('/'))
-  end
-
   # Splits on slashes, dropping empty segments and rejecting anything that could escape the given path
   def path_segments(path)
     segments = path.split('/').reject(&:blank?)
@@ -87,10 +87,5 @@ class Atc::Stabilization::TaskArgs
 
   def invalid_source_message(source)
     "Invalid source: #{source.inspect}. Expected a drive letter followed by a path, e.g. #{SOURCE_EXAMPLE}"
-  end
-
-  def invalid_target_message(target)
-    "Invalid ingest_bucket_target: #{target.inspect}. Expected a path within the ingest bucket containing only " \
-      "letters, numbers and the characters - _ . ( ), e.g. #{INGEST_BUCKET_TARGET_EXAMPLE}"
   end
 end

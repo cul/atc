@@ -5,7 +5,7 @@ require 'fileutils'
 require 'securerandom'
 
 class Atc::Stabilization::Processor
-  attr_reader :run_id, :stabilization_dir
+  attr_reader :run_id, :run_dir
 
   # Takes an Atc::Stabilization::TaskArgs which holds the validated source directory and ingest bucket target
   def initialize(task_args)
@@ -14,35 +14,31 @@ class Atc::Stabilization::Processor
 
     # The bag will be uploaded to the root of the stabilization bucket
     @stabilization_bucket = SMB_CONFIG[:stabilization_bucket]
+    @repository_name = task_args.repository_name
+    @collection_name = task_args.collection_name
     # The layout object helps determine the structure of the bag within the stabilization bucket
-    @layout = Atc::Bag::Layout.new(task_args.stabilization_path)
-
-    # Where the bag will eventually go in the ingest bucket (not yet implemented)
-    @ingest_bucket = SMB_CONFIG[:ingest_bucket]
-    @ingest_root = task_args.ingest_path
+    puts "Passing bag name to layout: #{task_args.bag_name}"
+    @layout = Atc::Bag::Layout.new(task_args.bag_name)
 
     @run_id = SecureRandom.uuid
-    @stabilization_dir = File.join(SMB_CONFIG[:stabilization_dir], @run_id) # Needs a better name
-    FileUtils.mkdir_p(@stabilization_dir)
+    @work_dir = SMB_CONFIG[:work_dir]
+    @run_dir = File.join(@work_dir, @run_id)
+    FileUtils.mkdir_p(@run_dir)
 
     @connector = Atc::Smb::Connector.new
-    @inventory = Atc::Stabilization::Inventory.new(stabilization_dir: @stabilization_dir)
-    @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @stabilization_dir, layout: @layout)
+    @inventory = Atc::Stabilization::Inventory.new(run_dir: @run_dir)
+    @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @run_dir, layout: @layout)
     @uploader = Atc::Stabilization::BagUploader.new(@stabilization_bucket)
-    @ingest_uploader = Atc::Stabilization::BagUploader.new(@ingest_bucket)
 
     puts "Reading from #{@connector.smb_address}#{@source_dir}"
     puts "Writing to s3://#{@stabilization_bucket}/#{@layout.bag_root_prefix}"
-    puts "Later sending to s3://#{@ingest_bucket}/#{@ingest_root}"
-    puts "Files will be stored in the local stabilization directory: #{@stabilization_dir}"
+    puts "Files will be stored in the local stabilization directory: #{@run_dir}"
   end
 
   def run
-    # TODO: If directories exist, present 2 options:
-    # 1. Rename the target path
-    # 2. Accept an overwrite flag
-    existing_path = check_if_directories_exist
-    abort "Path already exists: #{existing_path}" if existing_path
+    # Safeguard against overwriting an existing stabilization directory. With the current implementation,
+    # this should never happen because each stabilization directory contains a YYYYMMDD_HHMMSS timestamp.
+    abort "Path already exists: #{@layout.bag_root_prefix}" if stabilization_directory_exists?
 
     # 1. Read from the source directory and log every file into a CSV
     add_source_files_to_csv
@@ -69,18 +65,8 @@ class Atc::Stabilization::Processor
     download_and_validate_bag
   end
 
-  def check_if_directories_exist
-    destinations = [
-      [@layout.bag_root_prefix, @uploader],
-      [@ingest_root, @ingest_uploader]
-    ]
-
-    destinations.each do |dir, uploader|
-      puts "Checking if directory exists: #{dir}"
-      return "s3://#{uploader.bucket_name}/#{dir}" if uploader.directory_exists(dir)
-    end
-
-    nil
+  def stabilization_directory_exists?
+    @uploader.directory_exists(@layout.bag_root_prefix)
   end
 
   def add_source_files_to_csv
@@ -114,11 +100,11 @@ class Atc::Stabilization::Processor
     puts "Payload-Oxum for manifest: #{@payload_manifest.payload_oxum}"
   end
 
-  # Files are written to the root of the stabilization directory for easier cleanup (no empty directories)
+  # Files are written to the root of the run directory for easier cleanup (no empty directories)
   # and to avoid running past filesystem's length limit.
   def staging_path(index, normalized_path)
     file_number = (index + 1).to_s.rjust(6, '0')
-    File.join(@stabilization_dir, "#{file_number}#{File.extname(normalized_path)}")
+    File.join(@run_dir, "#{file_number}#{File.extname(normalized_path)}")
   end
 
   # Waits for GuardDuty to finish scanning every file uploaded and records the outcome in the CSV
@@ -158,9 +144,10 @@ class Atc::Stabilization::Processor
       payload_oxum: @payload_manifest.payload_oxum,
       manifest_file: @payload_manifest.manifest_file,
       normalization_log_file: @inventory.csv_file,
-      bag_dir: @stabilization_dir,
+      bag_dir: @run_dir,
       virus_check_passed: virus_check_passed,
-      ingest_bucket_path: @ingest_root
+      repository_name: @repository_name,
+      collection_name: @collection_name
     )
     tag_file_writer.write_tag_files
 
@@ -176,8 +163,8 @@ class Atc::Stabilization::Processor
     # 1. Check if there is same-name directory at the target cul path, name it after stabilization root
 
     # download_dir = File.join(SMB_CONFIG[:cul_volume_download_dir], @layout.bag_root_prefix) # this will be used on the server
-    final_bag_path = File.join(SMB_CONFIG[:stabilization_dir], @layout.bag_root_prefix)
-    parent_path = SMB_CONFIG[:stabilization_dir]
+    final_bag_path = File.join(SMB_CONFIG[:work_dir], @layout.bag_root_prefix)
+    parent_path = SMB_CONFIG[:work_dir]
     puts "Downloading to #{parent_path}"
 
     if Dir.exist?(final_bag_path)
@@ -189,7 +176,7 @@ class Atc::Stabilization::Processor
       raise "Target directory #{final_bag_path} already exists."
     end
 
-    # 2. Download the finalized bag from the ingest bucket to the local stabilization directory
+    # 2. Download the finalized bag from the stabilization bucket to the local work directory
     # The directory will be downloaded as its basename under the parent path
     s3_downloader = Atc::Aws::S3Downloader.new(@stabilization_bucket, parent_path)
     s3_downloader.download_directory(@layout.bag_root_prefix)

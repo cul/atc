@@ -1,5 +1,5 @@
 development:
-  stabilization_dir: <%= Rails.root.join('tmp', 'stabilization') %>
+  work_dir: <%= Rails.root.join('tmp', 'stabilization') %>
   stabilization_bucket: stabilization-bucket
   ingest_bucket: ingest-bucket
   cul_volume_download_dir: path-to-dir-on-cul
@@ -15,7 +15,7 @@ development:
     share: folder-to-access
 
 test:
-  stabilization_dir: <%= Rails.root.join('tmp', 'stabilization') %>
+  work_dir: <%= Rails.root.join('tmp', 'stabilization') %>
   stabilization_bucket: stabilization-bucket
   ingest_bucket: ingest-bucket
   cul_volume_download_dir: path-to-dir-on-cul
