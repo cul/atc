@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'open3'
-require 'tempfile'
 
 class Atc::Smb::Connector
   # Matches a single entry in the output of smbclient's `ls` command
@@ -18,9 +17,6 @@ class Atc::Smb::Connector
   def initialize(source_config: SMB_CONFIG[:source])
     @host = source_config[:host]
     @share = source_config[:share]
-    @username = source_config[:username]
-    @password = source_config[:password]
-    @domain = source_config[:domain]
   end
 
   def smb_address
@@ -31,19 +27,19 @@ class Atc::Smb::Connector
   # Returns an Array of [file_path, size] pairs where file_path is relative to remote_dir.
   def list_files(remote_dir)
     base_dir = normalize_path(remote_dir)
-    with_auth_file do |auth_file_path|
-      parse_ls_output(base_dir, ls_output(base_dir, auth_file_path))
-    end
+    parse_ls_output(base_dir, ls_output(base_dir))
   end
 
   # Downloads a single file from remote_dir (a directory on the share) to local_path,
   # verifies that the whole file arrived and returns local_path
   def download_file(remote_dir, file_path, local_path, expected_size:)
-    with_auth_file do |auth_file_path|
-      smbclient_get(remote_dir, file_path, local_path, auth_file_path)
-    end
+    smbclient_get(remote_dir, file_path, local_path)
     verify_download_size(file_path, local_path, expected_size)
     local_path
+  end
+
+  def self.auth_file_path
+    Rails.root.join('config/l-drive-auth')
   end
 
   private
@@ -57,7 +53,7 @@ class Atc::Smb::Connector
   end
 
   # Runs smbclient's `get` command to copy a single file to the given local_path
-  def smbclient_get(remote_dir, file_path, local_path, auth_file_path)
+  def smbclient_get(remote_dir, file_path, local_path)
     path_with_share = "#{remote_dir}#{File.dirname(file_path)}"
     source_filename = File.basename(file_path)
 
@@ -65,7 +61,7 @@ class Atc::Smb::Connector
     puts "Source filename: #{source_filename}"
     puts "Local path: #{local_path}"
 
-    command = smbclient_command(path_with_share, auth_file_path, "get \"#{source_filename}\" \"#{local_path}\"")
+    command = smbclient_command(path_with_share, "get \"#{source_filename}\" \"#{local_path}\"")
     puts "Running: #{command.join(' ')}"
     _stdout, stderr, status = Open3.capture3(*command)
     puts "Finished running command for #{file_path}, success=#{status.success?}"
@@ -73,17 +69,6 @@ class Atc::Smb::Connector
     raise "error retrieving #{file_path}: #{stderr.strip}" unless status.success?
 
     local_path
-  end
-
-  # Generate a temporary authentication file so that the password is not exposed
-  # on the command line
-  def with_auth_file
-    file = Tempfile.new('smb-auth')
-    file.write("username=#{@username}\npassword=#{@password}\ndomain=#{@domain}\n")
-    file.close
-    yield file.path
-  ensure
-    file&.unlink
   end
 
   # Returns an Array of [file_path, size] pairs for every file in a recursive listing,
@@ -107,9 +92,9 @@ class Atc::Smb::Connector
     segments.empty? ? '' : "/#{segments.join('/')}"
   end
 
-  def ls_output(remote_dir, auth_file_path)
+  def ls_output(remote_dir)
     # TODO: Validate that the output matches the format we expect so the regex doesn't break
-    command = smbclient_command(remote_dir, auth_file_path, 'recurse ON; ls')
+    command = smbclient_command(remote_dir, 'recurse ON; ls')
     puts "Running: #{command.join(' ')}"
     stdout, stderr, status = Open3.capture3(*command)
 
@@ -120,9 +105,9 @@ class Atc::Smb::Connector
     stdout
   end
 
-  def smbclient_command(remote_dir, auth_file_path, smb_command)
+  def smbclient_command(remote_dir, smb_command)
     # Kerberos is not required but no other authentication method is allowed for this command
-    ['smbclient', "//#{@host}/#{@share}", '--authentication-file', auth_file_path,
+    ['smbclient', smb_address, '--authentication-file', self.class.auth_file_path.to_s,
      '-m', 'SMB3', '--use-kerberos=required', '-D', remote_dir, '--command', smb_command]
   end
 end

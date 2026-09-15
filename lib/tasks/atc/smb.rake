@@ -12,11 +12,23 @@ namespace :atc do
       abort Rainbow(e.message).red
     end
 
+    # TODO: Should also accept source_type
     desc 'Run the full stabilization process'
     task run: :environment do
       puts Rainbow("This process will copy files from #{Rainbow(smb_args.source_path).yellow.bold} on the #{Rainbow(smb_args.drive).yellow.bold} drive \
       to a newly created #{Rainbow(smb_args.bag_name).yellow.bold} directory in the stabilization bucket.")
-      Atc::Stabilization::Processor.new(smb_args).run
+
+      # Upon success:
+      # success = true, s3_uri = 'S3 URI of the bag in the stabilization bucket'
+      # Upon failure:
+      # success = false, s3_uri = nil
+      success, s3_uri = Atc::Stabilization::Processor.new(
+        source_dir: smb_args.source_dir,
+        repository_name: smb_args.repository_name,
+        collection_name: smb_args.collection_name
+      ).run
+
+      # Download to CUL1 and validate completed bag
     end
 
     task check_directories: :environment do

@@ -17,6 +17,8 @@ class Atc::Stabilization::TaskArgs
   #   at the root of the stabilization bucket
   attr_reader :drive, :source_path, :repository_name, :collection_name, :bag_name
 
+  # TODO: Should also accept source_type
+  # TODO: No longer parse "L:/..." in the source
   def self.from_env(env = ENV)
     Atc::Stabilization::TaskArgs.new(
       source: env['source'],

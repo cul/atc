@@ -4,7 +4,7 @@
 class Atc::Bag::Layout
   PAYLOAD_DIRECTORY = 'data'
 
-  # The prefix the whole bag lives under within its bucket (eg. 'folder1-folder2')
+  # The prefix the whole bag lives under within its bucket (eg. 'repo_name_collection_name_YYMMDD_HHMMSS')
   attr_reader :bag_root_prefix
 
   def initialize(bag_root_prefix)
@@ -17,12 +17,12 @@ class Atc::Bag::Layout
     File.join(PAYLOAD_DIRECTORY, normalized_path)
   end
 
-  # Where a payload file lives within the bucket (eg. folder1-folder2/data/subdir/file.txt)
+  # Where a payload file lives within the bucket (eg. repo_name_collection_name_YYMMDD_HHMMSS/data/subdir/file.txt)
   def payload_object_key(normalized_path)
     object_key(payload_path(normalized_path))
   end
 
-  # Where a tag file lives within the bucket (eg. 'folder1-folder2/bag-info.txt')
+  # Where a tag file lives within the bucket (eg. 'repo_name_collection_name_YYMMDD_HHMMSS/bag-info.txt')
   def tag_file_object_key(tag_file)
     object_key(File.basename(tag_file))
   end

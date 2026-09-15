@@ -4,12 +4,11 @@ require 'csv'
 
 class Atc::Stabilization::Inventory
   HEADERS = %w[file_path size skipped normalized_path virus_scan_result].freeze
-  SKIPPED = 'SKIPPED'
   MAX_FILE_SIZE = 100.gigabytes
 
   Entry = Struct.new(:file_path, :size, :skipped, :normalized_path, :virus_scan_result, keyword_init: true) do
     def skipped?
-      skipped == SKIPPED
+      skipped == 'true'
     end
 
     def oversized?
@@ -24,6 +23,7 @@ class Atc::Stabilization::Inventory
   attr_reader :csv_file
 
   def initialize(run_dir:)
+    # TODO: Rename to inventory.csv
     @csv_file = File.join(run_dir, 'normalization-log.csv')
   end
 
@@ -87,7 +87,8 @@ class Atc::Stabilization::Inventory
   end
 
   def new_entry(file_path, size)
-    Entry.new(file_path: file_path, size: size, skipped: skip?(file_path, size) ? SKIPPED : nil)
+    # TODO: test skip?
+    Entry.new(file_path: file_path, size: size, skipped: skip?(file_path, size) ? 'true' : 'false')
   end
 
   def normalized_path_for(file_path, assigned_paths)

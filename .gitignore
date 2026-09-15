@@ -51,6 +51,8 @@
 /config/resque.yml
 /config/smb.yml
 /config/check_please.yml
+# Config file created in the stabilization initializer
+/config/l-drive-auth
 
 # simplecov coverage report
 /coverage

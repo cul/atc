@@ -5,14 +5,18 @@ development:
   cul_volume_download_dir: path-to-dir-on-cul
   notification_email: notification-email@email.com
   default_sender_email_address: defaultsender@email.com
-  # Currently the stabilization script supports only one source
-  source:
-    drive: C
-    username: username@email.copm
-    password: pass123456789
-    domain: cul
-    host: host.cul.columbia.edu
-    share: folder-to-access
+  # Currently the stabilization script supports only ldrive as the source
+  sources:
+    ldrive:
+      drive: C
+      username: username@email.com
+      password: pass123456789
+      domain: cul
+      host: host.cul.columbia.edu
+      share: folder-to-access
+    googledrive:
+      username: username@email.com
+      password: customgoogledrivepassword
 
 test:
   work_dir: <%= Rails.root.join('tmp', 'stabilization') %>
@@ -21,11 +25,15 @@ test:
   cul_volume_download_dir: path-to-dir-on-cul
   notification_email: notification-email@email.com
   default_sender_email_address: defaultsender@email.com
-  # Currently the stabilization script supports only one source
-  source:
-    drive: C
-    username: testusername@email.copm
-    password: testpass123456789
-    domain: cul
-    host: testhost.cul.columbia.edu
-    share: folder-to-access
+  # Currently the stabilization script supports only ldrive as the source
+  sources:
+    ldrive:
+      drive: C
+      username: username@email.com
+      password: pass123456789
+      domain: cul
+      host: host.cul.columbia.edu
+      share: folder-to-access
+    googledrive:
+      username: username@email.com
+      password: customgoogledrivepassword

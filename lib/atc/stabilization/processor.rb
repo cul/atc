@@ -8,7 +8,7 @@ class Atc::Stabilization::Processor
   attr_reader :run_id, :run_dir
 
   # Takes an Atc::Stabilization::TaskArgs which holds the validated source directory and ingest bucket target
-  def initialize(task_args)
+  def initialize(source_path: )
     # Path to the source directory we're syncing from
     @source_dir = task_args.source_path
 
@@ -61,6 +61,8 @@ class Atc::Stabilization::Processor
     failures = scan_files_and_report_results
     # 5. Assemble tag files and finalize the BagIt package, regardless of virus scan results
     assemble_final_files(virus_check_passed: failures.empty?)
+    
+    # TODO: Move this step outside of Processor
     # 6. If everything was successful, download the finalized bag
     download_and_validate_bag
   end
@@ -109,7 +111,7 @@ class Atc::Stabilization::Processor
 
   # Waits for GuardDuty to finish scanning every file uploaded and records the outcome in the CSV
   def scan_files_and_report_results
-    checker = Atc::Aws::VirusScanChecker.new(@stabilization_bucket)
+    checker = Atc::Aws::VirusScanChecker.new(@stabilization_bucket) # TODO: Move to initializer
     puts "Waiting for virus scan results for #{normalized_paths_by_object_key.size} file(s)..."
     # Files that never got a result stay as 'NOT SCANNED' so can still be reported as failures
     results = normalized_paths_by_object_key.values.index_with('NOT SCANNED')
@@ -126,6 +128,7 @@ class Atc::Stabilization::Processor
     failures
   end
 
+  # TODO: In addition to logging to the console, send a notification email
   def report_scan_outcome(failures)
     if failures.empty?
       puts 'All files passed the virus scan'
@@ -163,8 +166,10 @@ class Atc::Stabilization::Processor
     # 1. Check if there is same-name directory at the target cul path, name it after stabilization root
 
     # download_dir = File.join(SMB_CONFIG[:cul_volume_download_dir], @layout.bag_root_prefix) # this will be used on the server
+    
+    # TODO: Change SMB_CONFIG[:work_dir] STABILIZATION_CONFIG[:bag_download_dir]
     final_bag_path = File.join(SMB_CONFIG[:work_dir], @layout.bag_root_prefix)
-    parent_path = SMB_CONFIG[:work_dir]
+    parent_path = SMB_CONFIG[:work_dir] # STABILIZATION_CONFIG[:work_dir]
     puts "Downloading to #{parent_path}"
 
     if Dir.exist?(final_bag_path)
@@ -207,6 +212,7 @@ class Atc::Stabilization::Processor
   # Maps the object key of every uploaded file to its normalized path so we can record a scan
   # result in a CSV file
   def normalized_paths_by_object_key
+    # TODO: Add types
     @normalized_paths_by_object_key ||= @inventory.each_transferable.to_h do |entry|
       object_key = @layout.payload_object_key(entry.normalized_path)
       puts "Object key for #{entry.normalized_path} is #{object_key}"

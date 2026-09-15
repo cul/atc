@@ -9,6 +9,7 @@ class Atc::Stabilization::BagUploader
   end
 
   def upload_file(local_file_path, object_key)
+    # TODO: Use the new AWS TransferManager class
     test = generate_s3_object(object_key).upload_file(
       local_file_path,
       checksum_algorithm: 'CRC32C',
