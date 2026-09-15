@@ -1,18 +1,16 @@
 namespace :atc do
   namespace :stabilization do
     # Every task that starts with Processor invocation requires the following environment variables:
-    #   source=L:/existing-dir/subdir          A configured source drive (see the sources section of stabilization.template.yml)
-    #                                          followed by the directory to stabilize
-    #   ingest_bucket_target=folder1/folder2   Where the bag goes within the ingest bucket. Also used to name 
-    #                                          the bag at the root of the stabilization bucket, using a hyphenated form 
-    #                                          of the ingest bucket target.
+    #   source_type=ldrive                     A configured source drive (see the sources section of stabilization.template.yml)
+    #   source_path=/existing-dir/subdir       The directory to stabilize on the source drive
+    #   repository_name=RBML                   The repository name that will be logged in bag-info.txt; used for assembling name of the bag
+    #   collection_name=David Byrne Papers     The collection name that will be logged in bag-info.txt; used for assembling name of the bag
     def task_args
       @task_args ||= Atc::Stabilization::TaskArgs.from_env
     rescue ArgumentError => e
       abort Rainbow(e.message).red
     end
 
-    # TODO: Should also accept source_type
     desc 'Run the full stabilization process'
     task run: :environment do
       puts Rainbow("This process will copy files from #{Rainbow(task_args.source_path).yellow.bold} on the #{Rainbow(task_args.source_type).yellow.bold} to a newly created #{Rainbow(task_args.bag_name).yellow.bold} directory in the stabilization bucket.")

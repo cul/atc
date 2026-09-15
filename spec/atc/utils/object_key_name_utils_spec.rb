@@ -11,18 +11,8 @@ describe Atc::Utils::ObjectKeyNameUtils do
       'top_dir/sub_dir/.hidden_file',
       'top_dir/sub_dir/.hidden_file.txt',
       'top_dir/sub_dir/file.txt',
-      'top_dir/sub.dir/file.txt',
       '.top_dir/sub_dir/file',
       'top_dir/./file',
-      'top_dir/../file',
-      'top_dir/.../file',
-      'top_dir/sub_dir/file.txt.txt',
-      'top_dir/sub_dir/.ext.txt.txt',
-      '.a.b.c./.a.b.c',
-      'top_dir/sub_dir/(file)',
-      '())(top_dir())(/()sub_dir)(/())(file())(',
-      '.a.b.c./.a.b.c./.a.b.c',
-      '(a)bc/a(b)c/ab(c)',
       '_a_b_c_/_a_b_c_/_a_b_c_'
     ]
   end
@@ -36,6 +26,15 @@ describe Atc::Utils::ObjectKeyNameUtils do
         '..',
         './',
         '../',
+        'top_dir/../file',
+        'top_dir/.../file',
+        'top_dir/sub_dir/file.txt.txt',
+        'top_dir/sub_dir/.ext.txt.txt',
+        '.a.b.c./.a.b.c',
+        'top_dir/sub_dir/(file)',
+        '())(top_dir())(/()sub_dir)(/())(file())(',
+        '.a.b.c./.a.b.c./.a.b.c',
+        '(a)bc/a(b)c/ab(c)',
         '/top_dir/sub_dir/file',
         'top_dir/sub_dir/file ',
         'top_dir/sub_dir/ file',
@@ -45,6 +44,7 @@ describe Atc::Utils::ObjectKeyNameUtils do
         'top dir/sub_dir/file',
         'top_dir/sub_dir/fîle.txt',
         'top_dir/sub_dir/file.îxt',
+        'top_dir/sub.dir/file.txt',
         'top_dir/sub_dir/..',
         'top_dir/sub_dir/...',
         'top_dir/我能/我能.我能.我能',
@@ -68,12 +68,12 @@ describe Atc::Utils::ObjectKeyNameUtils do
   describe '.remediate_key_name' do
     let(:sample_remediated_path_key_names) do
       [
-        ['.a.b.c./.a.b.c./.a.b.c.', '.a.b.c./.a.b.c./.a.b.c_'],
+        ['.a.b.c./.a.b.c./.a.b.c.', '.a_b_c_/.a_b_c_/.a_b_c_'],
         [' a b c / a b c / a b c ', '_a_b_c_/_a_b_c_/_a_b_c_'],
         [' a b c/ a b c/ a b c', '_a_b_c/_a_b_c/_a_b_c'],
         ['aîc/aîc/aîc.îii', 'aic/aic/aic.iii'],
-        ['top_dîr/我能/我能.我能.我能', 'top_dir/Wo_Neng_/Wo_Neng_.Wo_Neng_.Wo_Neng_'],
-        ['top_dîr/ça_sub dir/file .txt.txt', 'top_dir/ca_sub_dir/file_.txt.txt'],
+        ['top_dîr/我能/我能.我能.我能', 'top_dir/WoNeng/WoNeng_WoNeng.WoNeng'],
+        ['top_dîr/ça_sub dir/file .txt.txt', 'top_dir/ca_sub_dir/file__txt.txt'],
         ['top_dîr/ça_sub dir/مروخب.مروخب', 'top_dir/ca_sub_dir/mrwkhb.mrwkhb']
       ]
     end

@@ -133,7 +133,7 @@ describe PerformTransferJob do
 
   context 'when a key is encountered that needs remediation' do
     let(:object_key) { '🎃a/🍕b/c  🎉.jpg' }
-    let(:expected_remediated_key) { '_a/_b/c___.jpg' }
+    let(:expected_remediated_key) { '_jack_o_lantern_a/_pizza_b/c___tada_.jpg' }
 
     it 'is remediated automatically and the job completes without error' do
       expect(aws_storage_provider).to receive(:perform_transfer).with(
@@ -148,7 +148,7 @@ describe PerformTransferJob do
   context 'when a key is very long' do
     let(:path_multiples) { ((PerformTransferJob::LONG_ORIGINAL_PATH_THRESHOLD - 10) / 10).ceil }
     let(:object_key) { "#{'🎃a/🍕b/' * path_multiples}c  🎉.jpg" }
-    let(:expected_remediated_key) { "#{'_a/_b/' * path_multiples}c___.jpg" }
+    let(:expected_remediated_key) { "#{'_jack_o_lantern_a/_pizza_b/' * path_multiples}c___tada_.jpg" }
     let(:expected_original_path_metadata) do
       {
         'checksum-sha256-hex' => well_known_checksum,

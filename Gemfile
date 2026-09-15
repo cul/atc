@@ -4,6 +4,8 @@ source 'https://rubygems.org'
 
 # URL encoding
 gem 'addressable', '~> 2.8'
+# Unicode to ASCII transliteration
+gem 'any_ascii', '>= 0.3.3'
 # Amazon S3 SDK; v1.214 contains TransferManager and introduces TransferManager#download_directory
 gem 'aws-sdk-s3', '~> 1.214'
 # Additional gem enabling the AWS SDK to calculate CRC32C checksums

@@ -10,7 +10,7 @@ module Atc::Utils::ObjectKeyNameUtils
   # So fcd1 decided to call this module ObjectKeyNameUtils to try and cover both naming
   # conventions. However, it's just a name and fcd1 is cool if module is renamed
 
-  DISALLOWED_ASCII_REGEX = '[^-a-zA-Z0-9_.()]'
+  DISALLOWED_ASCII_REGEX = '[^-a-zA-Z0-9_.]'
 
   def self.valid_key_name?(path_filename)
     return false if ['', '.', '..', '/'].include? path_filename
@@ -23,13 +23,13 @@ module Atc::Utils::ObjectKeyNameUtils
     path_to_file, filename = pathname.split
 
     # validate filename
-    return false if filename.to_s.end_with?('.') || /#{DISALLOWED_ASCII_REGEX}/.match?(filename.to_s)
+    return false unless remediate_filename(filename.to_s) == filename.to_s
     # if the valid filename is at the top level, return true
     return true if pathname == pathname.basename
 
     # check each component in the path to the file
     path_to_file.each_filename do |path_segment|
-      return false if /#{DISALLOWED_ASCII_REGEX}/.match? path_segment
+      return false unless remediate_directory_segment(path_segment) == path_segment
     end
     true
   end
@@ -42,14 +42,9 @@ module Atc::Utils::ObjectKeyNameUtils
     self.argument_check(filepath_key_name)
 
     pathname = Pathname.new(filepath_key_name)
-
-    remediated_pathname = Pathname.new('')
     path_to_file, filename = pathname.split
 
-    filename_valid_ascii =
-      Stringex::Unidecoder.decode(filename.to_s).gsub(/#{DISALLOWED_ASCII_REGEX}/, '_').gsub(/\.$/, '_')
-
-    remediated_key_name = self.remediate_path(path_to_file, remediated_pathname).join(filename_valid_ascii).to_s
+    remediated_key_name = self.remediate_path(path_to_file).join(remediate_filename(filename.to_s)).to_s
 
     # no collisions
     return remediated_key_name unless unavailable_key_names.include? remediated_key_name
@@ -63,13 +58,45 @@ module Atc::Utils::ObjectKeyNameUtils
     raise ArgumentError, 'Bad argument: absolute path' if filepath_key_name.start_with?('/')
   end
 
-  def self.remediate_path(path_to_file, remediated_pathname)
+  def self.remediate_path(path_to_file)
     # remediate each component in the path to the file
+    remediated_pathname = Pathname.new('')
     path_to_file.each_filename do |path_segment|
-      remediated_path_segment = Stringex::Unidecoder.decode(path_segment).gsub(/#{DISALLOWED_ASCII_REGEX}/, '_')
-      remediated_pathname += remediated_path_segment
+      remediated_pathname += remediate_directory_segment(path_segment)
     end
     remediated_pathname
+  end
+
+  # Directories have no file extensions so every period gets replaced with an underscore except
+  # an actual leading period that indicates a hidden directory.
+  def self.remediate_directory_segment(segment)
+    # Pathname#split for a top-level file will have a Pathname(".") as the first element
+    return segment if segment == '.'
+
+    collapse_interior_periods(AnyAscii.transliterate(segment).gsub(/#{DISALLOWED_ASCII_REGEX}/, '_'))
+  end
+
+  # The filename preserves the single period that separates its base name from its real extension.
+  # Every other period is replaced with an underscore.
+  def self.remediate_filename(filename)
+    extension = File.extname(filename)
+    base = extension.empty? ? filename : filename[0...-extension.length]
+
+    remediated_base = collapse_interior_periods(AnyAscii.transliterate(base).gsub(/#{DISALLOWED_ASCII_REGEX}/, '_'))
+    remediated_extension =
+      extension == '.' ? '_' : AnyAscii.transliterate(extension).gsub(/#{DISALLOWED_ASCII_REGEX}/, '_')
+
+    remediated_base + remediated_extension
+  end
+
+  # Replaces every period with an underscore except a leading period (used by the hidden file/directories).
+  # Segments made up of nothing but periods get every period replaced.
+  def self.collapse_interior_periods(str)
+    return str unless str.include?('.')
+    return str.tr('.', '_') if str.match?(/\A\.+\z/)
+
+    leading_period, rest = str.start_with?('.') ? ['.', str[1..]] : ['', str]
+    leading_period + rest.tr('.', '_')
   end
 
   def self.handle_collision(remediated_key_name, unavailable_key_names)

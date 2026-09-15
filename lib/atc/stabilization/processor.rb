@@ -39,7 +39,7 @@ class Atc::Stabilization::Processor
     # Safeguard against overwriting an existing stabilization directory. With the current implementation,
     # this should never happen because each stabilization directory contains a YYYYMMDD_HHMMSS timestamp.
     abort "Path already exists: #{@layout.bag_root_prefix}" if stabilization_directory_exists?
-    return
+
     # 1. Read from the source directory and log every file into a CSV
     add_source_files_to_csv
     # 1a. Check if any of the added files is above 100GB
@@ -55,6 +55,8 @@ class Atc::Stabilization::Processor
 
     # 2. Normalize the source paths so that they are suitable for uploading
     normalize_source_paths
+    puts "Done normalizing; check #{work_dir} for results"
+    return
     # 3. Download and process the files (one at a time)
     download_and_process_source_files
     # 4. Check for results of virus scanning and record them in the CSV

@@ -82,6 +82,7 @@ GEM
       public_suffix (>= 2.0.2, < 6.0)
     airbrussh (1.5.3)
       sshkit (>= 1.6.1, != 1.7.0)
+    any_ascii (0.3.3)
     ast (2.4.2)
     aws-crt (0.2.0-arm64-darwin)
       ffi
@@ -551,6 +552,7 @@ PLATFORMS
 
 DEPENDENCIES
   addressable (~> 2.8)
+  any_ascii (>= 0.3.3)
   aws-crt (~> 0.2.0)
   aws-sdk-s3 (~> 1.214)
   bagit (~> 0.7.0)
