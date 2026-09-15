@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Parses and validates the environment variables passed to the atc:smb rake tasks:
-# bundle exec rake atc:smb:run source=L:/existing-dir/subdir repository_name="RBML" collection_name="David Byrne Papers"
+# Parses and validates the environment variables passed to the atc:stabilization rake tasks:
+# bundle exec rake atc:stabilization:run source=L:/existing-dir/subdir repository_name="RBML" collection_name="David Byrne Papers"
 class Atc::Stabilization::TaskArgs
   SOURCE_REGEX = %r{\A(?<drive>[A-Za-z]:)[\\/](?<path>.+)\z}
 
@@ -9,7 +9,7 @@ class Atc::Stabilization::TaskArgs
   REPOSITORY_NAME_EXAMPLE = 'repository_name="RBML"'
   COLLECTION_NAME_EXAMPLE = 'collection_name="David Byrne Papers"'
 
-  # - drive is the drive configured as the source in smb.yml (eg. 'L')
+  # - drive is the drive configured as the source in stabilization.yml (eg. 'L')
   # - source_path is the path on that drive in "/existing-dir/subdir" format
   # - repository_name is the name of the repository (eg. "RBML")
   # - collection_name is the name of the collection within the repository (eg. "David Byrne Papers")

@@ -13,7 +13,7 @@ class Atc::Stabilization::Processor
     @source_dir = task_args.source_path
 
     # The bag will be uploaded to the root of the stabilization bucket
-    @stabilization_bucket = SMB_CONFIG[:stabilization_bucket]
+    @stabilization_bucket = STABILIZATION_CONFIG[:stabilization_bucket]
     @repository_name = task_args.repository_name
     @collection_name = task_args.collection_name
     # The layout object helps determine the structure of the bag within the stabilization bucket
@@ -21,7 +21,7 @@ class Atc::Stabilization::Processor
     @layout = Atc::Bag::Layout.new(task_args.bag_name)
 
     @run_id = SecureRandom.uuid
-    @work_dir = SMB_CONFIG[:work_dir]
+    @work_dir = STABILIZATION_CONFIG[:work_dir]
     @run_dir = File.join(@work_dir, @run_id)
     FileUtils.mkdir_p(@run_dir)
 
@@ -46,7 +46,7 @@ class Atc::Stabilization::Processor
     large_files = check_large_files
     if large_files.any?
       StabilizationMailer.with(
-        to: SMB_CONFIG[:notification_email],
+        to: STABILIZATION_CONFIG[:notification_email],
         subject: 'Large files detected',
         body_content: large_files.join(', ')
       ).send_mail.deliver
@@ -165,16 +165,14 @@ class Atc::Stabilization::Processor
   def download_and_validate_bag
     # 1. Check if there is same-name directory at the target cul path, name it after stabilization root
 
-    # download_dir = File.join(SMB_CONFIG[:cul_volume_download_dir], @layout.bag_root_prefix) # this will be used on the server
-    
-    # TODO: Change SMB_CONFIG[:work_dir] STABILIZATION_CONFIG[:bag_download_dir]
-    final_bag_path = File.join(SMB_CONFIG[:work_dir], @layout.bag_root_prefix)
-    parent_path = SMB_CONFIG[:work_dir] # STABILIZATION_CONFIG[:work_dir]
+    # download_dir = File.join(STABILIZATION_CONFIG[:cul_volume_download_dir], @layout.bag_root_prefix) # this will be used on the server    
+    final_bag_path = File.join(STABILIZATION_CONFIG[:work_dir], @layout.bag_root_prefix)
+    parent_path = STABILIZATION_CONFIG[:work_dir]
     puts "Downloading to #{parent_path}"
 
     if Dir.exist?(final_bag_path)
       StabilizationMailer.with(
-        to: SMB_CONFIG[:notification_email],
+        to: STABILIZATION_CONFIG[:notification_email],
         subject: "Couldn't download bag",
         body_content: "The directory #{final_bag_path} already exists."
       ).send_mail.deliver
@@ -193,7 +191,7 @@ class Atc::Stabilization::Processor
     if validator.valid?
       puts "#{final_bag_path} is valid"
       StabilizationMailer.with(
-        to: SMB_CONFIG[:notification_email],
+        to: STABILIZATION_CONFIG[:notification_email],
         subject: 'Successfully downloaded bag',
         body_content: "The bag was successfully downloaded to #{final_bag_path}."
       ).send_mail.deliver
@@ -202,7 +200,7 @@ class Atc::Stabilization::Processor
       puts "#{final_bag_path} is not valid:"
       validator.errors.each { |error| puts error }
       StabilizationMailer.with(
-        to: SMB_CONFIG[:notification_email],
+        to: STABILIZATION_CONFIG[:notification_email],
         subject: 'Failed to download bag',
         body_content: "The bag downloaded to #{final_bag_path} is not valid:\n#{validator.errors.join("\n")}"
       ).send_mail.deliver

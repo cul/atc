@@ -49,7 +49,7 @@
 /config/permissions.yml
 /config/redis.yml
 /config/resque.yml
-/config/smb.yml
+/config/stabilization.yml
 /config/check_please.yml
 # Config file created in the stabilization initializer
 /config/l-drive-auth

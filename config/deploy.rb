@@ -30,7 +30,7 @@ append  :linked_files,
         'config/permissions.yml',
         'config/redis.yml',
         'config/resque.yml',
-        'config/smb.yml'
+        'config/stabilization.yml'
 
 # Default value for linked_dirs is []
 append :linked_dirs, 'log', 'tmp/pids', 'tmp/csv_exports'

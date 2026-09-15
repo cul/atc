@@ -10,11 +10,12 @@ class Atc::Smb::Connector
   DIR_HEADER_REGEX = /\A\\(?<path>.*\S)\s*\z/
 
   # The drive letter (eg. 'L')
+  # TODO: Update to use nested STABILIZATION_CONFIG[:sources][:drive] syntax
   def self.drive
-    SMB_CONFIG[:source][:drive]
+    STABILIZATION_CONFIG[:source][:drive]
   end
 
-  def initialize(source_config: SMB_CONFIG[:source])
+  def initialize(source_config: STABILIZATION_CONFIG[:source])
     @host = source_config[:host]
     @share = source_config[:share]
   end
