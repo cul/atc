@@ -10,12 +10,13 @@ class Atc::Smb::Connector
   DIR_HEADER_REGEX = /\A\\(?<path>.*\S)\s*\z/
 
   # The drive letter (eg. 'L')
-  # TODO: Update to use nested STABILIZATION_CONFIG[:sources][:drive] syntax
   def self.drive
-    STABILIZATION_CONFIG[:source][:drive]
+    STABILIZATION_CONFIG[:sources][:ldrive][:drive]
   end
 
-  def initialize(source_config: STABILIZATION_CONFIG[:source])
+  # This class only ever connects to the ldrive source. Other source types (eg. googledrive)
+  # are not implemented yet (see Atc::Stabilization::TaskArgs::IMPLEMENTED_SOURCE_TYPES).
+  def initialize(source_config: STABILIZATION_CONFIG[:sources][:ldrive])
     @host = source_config[:host]
     @share = source_config[:share]
   end

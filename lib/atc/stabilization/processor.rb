@@ -24,8 +24,8 @@ class Atc::Stabilization::Processor
     @run_dir = File.join(@work_dir, @run_id)
     FileUtils.mkdir_p(@run_dir)
 
-    # TODO: Handle this better
-    @connector = source_type == 'ldrive' ? Atc::Smb::Connector.new : nil
+    # source_type is validated by Atc::Stabilization::TaskArgs which currently only implements ldrive
+    @connector = Atc::Smb::Connector.new
     @inventory = Atc::Stabilization::Inventory.new(run_dir: @run_dir)
     @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @run_dir, layout: @layout)
     @uploader = Atc::Stabilization::BagUploader.new(@stabilization_bucket)
@@ -146,7 +146,7 @@ class Atc::Stabilization::Processor
       source_dir: @source_dir,
       payload_oxum: @payload_manifest.payload_oxum,
       manifest_file: @payload_manifest.manifest_file,
-      normalization_log_file: @inventory.csv_file,
+      inventory_file: @inventory.csv_file,
       bag_dir: @run_dir,
       virus_check_passed: virus_check_passed,
       repository_name: @repository_name,

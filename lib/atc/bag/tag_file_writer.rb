@@ -10,14 +10,14 @@ class Atc::Bag::TagFileWriter
   # bag_dir is the local directory that the bag's tag files are written to
   def initialize(
     source_dir:,
-    payload_oxum:, manifest_file:, normalization_log_file:,
+    payload_oxum:, manifest_file:, inventory_file:,
     virus_check_passed:, bag_dir:,
     repository_name:, collection_name:
   )
     @source_dir = source_dir
     @payload_oxum = payload_oxum
     @manifest_file = manifest_file
-    @normalization_log_file = normalization_log_file
+    @inventory_file = inventory_file
     @repository_name = repository_name
     @collection_name = collection_name
     @bag_dir = bag_dir
@@ -38,7 +38,7 @@ class Atc::Bag::TagFileWriter
   private
 
   def checksummed_tag_files
-    [bagit_file, bag_info_file, @manifest_file, @normalization_log_file]
+    [bagit_file, bag_info_file, @manifest_file, @inventory_file]
   end
 
   def bag_info_content
@@ -58,7 +58,7 @@ class Atc::Bag::TagFileWriter
   def virus_check_result
     return 'PASS' if @virus_check_passed
 
-    "FAIL - See #{File.basename(@normalization_log_file)} for additional details."
+    "FAIL - See #{File.basename(@inventory_file)} for additional details."
   end
 
   def tag_manifest_content

@@ -7,7 +7,7 @@ namespace :atc do
     #                                          the bag at the root of the stabilization bucket, using a hyphenated form 
     #                                          of the ingest bucket target.
     def task_args
-      Atc::Stabilization::TaskArgs.from_env
+      @task_args ||= Atc::Stabilization::TaskArgs.from_env
     rescue ArgumentError => e
       abort Rainbow(e.message).red
     end
@@ -40,8 +40,7 @@ namespace :atc do
     end
 
     task check_directories: :environment do
-      destination = "the ingest bucket path '#{Rainbow(task_args.ingest_path).yellow.bold}'"
-      puts Rainbow("This process will copy files from #{Rainbow(task_args.source_path).yellow.bold} on the #{Rainbow(task_args.drive).yellow.bold} drive to #{destination}")
+      puts Rainbow("This process will copy files from #{Rainbow(task_args.source_path).yellow.bold} on the #{Rainbow(task_args.source_type).yellow.bold} to a newly created #{Rainbow(task_args.bag_name).yellow.bold} directory in the stabilization bucket.")
       processor = Atc::Stabilization::Processor.new(task_args)
       processor.check_if_directories_exist
     end
