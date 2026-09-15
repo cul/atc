@@ -7,25 +7,25 @@ require 'securerandom'
 class Atc::Stabilization::Processor
   attr_reader :run_id, :run_dir
 
-  # Takes an Atc::Stabilization::TaskArgs which holds the validated source directory and ingest bucket target
-  def initialize(source_path: )
+  def initialize(source_path:, source_type:, repository_name:, collection_name:, bag_name:)
     # Path to the source directory we're syncing from
-    @source_dir = task_args.source_path
+    @source_dir = source_path
 
     # The bag will be uploaded to the root of the stabilization bucket
     @stabilization_bucket = STABILIZATION_CONFIG[:stabilization_bucket]
-    @repository_name = task_args.repository_name
-    @collection_name = task_args.collection_name
+    @repository_name = repository_name
+    @collection_name = collection_name
     # The layout object helps determine the structure of the bag within the stabilization bucket
-    puts "Passing bag name to layout: #{task_args.bag_name}"
-    @layout = Atc::Bag::Layout.new(task_args.bag_name)
+    puts "Passing bag name to layout: #{bag_name}"
+    @layout = Atc::Bag::Layout.new(bag_name)
 
     @run_id = SecureRandom.uuid
     @work_dir = STABILIZATION_CONFIG[:work_dir]
     @run_dir = File.join(@work_dir, @run_id)
     FileUtils.mkdir_p(@run_dir)
 
-    @connector = Atc::Smb::Connector.new
+    # TODO: Handle this better
+    @connector = source_type == 'ldrive' ? Atc::Smb::Connector.new : nil
     @inventory = Atc::Stabilization::Inventory.new(run_dir: @run_dir)
     @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @run_dir, layout: @layout)
     @uploader = Atc::Stabilization::BagUploader.new(@stabilization_bucket)
@@ -39,7 +39,7 @@ class Atc::Stabilization::Processor
     # Safeguard against overwriting an existing stabilization directory. With the current implementation,
     # this should never happen because each stabilization directory contains a YYYYMMDD_HHMMSS timestamp.
     abort "Path already exists: #{@layout.bag_root_prefix}" if stabilization_directory_exists?
-
+    return
     # 1. Read from the source directory and log every file into a CSV
     add_source_files_to_csv
     # 1a. Check if any of the added files is above 100GB

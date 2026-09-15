@@ -15,18 +15,26 @@ namespace :atc do
     # TODO: Should also accept source_type
     desc 'Run the full stabilization process'
     task run: :environment do
-      puts Rainbow("This process will copy files from #{Rainbow(task_args.source_path).yellow.bold} on the #{Rainbow(task_args.drive).yellow.bold} drive \
-      to a newly created #{Rainbow(task_args.bag_name).yellow.bold} directory in the stabilization bucket.")
+      puts Rainbow("This process will copy files from #{Rainbow(task_args.source_path).yellow.bold} on the #{Rainbow(task_args.source_type).yellow.bold} to a newly created #{Rainbow(task_args.bag_name).yellow.bold} directory in the stabilization bucket.")
 
       # Upon success:
       # success = true, s3_uri = 'S3 URI of the bag in the stabilization bucket'
       # Upon failure:
       # success = false, s3_uri = nil
-      success, s3_uri = Atc::Stabilization::Processor.new(
-        source_dir: task_args.source_dir,
+      Atc::Stabilization::Processor.new(
+        source_path: task_args.source_path,
+        source_type: task_args.source_type,
         repository_name: task_args.repository_name,
-        collection_name: task_args.collection_name
+        collection_name: task_args.collection_name,
+        bag_name: task_args.bag_name
       ).run
+      return
+      # success, s3_uri = Atc::Stabilization::Processor.new(
+      #   source_path: task_args.source_path,
+      #   source_type: task_args.source_type,
+      #   repository_name: task_args.repository_name,
+      #   collection_name: task_args.collection_name
+      # ).run
 
       # Download to CUL1 and validate completed bag
     end
