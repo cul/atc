@@ -32,10 +32,11 @@ class Atc::Stabilization::Processor
     @checker =  Atc::Aws::VirusScanChecker.new(@stabilization_bucket)
 
     puts "Reading from #{@connector.smb_address}#{@source_dir}"
-    puts "Writing to s3://#{@stabilization_bucket}/#{@layout.bag_root_prefix}"
+    puts "Writing to #{s3_uri}"
     puts "Files will be stored in the local stabilization directory: #{@run_dir}"
   end
 
+  # Returns [success, s3_uri]
   def run
     # Safeguard against overwriting an existing stabilization directory. With the current implementation,
     # this should never happen because each stabilization directory contains a YYYYMMDD_HHMMSS timestamp.
@@ -46,30 +47,27 @@ class Atc::Stabilization::Processor
     # 1a. Check if any of the added files is above 100GB
     large_files = check_large_files
     if large_files.any?
-      StabilizationMailer.with(
-        to: STABILIZATION_CONFIG[:notification_email],
-        subject: 'Large files detected',
-        body_content: large_files.join(', ')
-      ).send_mail.deliver
-      return
+      report_failure('Large files detected', large_files.join(', '))
+      return [false, nil]
     end
 
     # 2. Normalize the source paths so that they are suitable for uploading
     normalize_source_paths
-    puts "Done normalizing; check #{@run_dir} for results"
-    return
     # 3. Download and process the files (one at a time)
     download_and_process_source_files
     # 4. Check for results of virus scanning and record them in the CSV
     failures = scan_files_and_report_results
     # 5. Assemble tag files and finalize the BagIt package, regardless of virus scan results
     assemble_final_files(virus_check_passed: failures.empty?)
-    
-    # TODO: Move this step outside of Processor
-    # 6. If everything was successful, download the finalized bag
-    download_and_validate_bag
 
-    # TODO: Remove the @run_dir
+    return [false, s3_uri] if failures.any?
+
+    # cleanup_run_dir
+    [true, s3_uri]
+  end
+
+  def s3_uri
+    "s3://#{@stabilization_bucket}/#{@layout.bag_root_prefix}"
   end
 
   def stabilization_directory_exists?
@@ -165,52 +163,6 @@ class Atc::Stabilization::Processor
     end
   end
 
-  # TODO: Move to a separate class and clean up
-  def download_and_validate_bag
-    # 1. Check if there is same-name directory at the target cul path, name it after stabilization root
-
-    # download_dir = File.join(STABILIZATION_CONFIG[:cul_volume_download_dir], @layout.bag_root_prefix) # this will be used on the server    
-    final_bag_path = File.join(STABILIZATION_CONFIG[:work_dir], @layout.bag_root_prefix)
-    parent_path = STABILIZATION_CONFIG[:work_dir]
-    puts "Downloading to #{parent_path}"
-
-    if Dir.exist?(final_bag_path)
-      StabilizationMailer.with(
-        to: STABILIZATION_CONFIG[:notification_email],
-        subject: "Couldn't download bag",
-        body_content: "The directory #{final_bag_path} already exists."
-      ).send_mail.deliver
-      raise "Target directory #{final_bag_path} already exists."
-    end
-
-    # 2. Download the finalized bag from the stabilization bucket to the local work directory
-    # The directory will be downloaded as its basename under the parent path
-    s3_downloader = Atc::Aws::S3Downloader.new(@stabilization_bucket, parent_path)
-    s3_downloader.download_directory(@layout.bag_root_prefix)
-
-    # 3. Validate the bag (e.g., check for the presence of all expected files and tag files)
-    puts "Checking downloaded bag under #{final_bag_path}"
-    validator = Atc::Bag::Validator.new(final_bag_path)
-
-    if validator.valid?
-      puts "#{final_bag_path} is valid"
-      StabilizationMailer.with(
-        to: STABILIZATION_CONFIG[:notification_email],
-        subject: 'Successfully downloaded bag',
-        body_content: "The bag was successfully downloaded to #{final_bag_path}."
-      ).send_mail.deliver
-      # TODO: Delete the bag from AWS stabilization directory
-    else
-      puts "#{final_bag_path} is not valid:"
-      validator.errors.each { |error| puts error }
-      StabilizationMailer.with(
-        to: STABILIZATION_CONFIG[:notification_email],
-        subject: 'Failed to download bag',
-        body_content: "The bag downloaded to #{final_bag_path} is not valid:\n#{validator.errors.join("\n")}"
-      ).send_mail.deliver
-    end
-  end
-
   # Maps the object key of every uploaded file to its normalized path so we can record a scan
   # result in a CSV file
   def normalized_paths_by_object_key
@@ -227,5 +179,17 @@ class Atc::Stabilization::Processor
       puts "Warning: File #{entry.file_path} is larger than 100GB (#{entry.size} bytes)"
       entry.file_path
     end
+  end
+
+  private
+
+  def report_failure(subject, message)
+    puts message
+    StabilizationMailer.notify(subject, message)
+  end
+
+  def cleanup_run_dir
+    puts "Removing the local stabilization directory: #{@run_dir}"
+    FileUtils.rm_rf(@run_dir)
   end
 end

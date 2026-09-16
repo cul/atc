@@ -14,12 +14,13 @@ class Atc::Aws::S3Downloader
   def download_directory(s3_folder_prefix)
     puts "Downloading data from s3://#{@bucket_name}/#{s3_folder_prefix} to the local directory #{@download_directory}"
 
-    test = @transfer_manager.download_directory(
+    result = @transfer_manager.download_directory(
       @download_directory,
       bucket: @bucket_name,
       s3_prefix: s3_folder_prefix
     )
     # Hash of {:completed_downloads=>10, :failed_downloads=>0, :errors=>[...]}
-    puts test
+    puts result
+    result
   end
 end

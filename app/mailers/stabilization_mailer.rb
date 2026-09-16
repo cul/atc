@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 class StabilizationMailer < ApplicationMailer
+  def self.notify(subject, message)
+    with(
+      to: STABILIZATION_CONFIG[:notification_email],
+      subject: subject,
+      body_content: message
+    ).send_mail.deliver
+  end
+
   def send_mail
     mail(
       to: params[:to],

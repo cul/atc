@@ -33,7 +33,7 @@ append  :linked_files,
         'config/stabilization.yml'
 
 # Default value for linked_dirs is []
-append :linked_dirs, 'log', 'tmp/pids', 'tmp/csv_exports'
+append :linked_dirs, 'log', 'tmp/pids', 'tmp/csv_exports', 'tmp/stabilization'
 
 set :passenger_restart_with_touch, true
 

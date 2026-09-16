@@ -11,95 +11,102 @@ namespace :atc do
       abort Rainbow(e.message).red
     end
 
-    desc 'Run the full stabilization process'
-    task run: :environment do
-      puts Rainbow("This process will copy files from #{Rainbow(task_args.source_path).yellow.bold} on the #{Rainbow(task_args.source_type).yellow.bold} to a newly created #{Rainbow(task_args.bag_name).yellow.bold} directory in the stabilization bucket.")
-
-      # Upon success:
-      # success = true, s3_uri = 'S3 URI of the bag in the stabilization bucket'
-      # Upon failure:
-      # success = false, s3_uri = nil
-      Atc::Stabilization::Processor.new(
+    # Memoized because every Processor creates its a timestamped run directory
+    def processor
+      @processor ||= Atc::Stabilization::Processor.new(
         source_path: task_args.source_path,
         source_type: task_args.source_type,
         repository_name: task_args.repository_name,
         collection_name: task_args.collection_name,
         bag_name: task_args.bag_name
-      ).run
-      return
-      # success, s3_uri = Atc::Stabilization::Processor.new(
-      #   source_path: task_args.source_path,
-      #   source_type: task_args.source_type,
-      #   repository_name: task_args.repository_name,
-      #   collection_name: task_args.collection_name
-      # ).run
-
-      # Download to CUL1 and validate completed bag
+      )
     end
 
-    task check_directories: :environment do
+    def describe_run
       puts Rainbow("This process will copy files from #{Rainbow(task_args.source_path).yellow.bold} on the #{Rainbow(task_args.source_type).yellow.bold} to a newly created #{Rainbow(task_args.bag_name).yellow.bold} directory in the stabilization bucket.")
-      processor = Atc::Stabilization::Processor.new(task_args)
-      processor.check_if_directories_exist
     end
 
+    # Downloads the finalized bag from the stabilization bucket and validates it
+    def retrieve_bag(bag_root_prefix)
+      retrieved = Atc::Stabilization::BagRetriever.new(
+        bucket: STABILIZATION_CONFIG[:stabilization_bucket],
+        bag_root_prefix: bag_root_prefix,
+        # download_dir:STABILIZATION_CONFIG[:cul_volume_download_dir] # this will be used in prod
+        download_dir: STABILIZATION_CONFIG[:work_dir]
+      ).retrieve
+
+      abort Rainbow('Could not retrieve a valid bag (see the reason above).').red unless retrieved
+    end
+
+    desc 'Run the full stabilization process'
+    task run: :environment do
+      describe_run
+      success, s3_uri = processor.run
+
+      unless success
+        message = 'The stabilization process did not complete successfully, so the bag was not downloaded.'
+        message += " The bag is available at #{s3_uri} for investigation." if s3_uri
+        abort Rainbow(message).red
+      end
+
+      puts Rainbow("The bag was uploaded to #{s3_uri}").green
+      retrieve_bag(task_args.bag_name)
+    end
+
+    desc 'Download a finalized bag from the stabilization bucket and validate it'
+    task download_finalized_bag: :environment do
+      bag_name = ENV['bag_name']
+      abort Rainbow('Missing required argument: bag_name=repository_collection_YYYYMMDD_HHMMSS').red if bag_name.blank?
+
+      retrieve_bag(bag_name)
+    end
 
     ################################
     # Below are individual tasks for testing and running specific parts of the SMB stabilization process.
-    # Running these individually might result in an incomplete stabilization process. 
+    # Running these individually might result in an incomplete stabilization process.
     # Use it for testing and debugging purposes only.
     ################################
     desc 'Lists the source directory into a CSV'
     task create_file_inventory: :environment do
-      Atc::Stabilization::Processor.new(task_args).add_source_files_to_csv
+      processor.add_source_files_to_csv
       puts 'Added source files to CSV'
     end
 
     desc 'Normalizes the paths in the CSV file'
     task normalize_paths: :environment do
-      Atc::Stabilization::Processor.new(task_args).normalize_source_paths
+      processor.normalize_source_paths
     end
 
     desc 'Download each source file and upload it to the ingest bucket'
     task upload_files: :environment do
-      Atc::Stabilization::Processor.new(task_args).download_and_process_source_files
+      processor.download_and_process_source_files
     end
 
     # Assumes CSV file already contains the list of files to upload and those files
     # are present in the local stabilization directory
     # desc 'Upload files that are already present in the local stabilization directory'
     # task test_upload: :environment do
-    #   Atc::Stabilization::Processor.new(task_args).upload_files
+    #   processor.upload_files
     # end
 
     desc 'Wait for virus scan results for the uploaded files and report the outcome'
     task get_scanning_results: :environment do
-      Atc::Stabilization::Processor.new(task_args).scan_files_and_report_results
+      processor.scan_files_and_report_results
     end
 
     desc 'Report any source files larger than 100GB'
     task large_files: :environment do
-      processor = Atc::Stabilization::Processor.new(task_args)
       large_files = processor.check_large_files
 
       if large_files.any?
         puts "Some files are larger than 100GB: #{large_files.join(', ')}"
-
-        StabilizationMailer.with(
-          to: STABILIZATION_CONFIG[:notification_email],
-          subject: 'Large files detected',
-          body_content: large_files.join(', ')
-        ).send_mail.deliver
+        StabilizationMailer.notify('Large files detected', large_files.join(', '))
       end
     end
 
     desc 'Write the BagIt tag files and upload them to the top level of the bag'
     task assemble_files: :environment do
-      Atc::Stabilization::Processor.new(task_args).assemble_final_files(virus_check_passed: true)
-    end
-
-    task download_finalized_bag: :environment do
-      Atc::Stabilization::Processor.new(task_args).download_and_validate_bag
+      processor.assemble_final_files(virus_check_passed: true)
     end
   end
 end
