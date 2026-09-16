@@ -29,6 +29,7 @@ class Atc::Stabilization::Processor
     @inventory = Atc::Stabilization::Inventory.new(run_dir: @run_dir)
     @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @run_dir, layout: @layout)
     @uploader = Atc::Stabilization::BagUploader.new(@stabilization_bucket)
+    @checker =  Atc::Aws::VirusScanChecker.new(@stabilization_bucket)
 
     puts "Reading from #{@connector.smb_address}#{@source_dir}"
     puts "Writing to s3://#{@stabilization_bucket}/#{@layout.bag_root_prefix}"
@@ -55,7 +56,7 @@ class Atc::Stabilization::Processor
 
     # 2. Normalize the source paths so that they are suitable for uploading
     normalize_source_paths
-    puts "Done normalizing; check #{work_dir} for results"
+    puts "Done normalizing; check #{@run_dir} for results"
     return
     # 3. Download and process the files (one at a time)
     download_and_process_source_files
@@ -67,6 +68,8 @@ class Atc::Stabilization::Processor
     # TODO: Move this step outside of Processor
     # 6. If everything was successful, download the finalized bag
     download_and_validate_bag
+
+    # TODO: Remove the @run_dir
   end
 
   def stabilization_directory_exists?
@@ -113,12 +116,11 @@ class Atc::Stabilization::Processor
 
   # Waits for GuardDuty to finish scanning every file uploaded and records the outcome in the CSV
   def scan_files_and_report_results
-    checker = Atc::Aws::VirusScanChecker.new(@stabilization_bucket) # TODO: Move to initializer
     puts "Waiting for virus scan results for #{normalized_paths_by_object_key.size} file(s)..."
     # Files that never got a result stay as 'NOT SCANNED' so can still be reported as failures
     results = normalized_paths_by_object_key.values.index_with('NOT SCANNED')
 
-    checker.each_scan_result(normalized_paths_by_object_key.keys) do |object_key, status|
+    @checker.each_scan_result(normalized_paths_by_object_key.keys) do |object_key, status|
       puts "Scan result for #{object_key}: #{status}"
       results[normalized_paths_by_object_key[object_key]] = status
     end
