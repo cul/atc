@@ -62,7 +62,7 @@ class Atc::Stabilization::Processor
 
     return [false, s3_uri] if failures.any?
 
-    # cleanup_run_dir
+    cleanup_run_dir
     [true, s3_uri]
   end
 
@@ -98,8 +98,7 @@ class Atc::Stabilization::Processor
       @uploader.upload_file(local_path, @layout.payload_object_key(normalized_path))
       puts "File #{normalized_path} uploaded successfully, checksum: #{checksum}, size: #{entry.size}"
       @payload_manifest.add_row(checksum, normalized_path, entry.size)
-
-      # TODO: Delete the local file
+      FileUtils.rm_f(local_path)
     end
 
     puts "Payload-Oxum for manifest: #{@payload_manifest.payload_oxum}"
