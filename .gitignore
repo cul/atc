@@ -54,6 +54,9 @@
 # Config file created in the stabilization initializer
 /config/l-drive-auth
 
+# test rake tasks
+local.rake
+
 # simplecov coverage report
 /coverage
 

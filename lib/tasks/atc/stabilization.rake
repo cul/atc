@@ -51,6 +51,8 @@ namespace :atc do
 
       puts Rainbow("The bag was uploaded to #{s3_uri}").green
       retrieve_bag(task_args.bag_name)
+    rescue Atc::Exceptions::SourceListingError => e
+      abort Rainbow("Could not read the source directory: #{e.message}").red
     end
 
     desc 'Download a finalized bag from the stabilization bucket and validate it'

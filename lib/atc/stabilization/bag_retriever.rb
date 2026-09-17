@@ -15,8 +15,8 @@ class Atc::Stabilization::BagRetriever
   # Returns true when the bag was downloaded and is valid
   def retrieve
     return false unless download_location_available?
+    return false unless download_bag
 
-    download_bag
     validate_bag
   end
 
@@ -33,7 +33,24 @@ class Atc::Stabilization::BagRetriever
 
   def download_bag
     puts "Downloading to #{@download_dir}"
-    Atc::Aws::S3Downloader.new(@bucket, @download_dir).download_directory(@bag_root_prefix)
+    result = Atc::Aws::S3Downloader.new(@bucket, @download_dir).download_directory(@bag_root_prefix)
+    return true if result[:completed_downloads].positive?
+
+    report_failure("Couldn't download bag", "No files were found at #{s3_uri}.")
+    false
+  rescue Aws::S3::DirectoryDownloadError => e
+    report_failure("Couldn't download bag", download_error_message(e))
+    false
+  end
+
+  # The download stops at the first error so the bag is incomplete
+  def download_error_message(error)
+    "#{s3_uri} could not be fully downloaded: #{error.message}\n\n" \
+      "Remove the incomplete download at #{@bag_path} before trying again."
+  end
+
+  def s3_uri
+    "s3://#{@bucket}/#{@bag_root_prefix}"
   end
 
   def validate_bag

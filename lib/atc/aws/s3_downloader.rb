@@ -19,8 +19,8 @@ class Atc::Aws::S3Downloader
       bucket: @bucket_name,
       s3_prefix: s3_folder_prefix
     )
-    # Hash of {:completed_downloads=>10, :failed_downloads=>0, :errors=>[...]}
-    puts result
+    # Hash of {:completed_downloads=>10, :failed_downloads=>0}
+    puts "Downloaded #{result[:completed_downloads]} file(s)"
     result
   end
 end

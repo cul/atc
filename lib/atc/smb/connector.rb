@@ -9,6 +9,9 @@ class Atc::Smb::Connector
   # Matches the header line that smbclient prints before going intothe contents of each subdirectory
   DIR_HEADER_REGEX = /\A\\(?<path>.*\S)\s*\z/
 
+  # Matches the status code that smbclient prints when it can't read an individual file or directory
+  NT_STATUS_ERROR_REGEX = /NT_STATUS_(?!OK\b)\w+/
+
   # The drive letter (eg. 'L')
   def self.drive
     STABILIZATION_CONFIG[:sources][:ldrive][:drive]
@@ -29,7 +32,11 @@ class Atc::Smb::Connector
   # Returns an Array of [file_path, size] pairs where file_path is relative to remote_dir.
   def list_files(remote_dir)
     base_dir = normalize_path(remote_dir)
-    parse_ls_output(base_dir, ls_output(base_dir))
+    files = parse_ls_output(base_dir, ls_output(base_dir))
+
+    raise Atc::Exceptions::SourceListingError, "No files found under #{smb_address}#{base_dir}" if files.empty?
+
+    files
   end
 
   # Downloads a single file from remote_dir (a directory on the share) to local_path,
@@ -76,8 +83,21 @@ class Atc::Smb::Connector
   # Returns an Array of [file_path, size] pairs for every file in a recursive listing,
   # with paths relative to base_dir
   def parse_ls_output(base_dir, output)
+    # Treat partial listings as errors so we don't accidentally operate on incomplete data
+    errors = output.each_line.select { |line| line.match?(NT_STATUS_ERROR_REGEX) }.map(&:strip)
+
+    if errors.any?
+      raise Atc::Exceptions::SourceListingError,
+            "Not everything under #{base_dir} could be listed:\n#{errors.join("\n")}"
+    end
+
+    parse_file_entries(base_dir, output)
+  end
+
+  def parse_file_entries(base_dir, output)
     relative_dir = ''
     files = []
+
     output.each_line do |line|
       if (header = DIR_HEADER_REGEX.match(line))
         relative_dir = normalize_path(header[:path]).delete_prefix(base_dir)
@@ -85,6 +105,7 @@ class Atc::Smb::Connector
         files << ["#{relative_dir}/#{entry[:name]}", entry[:size].to_i]
       end
     end
+
     files
   end
 
@@ -95,16 +116,27 @@ class Atc::Smb::Connector
   end
 
   def ls_output(remote_dir)
-    # TODO: Validate that the output matches the format we expect so the regex doesn't break
     command = smbclient_command(remote_dir, 'recurse ON; ls')
     puts "Running: #{command.join(' ')}"
     stdout, stderr, status = Open3.capture3(*command)
 
     unless status.success?
-      raise "error while listing #{remote_dir}: #{stderr.strip}. Are you sure the directory exists?"
+      raise Atc::Exceptions::SourceListingError,
+            "error while listing #{remote_dir}: #{stderr.strip}. Are you sure the directory exists?"
     end
 
-    stdout
+    output = "#{stdout}\n#{stderr}"
+    validate_encoding!(output)
+    output
+  end
+
+  # Reject listings with invalid encoding so that we don't attempt to process undecodable file names
+  def validate_encoding!(output)
+    return if output.valid_encoding?
+
+    undecodable = output.each_line.reject(&:valid_encoding?).map { |line| line.scrub.strip }
+    raise Atc::Exceptions::SourceListingError,
+          "Some names in the listing could not be decoded:\n#{undecodable.join("\n")}"
   end
 
   def smbclient_command(remote_dir, smb_command)
