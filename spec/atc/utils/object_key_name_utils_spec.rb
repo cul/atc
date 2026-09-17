@@ -74,7 +74,12 @@ describe Atc::Utils::ObjectKeyNameUtils do
         ['aîc/aîc/aîc.îii', 'aic/aic/aic.iii'],
         ['top_dîr/我能/我能.我能.我能', 'top_dir/WoNeng/WoNeng_WoNeng.WoNeng'],
         ['top_dîr/ça_sub dir/file .txt.txt', 'top_dir/ca_sub_dir/file__txt.txt'],
-        ['top_dîr/ça_sub dir/مروخب.مروخب', 'top_dir/ca_sub_dir/mrwkhb.mrwkhb']
+        ['top_dîr/ça_sub dir/مروخب.مروخب', 'top_dir/ca_sub_dir/mrwkhb.mrwkhb'],
+        ['top_dir/มูลนิธิฟอร์ดลงพื้นที่เยี่ยมบัณฑิตที่ได้รับทุนการศึกษา.doc',
+         'top_dir/mulnithifordlngphuenthieyiymbanthitthiaidrabthunkarsueksa.doc'],
+        ['top_dir/Не хочу сдаваться.doc', 'top_dir/Ne_khochu_sdavat_sya.doc'],
+        ['top_dir/قياس مدي تقبل فكرة اشهار جمعية جسور للتنمية الانسانية.docx',
+         'top_dir/qys_mdy_tqbl_fkrh_shhr_jm_yh_jswr_lltnmyh_lnsnyh.docx']
       ]
     end
 

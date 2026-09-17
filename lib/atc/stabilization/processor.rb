@@ -58,7 +58,7 @@ class Atc::Stabilization::Processor
     # 4. Check for results of virus scanning and record them in the CSV
     failures = scan_files_and_report_results
     # 5. Assemble tag files and finalize the BagIt package, regardless of virus scan results
-    assemble_final_files(virus_check_passed: failures.empty?)
+    return [false, s3_uri] unless assemble_final_files(virus_check_passed: failures.empty?)
 
     return [false, s3_uri] if failures.any?
 
@@ -155,12 +155,21 @@ class Atc::Stabilization::Processor
       collection_name: @collection_name
     )
     tag_file_writer.write_tag_files
+    upload_tag_files(tag_file_writer.tag_files)
+  rescue StandardError => e
+    # Rescue here so we can later point to the location of the bag for investigation
+    puts "Could not finalize the bag: #{e.message}"
+    false
+  end
 
-    tag_file_writer.tag_files.each do |file|
+  def upload_tag_files(tag_files)
+    tag_files.each do |file|
       object_key = @layout.tag_file_object_key(file)
       puts "Sending #{file} to #{object_key}"
       @uploader.upload_file(file, object_key)
     end
+
+    true
   end
 
   # Maps the object key of every uploaded file to its normalized path so we can record a scan
