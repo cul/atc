@@ -9,6 +9,8 @@ class Atc::Stabilization::TaskArgs
   # Source types that are currently supported
   IMPLEMENTED_SOURCE_TYPES = %w[ldrive].freeze
 
+  FOLDER_NAME_SEPARATOR_REGEX = /[^a-zA-Z0-9-]+/
+
   SOURCE_TYPE_EXAMPLE = 'source_type=ldrive'
   SOURCE_PATH_EXAMPLE = 'source_path="/existing-dir/subdir"'
   REPOSITORY_NAME_EXAMPLE = 'repository_name="RBML"'
@@ -48,11 +50,15 @@ class Atc::Stabilization::TaskArgs
   private
 
   def assemble_bag_name
-    normalized_repository_name = Atc::Utils::ObjectKeyNameUtils.remediate_key_name(@repository_name)
-    normalized_collection_name = Atc::Utils::ObjectKeyNameUtils.remediate_key_name(@collection_name)
+    normalized_repository_name = normalize_for_folder_name(@repository_name)
+    normalized_collection_name = normalize_for_folder_name(@collection_name)
     current_date = Time.current.strftime('%Y%m%d_%H%M%S')
 
     "#{normalized_repository_name}_#{normalized_collection_name}_#{current_date}"
+  end
+
+  def normalize_for_folder_name(name)
+    AnyAscii.transliterate(name).gsub(FOLDER_NAME_SEPARATOR_REGEX, '_').gsub(/\A_+|_+\z/, '')
   end
 
   def parse_name(name, example)
