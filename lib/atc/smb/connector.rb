@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'fileutils'
 require 'open3'
 
 class Atc::Smb::Connector
@@ -11,6 +12,23 @@ class Atc::Smb::Connector
 
   # Matches the status code that smbclient prints when it can't read an individual file or directory
   NT_STATUS_ERROR_REGEX = /NT_STATUS_(?!OK\b)\w+/
+
+  # Error codes that indicate a permanent failure; we avoid retrying when these are encountered
+  PERMANENT_ERROR_CODES = %w[
+    NT_STATUS_OBJECT_NAME_NOT_FOUND
+    NT_STATUS_OBJECT_PATH_NOT_FOUND
+    NT_STATUS_NO_SUCH_FILE
+    NT_STATUS_ACCESS_DENIED
+    NT_STATUS_LOGON_FAILURE
+  ].freeze
+
+  DOWNLOAD_TRIES = 3
+  DOWNLOAD_RETRY_INTERVAL = 5
+
+  LOG_DOWNLOAD_RETRY = lambda do |exception, try, _elapsed_time, next_interval|
+    puts "Download attempt #{try} of #{DOWNLOAD_TRIES} failed: #{exception.message}"
+    puts "Trying again in #{next_interval.round(1)} seconds..." if next_interval
+  end
 
   # The drive letter (eg. 'L')
   def self.drive
@@ -42,8 +60,17 @@ class Atc::Smb::Connector
   # Downloads a single file from remote_dir (a directory on the share) to local_path,
   # verifies that the whole file arrived and returns local_path
   def download_file(remote_dir, file_path, local_path, expected_size:)
-    smbclient_get(remote_dir, file_path, local_path)
-    verify_download_size(file_path, local_path, expected_size)
+    Retriable.retriable(
+      on: [Atc::Exceptions::SourceDownloadError],
+      tries: DOWNLOAD_TRIES,
+      base_interval: DOWNLOAD_RETRY_INTERVAL,
+      on_retry: LOG_DOWNLOAD_RETRY
+    ) do
+      FileUtils.rm_f(local_path) # in case we're retrying
+      smbclient_get(remote_dir, file_path, local_path)
+      verify_download_size(file_path, local_path, expected_size)
+    end
+
     local_path
   end
 
@@ -58,7 +85,8 @@ class Atc::Smb::Connector
     actual_size = File.size(local_path)
     return if actual_size == expected_size
 
-    raise "size mismatch for #{file_path}: expected #{expected_size} bytes, downloaded #{actual_size}"
+    raise Atc::Exceptions::SourceDownloadError,
+          "size mismatch for #{file_path}: expected #{expected_size} bytes, downloaded #{actual_size}"
   end
 
   # Runs smbclient's `get` command to copy a single file to the given local_path
@@ -75,9 +103,20 @@ class Atc::Smb::Connector
     _stdout, stderr, status = Open3.capture3(*command)
     puts "Finished running command for #{file_path}, success=#{status.success?}"
 
-    raise "error retrieving #{file_path}: #{stderr.strip}" unless status.success?
+    raise_download_error(file_path, stderr) unless status.success?
 
     local_path
+  end
+
+  def raise_download_error(file_path, stderr)
+    message = "error retrieving #{file_path}: #{stderr.strip}"
+    raise Atc::Exceptions::SourceFileUnavailable, message if permanent_error?(stderr)
+
+    raise Atc::Exceptions::SourceDownloadError, message
+  end
+
+  def permanent_error?(stderr)
+    PERMANENT_ERROR_CODES.any? { |code| stderr.include?(code) }
   end
 
   # Returns an Array of [file_path, size] pairs for every file in a recursive listing,

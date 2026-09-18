@@ -15,7 +15,6 @@ class Atc::Stabilization::BagUploader
       bucket: @bucket_name,
       key: object_key,
       checksum_algorithm: 'CRC32C',
-      multipart_threshold: Atc::Constants::DEFAULT_MULTIPART_THRESHOLD,
       content_type: BestType.mime_type.for_file_name(local_file_path)
     )
   end
