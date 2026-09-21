@@ -7,9 +7,10 @@ require 'securerandom'
 class Atc::Stabilization::Processor
   attr_reader :run_id, :run_dir
 
-  def initialize(source_path:, repository_name:, collection_name:, bag_name:, _source_type:)
+  def initialize(source_path:, source_type:, repository_name:, collection_name:, bag_name:)
     # Path to the source directory we're syncing from
     @source_dir = source_path
+    @source_type = source_type
     @repository_name = repository_name
     @collection_name = collection_name
 
@@ -187,7 +188,7 @@ class Atc::Stabilization::Processor
   end
 
   def create_services
-    @connector = Atc::Smb::Connector.new
+    @connector = Atc::Smb::Connector.new(source_config: STABILIZATION_CONFIG[:sources][@source_type.to_sym])
     @inventory = Atc::Stabilization::Inventory.new(run_dir: @run_dir)
     @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @run_dir, layout: @layout)
     @uploader = Atc::Stabilization::BagUploader.new(@stabilization_bucket)
