@@ -8,6 +8,7 @@ class Atc::Bag::TagFileWriter
   CONTENT_SOURCE_TYPE = 'L-Drive'
 
   # bag_dir is the local directory that the bag's tag files are written to
+  # rubocop:disable Metrics/ParameterLists
   def initialize(
     source_dir:,
     payload_oxum:, manifest_file:, inventory_file:,

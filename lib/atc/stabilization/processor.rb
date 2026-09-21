@@ -7,33 +7,24 @@ require 'securerandom'
 class Atc::Stabilization::Processor
   attr_reader :run_id, :run_dir
 
-  def initialize(source_path:, source_type:, repository_name:, collection_name:, bag_name:)
+  def initialize(source_path:, repository_name:, collection_name:, bag_name:, _source_type:)
     # Path to the source directory we're syncing from
     @source_dir = source_path
+    @repository_name = repository_name
+    @collection_name = collection_name
 
     # The bag will be uploaded to the root of the stabilization bucket
     @stabilization_bucket = STABILIZATION_CONFIG[:stabilization_bucket]
-    @repository_name = repository_name
-    @collection_name = collection_name
     # The layout object helps determine the structure of the bag within the stabilization bucket
-    puts "Passing bag name to layout: #{bag_name}"
     @layout = Atc::Bag::Layout.new(bag_name)
 
-    @run_id = SecureRandom.uuid
-    @work_dir = STABILIZATION_CONFIG[:work_dir]
-    @run_dir = File.join(@work_dir, @run_id)
-    FileUtils.mkdir_p(@run_dir)
+    create_run_dir
+    create_services
 
-    # source_type is validated by Atc::Stabilization::TaskArgs which currently only implements ldrive
-    @connector = Atc::Smb::Connector.new
-    @inventory = Atc::Stabilization::Inventory.new(run_dir: @run_dir)
-    @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @run_dir, layout: @layout)
-    @uploader = Atc::Stabilization::BagUploader.new(@stabilization_bucket)
-    @checker =  Atc::Aws::VirusScanChecker.new(@stabilization_bucket)
-
-    puts "Reading from #{@connector.smb_address}#{@source_dir}"
-    puts "Writing to #{s3_uri}"
-    puts "Files will be stored in the local stabilization directory: #{@run_dir}"
+    Rails.logger.info("Reading from #{@connector.smb_address}#{@source_dir}")
+    Rails.logger.info(
+      "Files will be stored in the local stabilization directory: #{@run_dir} and later uploaded to #{s3_uri}"
+    )
   end
 
   # Returns [success, s3_uri]
@@ -94,14 +85,11 @@ class Atc::Stabilization::Processor
       )
       # Generated from the downloaded file, in the same form the BagIt manifest needs
       checksum = Digest::SHA256.file(local_path).hexdigest
-      puts "Checksum for #{normalized_path}: #{checksum}"
       @uploader.upload_file(local_path, @layout.payload_object_key(normalized_path))
-      puts "File #{normalized_path} uploaded successfully, checksum: #{checksum}, size: #{entry.size}"
+      Rails.logger.info("File #{normalized_path} uploaded successfully, checksum: #{checksum}, size: #{entry.size}")
       @payload_manifest.add_row(checksum, normalized_path, entry.size)
       FileUtils.rm_f(local_path)
     end
-
-    puts "Payload-Oxum for manifest: #{@payload_manifest.payload_oxum}"
   end
 
   # Files are written to the root of the run directory for easier cleanup (no empty directories)
@@ -113,12 +101,12 @@ class Atc::Stabilization::Processor
 
   # Waits for GuardDuty to finish scanning every file uploaded and records the outcome in the CSV
   def scan_files_and_report_results
-    puts "Waiting for virus scan results for #{normalized_paths_by_object_key.size} file(s)..."
+    Rails.logger.info("Waiting for virus scan results for #{normalized_paths_by_object_key.size} file(s)...")
     # Files that never got a result stay as 'NOT SCANNED' so can still be reported as failures
     results = normalized_paths_by_object_key.values.index_with('NOT SCANNED')
 
     @checker.each_scan_result(normalized_paths_by_object_key.keys) do |object_key, status|
-      puts "Scan result for #{object_key}: #{status}"
+      Rails.logger.debug("Scan result for #{object_key}: #{status}")
       results[normalized_paths_by_object_key[object_key]] = status
     end
 
@@ -132,11 +120,11 @@ class Atc::Stabilization::Processor
   # TODO: In addition to logging to the console, send a notification email
   def report_scan_outcome(failures)
     if failures.empty?
-      puts 'All files passed the virus scan'
+      Rails.logger.info('All files passed the virus scan')
     else
-      puts "Some files didn't pass the virus scan:"
+      Rails.logger.warn("Some files didn't pass the virus scan:")
       failures.each do |normalized_path, status|
-        puts "#{normalized_path}: #{status}"
+        Rails.logger.warn("#{normalized_path}: #{status}")
       end
     end
   end
@@ -157,14 +145,14 @@ class Atc::Stabilization::Processor
     upload_tag_files(tag_file_writer.tag_files)
   rescue StandardError => e
     # Rescue here so we can later point to the location of the bag for investigation
-    puts "Could not finalize the bag: #{e.message}"
+    Rails.logger.error("Could not finalize the bag: #{e.message}")
     false
   end
 
   def upload_tag_files(tag_files)
     tag_files.each do |file|
       object_key = @layout.tag_file_object_key(file)
-      puts "Sending #{file} to #{object_key}"
+      Rails.logger.debug("Sending #{file} to #{object_key}")
       @uploader.upload_file(file, object_key)
     end
 
@@ -177,27 +165,42 @@ class Atc::Stabilization::Processor
     # TODO: Add types
     @normalized_paths_by_object_key ||= @inventory.each_transferable.to_h do |entry|
       object_key = @layout.payload_object_key(entry.normalized_path)
-      puts "Object key for #{entry.normalized_path} is #{object_key}"
+      Rails.logger.debug("Object key for #{entry.normalized_path} is #{object_key}")
       [object_key, entry.normalized_path]
     end
   end
 
   def check_large_files
     @inventory.oversized.map do |entry|
-      puts "Warning: File #{entry.file_path} is larger than 100GB (#{entry.size} bytes)"
+      Rails.logger.warn("File #{entry.file_path} is larger than 100GB (#{entry.size} bytes)")
       entry.file_path
     end
   end
 
   private
 
+  def create_run_dir
+    @run_id = SecureRandom.uuid
+    @work_dir = STABILIZATION_CONFIG[:work_dir]
+    @run_dir = File.join(@work_dir, @run_id)
+    FileUtils.mkdir_p(@run_dir)
+  end
+
+  def create_services
+    @connector = Atc::Smb::Connector.new
+    @inventory = Atc::Stabilization::Inventory.new(run_dir: @run_dir)
+    @payload_manifest = Atc::Bag::PayloadManifest.new(bag_dir: @run_dir, layout: @layout)
+    @uploader = Atc::Stabilization::BagUploader.new(@stabilization_bucket)
+    @checker = Atc::Aws::VirusScanChecker.new(@stabilization_bucket)
+  end
+
   def report_failure(subject, message)
-    puts message
+    Rails.logger.warn(message)
     StabilizationMailer.notify(subject, message)
   end
 
   def cleanup_run_dir
-    puts "Removing the local stabilization directory: #{@run_dir}"
+    Rails.logger.info("Removing the local stabilization directory: #{@run_dir}")
     FileUtils.rm_rf(@run_dir)
   end
 end

@@ -16,9 +16,6 @@ AllCops:
     - 'vendor/**/*'
     - 'lib/tasks/**/*'
     - 'tmp/**/*'
-    - 'lib/atc/stabilization/*' # temp
-    - 'lib/atc/aws/s3_downloader.rb' # temp
-    - 'lib/atc/bag/*' # temp
 
 Layout/LineLength:
   Exclude:
@@ -33,6 +30,7 @@ Metrics/ClassLength:
   Exclude:
     - 'lib/atc/aws/remote_fixity_check.rb'
     - 'lib/atc/smb/connector.rb'
+    - 'lib/atc/stabilization/processor.rb'
 
 Metrics/MethodLength:
   Exclude:
@@ -43,13 +41,13 @@ Metrics/MethodLength:
     - lib/atc/aws/s3_uploader.rb
     - lib/atc/utils/aws_checksum_utils.rb
     - lib/atc/gcp/storage_uploader.rb
+    - lib/atc/stabilization/processor.rb
 
 Rails/Output:
   Exclude:
     - 'lib/atc/aws/s3_uploader.rb'
     - 'lib/atc/aip_reader.rb'
     - 'lib/atc/directory_reader.rb'
-    - 'lib/atc/smb/connector.rb'
 
 Lint/MissingCopEnableDirective:
   Enabled: false

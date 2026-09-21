@@ -26,8 +26,8 @@ class Atc::Smb::Connector
   DOWNLOAD_RETRY_INTERVAL = 5
 
   LOG_DOWNLOAD_RETRY = lambda do |exception, try, _elapsed_time, next_interval|
-    puts "Download attempt #{try} of #{DOWNLOAD_TRIES} failed: #{exception.message}"
-    puts "Trying again in #{next_interval.round(1)} seconds..." if next_interval
+    Rails.logger.error("Download attempt #{try} of #{DOWNLOAD_TRIES} failed: #{exception.message}")
+    Rails.logger.error("Trying again in #{next_interval.round(1)} seconds...") if next_interval
   end
 
   # The drive letter (eg. 'L')
@@ -94,14 +94,9 @@ class Atc::Smb::Connector
     path_with_share = "#{remote_dir}#{File.dirname(file_path)}"
     source_filename = File.basename(file_path)
 
-    puts "Path with share: #{path_with_share}"
-    puts "Source filename: #{source_filename}"
-    puts "Local path: #{local_path}"
-
     command = smbclient_command(path_with_share, "get \"#{source_filename}\" \"#{local_path}\"")
-    puts "Running: #{command.join(' ')}"
+    Rails.logger.debug("Running: #{command.join(' ')}")
     _stdout, stderr, status = Open3.capture3(*command)
-    puts "Finished running command for #{file_path}, success=#{status.success?}"
 
     raise_download_error(file_path, stderr) unless status.success?
 
@@ -156,7 +151,7 @@ class Atc::Smb::Connector
 
   def ls_output(remote_dir)
     command = smbclient_command(remote_dir, 'recurse ON; ls')
-    puts "Running: #{command.join(' ')}"
+    Rails.logger.debug("Running: #{command.join(' ')}")
     stdout, stderr, status = Open3.capture3(*command)
 
     unless status.success?

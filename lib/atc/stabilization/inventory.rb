@@ -6,6 +6,7 @@ class Atc::Stabilization::Inventory
   HEADERS = %w[file_path size skipped normalized_path virus_scan_result].freeze
   MAX_FILE_SIZE = 100.gigabytes
 
+  # rubocop:disable Lint/StructNewOverride
   Entry = Struct.new(:file_path, :size, :skipped, :normalized_path, :virus_scan_result, keyword_init: true) do
     def skipped?
       skipped == 'true'
@@ -37,6 +38,7 @@ class Atc::Stabilization::Inventory
 
     all.each do |entry|
       next if entry.skipped?
+
       entry.normalized_path = normalized_path_for(entry.file_path, assigned_paths)
     end
 
@@ -95,7 +97,7 @@ class Atc::Stabilization::Inventory
       file_path.delete_prefix('/'), assigned_paths
     )
     assigned_paths << normalized_path
-    puts "Normalized path for #{file_path}: #{normalized_path}"
+    Rails.logger.info("Normalized path for #{file_path}: #{normalized_path}")
     normalized_path
   end
 

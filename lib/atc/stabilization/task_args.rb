@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Parses and validates the environment variables passed to the atc:stabilization rake tasks:
-# bundle exec rake atc:stabilization:run source_type=ldrive source_path="/existing-dir/subdir" repository_name="RBML" collection_name="David Byrne Papers"
+# bundle exec rake atc:stabilization:run source_type=ldrive source_path="/existing-dir/subdir"
+# repository_name="RBML" collection_name="David Byrne Papers"
 class Atc::Stabilization::TaskArgs
   # The sources that can be passed as source_type (see the sources section of stabilization.yml)
   SOURCE_TYPES = %w[ldrive googledrive].freeze
@@ -63,6 +64,7 @@ class Atc::Stabilization::TaskArgs
 
   def parse_name(name, example)
     raise ArgumentError, "Missing required argument: #{example}" if name.blank?
+
     name
   end
 

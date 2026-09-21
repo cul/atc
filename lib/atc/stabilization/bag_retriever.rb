@@ -32,7 +32,7 @@ class Atc::Stabilization::BagRetriever
   end
 
   def download_bag
-    puts "Downloading to #{@download_dir}"
+    Rails.logger.info("Downloading finalized bag to #{@download_dir}")
     result = Atc::Aws::S3Downloader.new(@bucket, @download_dir).download_directory(@bag_root_prefix)
     return true if result[:completed_downloads].positive?
 
@@ -54,22 +54,22 @@ class Atc::Stabilization::BagRetriever
   end
 
   def validate_bag
-    puts "Checking downloaded bag under #{@bag_path}"
     validator = Atc::Bag::Validator.new(@bag_path)
 
     unless validator.valid?
-      report_failure('Failed to download bag', "The bag downloaded to #{@bag_path} is not valid:\n#{validator.errors.join("\n")}")
+      report_failure('Failed to download bag',
+                     "The bag downloaded to #{@bag_path} is not valid:\n#{validator.errors.join("\n")}")
       return false
     end
 
-    puts "#{@bag_path} is valid"
+    Rails.logger.info("Bag under the #{@bag_path} path is valid")
     StabilizationMailer.notify('Successfully downloaded bag', "The bag was successfully downloaded to #{@bag_path}.")
     # TODO: Delete the bag from AWS stabilization directory
     true
   end
 
   def report_failure(subject, message)
-    puts message
+    Rails.logger.error(message)
     StabilizationMailer.notify(subject, message)
   end
 end

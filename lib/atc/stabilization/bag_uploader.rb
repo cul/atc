@@ -22,15 +22,14 @@ class Atc::Stabilization::BagUploader
   def directory_exists(directory_path)
     # A directory exists if at least one object shares its prefix
     prefix = directory_path.end_with?('/') ? directory_path : "#{directory_path}/"
-    puts "Check if directory exists under s3://#{@bucket_name}/#{prefix}"
 
     response = @s3_client.list_objects_v2(bucket: @bucket_name, prefix: prefix, max_keys: 1)
     directory_exists = response.key_count.positive?
 
     if directory_exists
-      puts "The directory '#{prefix}' exists (or contains files)."
+      Rails.logger.error("The directory '#{prefix}' exists (or contains files).")
     else
-      puts "The directory '#{prefix}' does not exist or is empty."
+      Rails.logger.info("The directory '#{prefix}' does not exist or is empty.")
     end
 
     directory_exists

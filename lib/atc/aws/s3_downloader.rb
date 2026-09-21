@@ -12,7 +12,9 @@ class Atc::Aws::S3Downloader
   end
 
   def download_directory(s3_folder_prefix)
-    puts "Downloading data from s3://#{@bucket_name}/#{s3_folder_prefix} to the local directory #{@download_directory}"
+    Rails.logger.info(
+      "Downloading data from s3://#{@bucket_name}/#{s3_folder_prefix} to the local directory #{@download_directory}"
+    )
 
     result = @transfer_manager.download_directory(
       @download_directory,
@@ -20,7 +22,7 @@ class Atc::Aws::S3Downloader
       s3_prefix: s3_folder_prefix
     )
     # Hash of {:completed_downloads=>10, :failed_downloads=>0}
-    puts "Downloaded #{result[:completed_downloads]} file(s)"
+    Rails.logger.info("Downloaded #{result[:completed_downloads]} file(s)")
     result
   end
 end
