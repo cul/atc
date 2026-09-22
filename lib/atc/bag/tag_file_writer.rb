@@ -1,0 +1,80 @@
+# frozen_string_literal: true
+
+require 'digest'
+
+# Assembles the BagIt tag files
+class Atc::Bag::TagFileWriter
+  # Everything transferred by this process comes from the L Drive for now
+  CONTENT_SOURCE_TYPE = 'L-Drive'
+
+  # bag_dir is the local directory that the bag's tag files are written to
+  # rubocop:disable Metrics/ParameterLists
+  def initialize(
+    source_dir:,
+    payload_oxum:, manifest_file:, inventory_file:,
+    virus_check_passed:, bag_dir:,
+    repository_name:, collection_name:
+  )
+    @source_dir = source_dir
+    @payload_oxum = payload_oxum
+    @manifest_file = manifest_file
+    @inventory_file = inventory_file
+    @repository_name = repository_name
+    @collection_name = collection_name
+    @bag_dir = bag_dir
+    @virus_check_passed = virus_check_passed
+  end
+
+  def write_tag_files
+    File.write(bagit_file, "BagIt-Version: 1.0\nTag-File-Character-Encoding: UTF-8\n")
+    File.write(bag_info_file, bag_info_content)
+    # The tag manifest holds checksums of other tag files so it has to be written last
+    File.write(tag_manifest_file, tag_manifest_content)
+  end
+
+  def tag_files
+    checksummed_tag_files + [tag_manifest_file]
+  end
+
+  private
+
+  def checksummed_tag_files
+    [bagit_file, bag_info_file, @manifest_file, @inventory_file]
+  end
+
+  def bag_info_content
+    bag_info = {
+      'Bagging-Date' => Time.zone.today.strftime('%Y-%m-%d'),
+      'Payload-Oxum' => @payload_oxum,
+      'Content-Source-Type' => CONTENT_SOURCE_TYPE,
+      'Content-Source-Path' => @source_dir,
+      'Repository-Name' => @repository_name,
+      'Collection-Name' => @collection_name,
+      'Virus-Check-Result' => virus_check_result
+    }
+
+    bag_info.map { |label, value| "#{label}: #{value}\n" }.join
+  end
+
+  def virus_check_result
+    return 'PASS' if @virus_check_passed
+
+    "FAIL - See #{File.basename(@inventory_file)} for additional details."
+  end
+
+  def tag_manifest_content
+    checksummed_tag_files.map { |file| "#{Digest::SHA256.file(file).hexdigest}  #{File.basename(file)}\n" }.join
+  end
+
+  def bagit_file
+    File.join(@bag_dir, 'bagit.txt')
+  end
+
+  def bag_info_file
+    File.join(@bag_dir, 'bag-info.txt')
+  end
+
+  def tag_manifest_file
+    File.join(@bag_dir, 'tagmanifest-sha256.txt')
+  end
+end
