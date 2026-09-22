@@ -31,8 +31,7 @@ namespace :atc do
       retrieved = Atc::Stabilization::BagRetriever.new(
         bucket: STABILIZATION_CONFIG[:stabilization_bucket],
         bag_root_prefix: bag_root_prefix,
-        # download_dir:STABILIZATION_CONFIG[:cul_volume_download_dir] # this will be used in prod
-        download_dir: STABILIZATION_CONFIG[:work_dir]
+        download_dir: STABILIZATION_CONFIG[:bag_download_dir]
       ).retrieve
 
       abort Rainbow('Could not retrieve a valid bag (see the reason above).').red unless retrieved
