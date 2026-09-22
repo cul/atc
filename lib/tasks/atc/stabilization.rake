@@ -13,6 +13,8 @@ namespace :atc do
 
     # Memoized because every Processor creates its a timestamped run directory
     def processor
+      # TODO: Pass in retain_stabilization_files environment variable
+      # Default it to false
       @processor ||= Atc::Stabilization::Processor.new(
         source_path: task_args.source_path,
         source_type: task_args.source_type,
