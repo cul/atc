@@ -61,6 +61,12 @@ describe Atc::Bag::Validator do
   end
 
   describe 'a bag whose contents do not match its manifests' do
+    # The bagit gem writes validation errors straight to stdout using an internal logger,
+    # which causes the rspec to display them every time the tests run
+    let(:null_logger) { Logger.new(File::NULL) }
+
+    before { allow(Logger).to receive(:new).and_return(null_logger) }
+
     it 'is not valid when a payload file has been modified' do
       File.write(File.join(bag_dir, 'data', 'file.txt'), "modified\n")
       expect(validator.valid?).to be(false)
