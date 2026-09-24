@@ -118,15 +118,12 @@ class Atc::Stabilization::Processor
     failures
   end
 
-  # TODO: In addition to logging to the console, send a notification email
   def report_scan_outcome(failures)
     if failures.empty?
       Rails.logger.info('All files passed the virus scan')
     else
-      Rails.logger.warn("Some files didn't pass the virus scan:")
-      failures.each do |normalized_path, status|
-        Rails.logger.warn("#{normalized_path}: #{status}")
-      end
+      mail_body = "Some files didn't pass the virus scan: #{failures.keys.join(', ')}"
+      report_failure('Virus Scan Failed', mail_body)
     end
   end
 
