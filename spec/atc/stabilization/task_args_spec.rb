@@ -33,6 +33,23 @@ describe Atc::Stabilization::TaskArgs do
       )
     end
 
+    it 'reads the optional retain_stabilization_files flag from the environment' do
+      args = described_class.from_env(
+        'source_type' => 'ldrive', 'source_path' => '/existing-dir/subdir',
+        'repository_name' => 'Starr', 'collection_name' => 'Wango Weng Interview',
+        'retain_stabilization_files' => 'true'
+      )
+      expect(args.retain_stabilization_files?).to be(true)
+    end
+
+    it 'defaults the optional retain_stabilization_files flag to false when it is absent' do
+      args = described_class.from_env(
+        'source_type' => 'ldrive', 'source_path' => '/existing-dir/subdir',
+        'repository_name' => 'Starr', 'collection_name' => 'Wango Weng Interview'
+      )
+      expect(args.retain_stabilization_files?).to be(false)
+    end
+
     it 'raises an error when an argument is missing from the environment' do
       expect { described_class.from_env({}) }.to raise_error(ArgumentError, /source_type/)
     end
@@ -96,6 +113,31 @@ describe Atc::Stabilization::TaskArgs do
     it 'raises an error when the collection name is missing' do
       expect { build_task_args(collection_name: nil) }.to raise_error(
         ArgumentError, "Missing required argument: #{described_class::COLLECTION_NAME_EXAMPLE}"
+      )
+    end
+  end
+
+  describe 'retain_stabilization_files' do
+    it 'is false when it is not given' do
+      expect(task_args.retain_stabilization_files?).to be(false)
+    end
+
+    it 'is true when it is "true"' do
+      expect(build_task_args(retain_stabilization_files: 'true').retain_stabilization_files?).to be(true)
+    end
+
+    it 'ignores surrounding whitespace and capitalization' do
+      expect(build_task_args(retain_stabilization_files: ' True ').retain_stabilization_files?).to be(true)
+    end
+
+    it 'is false when it is "false"' do
+      expect(build_task_args(retain_stabilization_files: 'false').retain_stabilization_files?).to be(false)
+    end
+
+    it 'raises an error for a value that is neither true nor false' do
+      expect { build_task_args(retain_stabilization_files: 'yes') }.to raise_error(
+        ArgumentError,
+        'Invalid retain_stabilization_files: "yes". Expected true or false.'
       )
     end
   end
