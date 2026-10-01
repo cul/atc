@@ -25,7 +25,7 @@ type UseCsvExportSummariesOptions = {
 
 export const getCsvExportSummariesQueryOptions = (pageIndex: number, perPage: number) => {
   return queryOptions({
-    queryKey: ['csv-export-summaries', `index-${pageIndex}`, `perPage-${perPage}`],
+    queryKey: ['csv-export-summaries', { pageIndex, perPage }],
     queryFn: () => getCsvExportSummaries(pageIndex, perPage),
   });
 };
