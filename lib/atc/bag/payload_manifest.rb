@@ -12,21 +12,28 @@ class Atc::Bag::PayloadManifest
     @layout = layout
     @file_count = 0
     @byte_count = 0
+
+    # Synchronize access to the manifest file and counters so it can be used safely across multiple threads
+    @semaphore = Mutex.new
   end
 
   def start
-    File.write(@manifest_file, '')
-    @file_count = 0
-    @byte_count = 0
+    @semaphore.synchronize do
+      File.write(@manifest_file, '')
+      @file_count = 0
+      @byte_count = 0
+    end
   end
 
   def add_row(checksum, normalized_path, size)
-    File.open(@manifest_file, 'a') do |file|
-      file.puts("#{checksum}  #{@layout.payload_path(normalized_path)}")
-    end
+    @semaphore.synchronize do
+      File.open(@manifest_file, 'a') do |file|
+        file.puts("#{checksum}  #{@layout.payload_path(normalized_path)}")
+      end
 
-    @file_count += 1
-    @byte_count += size
+      @file_count += 1
+      @byte_count += size
+    end
   end
 
   # The "Payload-Oxum" value for bag-info.txt

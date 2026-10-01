@@ -5,6 +5,8 @@ require 'fileutils'
 require 'securerandom'
 
 class Atc::Stabilization::Processor
+  THREAD_COUNT = 4
+
   attr_reader :run_id, :run_dir
 
   def initialize(source_path:, source_type:, repository_name:, collection_name:, bag_name:)
@@ -45,7 +47,7 @@ class Atc::Stabilization::Processor
 
     # 2. Normalize the source paths so that they are suitable for uploading
     normalize_source_paths
-    # 3. Download and process the files (one at a time)
+    # 3. Download and process the files (THREAD_COUNT at a time)
     download_and_process_source_files
     # 4. Check for results of virus scanning and record them in the CSV
     failures = scan_files_and_report_results
@@ -74,23 +76,16 @@ class Atc::Stabilization::Processor
     @inventory.normalize_paths
   end
 
-  # Downloads each file that was not skipped, then generates checksum, uploads and records it
-  # before moving on to the next one, so only one file is on local disk at a time
+  # Downloads each file that was not skipped, then generates checksum, uploads and records it.
+  # Files are processed concurrently by multiple threads (THREAD_COUNT at a time).
   def download_and_process_source_files
     @payload_manifest.start
 
-    @inventory.each_transferable.with_index do |entry, index|
-      normalized_path = entry.normalized_path
-      local_path = @connector.download_file(
-        @source_dir, entry.file_path, staging_path(index, normalized_path), expected_size: entry.size
-      )
-      # Generated from the downloaded file, in the same form the BagIt manifest needs
-      checksum = Digest::SHA256.file(local_path).hexdigest
-      @uploader.upload_file(local_path, @layout.payload_object_key(normalized_path))
-      Rails.logger.info("File #{normalized_path} uploaded successfully, checksum: #{checksum}, size: #{entry.size}")
-      @payload_manifest.add_row(checksum, normalized_path, entry.size)
-      FileUtils.rm_f(local_path)
-    end
+    queue = transfer_queue
+    threads = Array.new(THREAD_COUNT) { Thread.new { process_queue(queue) } }
+
+    errors = threads.map(&:value).compact
+    raise errors.first if errors.any?
   end
 
   # Files are written to the root of the run directory for easier cleanup (no empty directories)
@@ -176,6 +171,39 @@ class Atc::Stabilization::Processor
   end
 
   private
+
+  # Queue allows each thread to safely receive the next file to process without conflicts.
+  # It also avoids using each_transferable directly in multiple threads, which would cause FiberError,
+  #  and closes the CSV file before workers start file processing.
+  def transfer_queue
+    queue = Queue.new
+    @inventory.each_transferable.with_index { |entry, index| queue << [entry, index] }
+    queue.close
+  end
+
+  def process_queue(queue)
+    while (job = queue.pop)
+      process_source_file(*job)
+    end
+    nil
+  rescue StandardError => e
+    # Stop the other threads from starting new files
+    queue.clear
+    e
+  end
+
+  def process_source_file(entry, index)
+    normalized_path = entry.normalized_path
+    local_path = @connector.download_file(
+      @source_dir, entry.file_path, staging_path(index, normalized_path), expected_size: entry.size
+    )
+    # Generated from the downloaded file, in the same form the BagIt manifest needs
+    checksum = Digest::SHA256.file(local_path).hexdigest
+    @uploader.upload_file(local_path, @layout.payload_object_key(normalized_path))
+    Rails.logger.info("File #{normalized_path} uploaded successfully, checksum: #{checksum}, size: #{entry.size}")
+    @payload_manifest.add_row(checksum, normalized_path, entry.size)
+    FileUtils.rm_f(local_path)
+  end
 
   def create_run_dir
     @run_id = SecureRandom.uuid

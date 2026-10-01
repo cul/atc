@@ -74,6 +74,18 @@ describe Atc::Bag::PayloadManifest do
       expect(payload_manifest.file_count).to eq(2)
       expect(payload_manifest.byte_count).to eq(300)
     end
+
+    it 'records every row and the correct totals when rows are added from multiple threads' do
+      threads = Array.new(10) do |thread_number|
+        Thread.new do
+          100.times { |row_number| payload_manifest.add_row(checksum, "file-#{thread_number}-#{row_number}.txt", 1) }
+        end
+      end
+      threads.each(&:join)
+
+      expect(File.readlines(manifest_file).uniq.size).to eq(1000)
+      expect(payload_manifest.payload_oxum).to eq('1000.1000')
+    end
   end
 
   describe '#payload_oxum' do
