@@ -1,10 +1,8 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import { QueryConfig } from '@/lib/react-query';
 import { api } from '@/lib/api-client';
-import {
-  CsvExportSummariesResponse,
-  DEFAULT_CSV_EXPORT_PAGE_SIZE,
-} from '../utils/csv-exports-utils';
+import { DEFAULT_CSV_EXPORT_PAGE_SIZE } from '../utils/csv-exports-utils';
+import { CsvExportSummariesResponse } from '@/types/api';
 
 const getCsvExportSummaries = (pageIndex = 1, perPage = DEFAULT_CSV_EXPORT_PAGE_SIZE) => {
   const params = new URLSearchParams();
