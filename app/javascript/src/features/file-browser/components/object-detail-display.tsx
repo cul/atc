@@ -8,7 +8,7 @@ import {
   extractFileExtension,
 } from '../utils/format-utils';
 import { useObjectDetailsSuspenseQuery } from '../api/get-object-details';
-import DetailField from '../../../components/ui/detail-field';
+import DetailField from '@/components/ui/detail-field';
 
 const displayRetrievalTime = (archiveStatus: string | null) => {
   switch (archiveStatus) {
