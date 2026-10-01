@@ -16,7 +16,7 @@ type UseCsvExportSummariesOptions = {
 
 export const getCsvExportDetailsQueryOptions = (exportId: string) => {
   return queryOptions({
-    queryKey: ['csv-export-details', `export-id-${exportId}`],
+    queryKey: ['csv-export-details', exportId],
     queryFn: () => getCsvExportDetails(exportId),
   });
 };
