@@ -6,4 +6,10 @@
         and that is where the asset tags are included
 %>
 
-<div id="s3-browser-app">Loading...</div>
+<div 
+  id="s3-browser-app"
+  data-signed-in="<%= user_signed_in? %>"
+  data-sign-out-path="<%= destroy_user_session_path %>"
+>
+  Loading...
+</div>

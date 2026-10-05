@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleCheck, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { faTriangleExclamation, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { Link } from 'react-router';
 
 type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
@@ -26,12 +27,14 @@ export type NotificationProps = {
     type: NotificationType;
     title: string;
     message?: string;
+    linkValue?: string;
+    linkText?: string;
   };
   onDismiss: (id: string) => void;
 };
 
 export const Notification = ({
-  notification: { id, type, title, message },
+  notification: { id, type, title, message, linkValue, linkText },
   onDismiss,
 }: NotificationProps) => {
   const variant = VARIANT_MAP[type];
@@ -48,7 +51,16 @@ export const Notification = ({
         <FontAwesomeIcon icon={ICON_MAP[type]} className={`me-2 text-${variant}-emphasis`} />
         <strong className={`me-auto text-${variant}-emphasis`}>{title}</strong>
       </Toast.Header>
-      {message && <Toast.Body className="text-body-secondary">{message}</Toast.Body>}
+      {(message || linkValue) && (
+        <Toast.Body className="text-body-secondary">
+          {message}
+          {linkValue && (
+            <div className="pt-2">
+              <Link to={linkValue}>{linkText ?? linkValue}</Link>
+            </div>
+          )}
+        </Toast.Body>
+      )}
     </Toast>
   );
 };

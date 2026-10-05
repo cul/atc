@@ -3,12 +3,18 @@ import { Pagination } from 'react-bootstrap';
 
 interface TablePaginationProps<T> {
   table: Table<T>;
+  serverSidePaginatedProps?: {
+    rowCount: number;
+  };
 }
 
 // Based on https://tanstack.com/table/v8/docs/framework/react/examples/pagination
-function TablePagination<T>({ table }: TablePaginationProps<T>) {
+function TablePagination<T>({ table, serverSidePaginatedProps }: TablePaginationProps<T>) {
   const { pageIndex, pageSize } = table.getState().pagination;
-  const totalRows = table.getFilteredRowModel().rows.length;
+  const isServerSidePaginated = serverSidePaginatedProps !== undefined;
+  const totalRows = isServerSidePaginated
+    ? serverSidePaginatedProps.rowCount
+    : table.getFilteredRowModel().rows.length;
 
   // An empty table has a page count of 0 but we still want to display
   // the page as "1 of 1" rather than "1 of 0", so floor the displayed count at 1.
