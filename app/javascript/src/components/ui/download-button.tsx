@@ -1,18 +1,16 @@
 import { useState } from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, ButtonProps } from 'react-bootstrap';
 import { parseErrorBody, notifyError } from '@/lib/api-client';
 
-interface DownloadButtonProps extends React.ComponentPropsWithRef<'button'> {
+interface DownloadButtonProps extends ButtonProps {
   endpoint: string;
   defaultFilename?: string;
-  styles?: string;
-  variant?: string;
 }
 
 // A button that is used to download a file from an API endpoint
 // and optionally render an error notification when appropriate.
 // Adapted from: https://cheeger.com/general/2025/08/29/react-download-file-within-handler.html
-const DownloadButton = ({ endpoint, defaultFilename, styles, variant }: DownloadButtonProps) => {
+const DownloadButton = ({ endpoint, defaultFilename, ...buttonProps }: DownloadButtonProps) => {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
@@ -46,7 +44,7 @@ const DownloadButton = ({ endpoint, defaultFilename, styles, variant }: Download
   };
 
   return (
-    <Button onClick={handleDownload} disabled={isDownloading} className={styles} variant={variant}>
+    <Button onClick={handleDownload} disabled={isDownloading} {...buttonProps}>
       Download
     </Button>
   );

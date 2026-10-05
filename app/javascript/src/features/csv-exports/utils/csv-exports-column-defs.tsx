@@ -34,7 +34,7 @@ export const columnDefs = [
             <DownloadButton
               endpoint={`/api/csv_exports/${row.original.id}/download`}
               defaultFilename={`csv_export_${row.original.id}.csv`}
-              styles="ms-2 btn-sm"
+              className="ms-2 btn-sm"
               variant="outline-primary"
             />
           )}
