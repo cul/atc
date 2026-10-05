@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 DEVELOPMENT_ADMIN_USER_CONFIG = {
-  uid: 'development',
+  uid: 'admin',
   email: 'development@example.com',
   password: 'development',
   is_admin: true
