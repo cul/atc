@@ -10,10 +10,8 @@ Rails.application.routes.draw do # rubocop:disable Metrics/BlockLength
     if Rails.env.development?
       get '/users/development/sign_in_developer_admin',
           to: 'users/development#sign_in_developer_admin'
-    end
-    if Rails.env.development?
       get '/users/development/sign_in_developer_user',
-          to: 'users/development#sign_in_development_user'
+          to: 'users/development#sign_in_developer_user'
     end
   end
 

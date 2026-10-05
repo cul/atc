@@ -17,7 +17,7 @@ class Users::DevelopmentController < Devise::SessionsController
     redirect_to root_path
   end
 
-  def sign_in_development_user
+  def sign_in_developer_user
     return unless Rails.env.development?
 
     unless user_signed_in?
