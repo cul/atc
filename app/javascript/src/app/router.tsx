@@ -39,7 +39,7 @@ export const createAppRouter = (queryClient: QueryClient) =>
           loader: () => redirect('/browse/buckets'),
         },
         {
-          path: 'csv_exports',
+          path: 'csv-exports',
           Component: CsvExportsLayout,
           children: [
             {
