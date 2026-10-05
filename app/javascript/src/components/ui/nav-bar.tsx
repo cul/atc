@@ -10,7 +10,7 @@ const NavBar = () => {
       <Link to="/browse/buckets" className="btn btn-light btn-sm">
         S3 File Browser
       </Link>
-      <Link to="/csv_exports" className="btn btn-light btn-sm">
+      <Link to="/csv-exports" className="btn btn-light btn-sm">
         View CSV Exports
       </Link>
       <form action={signOutPath} method="post">

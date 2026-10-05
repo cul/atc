@@ -124,7 +124,7 @@ export const notifyNewCsvExport = (exportId: string) => {
     type: 'success',
     title: `Your Export has been ordered`,
     message: `Your new CSV Export with ID ${exportId} has been ordered.`,
-    linkValue: `/csv_exports/${exportId}`,
+    linkValue: `/csv-exports/${exportId}`,
     linkText: 'View export details.',
   });
 };
