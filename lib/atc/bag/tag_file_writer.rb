@@ -24,6 +24,7 @@ class Atc::Bag::TagFileWriter
     @bag_dir = bag_dir
     @virus_check_passed = virus_check_passed
   end
+  # rubocop:enable Metrics/ParameterLists
 
   def write_tag_files
     File.write(bagit_file, "BagIt-Version: 1.0\nTag-File-Character-Encoding: UTF-8\n")

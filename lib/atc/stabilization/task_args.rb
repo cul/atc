@@ -53,9 +53,9 @@ class Atc::Stabilization::TaskArgs
   def assemble_bag_name
     normalized_repository_name = normalize_for_folder_name(@repository_name)
     normalized_collection_name = normalize_for_folder_name(@collection_name)
-    current_date = Time.current.strftime('%Y%m%d_%H%M%S')
+    current_datetime = Time.current.strftime('%Y%m%d_%H%M%S')
 
-    "#{normalized_repository_name}_#{normalized_collection_name}_#{current_date}"
+    "#{normalized_repository_name}_#{normalized_collection_name}_#{current_datetime}"
   end
 
   def normalize_for_folder_name(name)
