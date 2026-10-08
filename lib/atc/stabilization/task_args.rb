@@ -2,7 +2,7 @@
 
 # Parses and validates the environment variables passed to the atc:stabilization rake tasks:
 # bundle exec rake atc:stabilization:run source_type=ldrive source_path="/existing-dir/subdir"
-# repository_name="RBML" collection_name="David Byrne Papers"
+# repository_name="RBML" collection_name="David Byrne Papers" retain_stabilization_files=true
 class Atc::Stabilization::TaskArgs
   # The sources that can be passed as source_type (see the sources section of stabilization.yml)
   SOURCE_TYPES = %w[ldrive googledrive].freeze
@@ -11,6 +11,8 @@ class Atc::Stabilization::TaskArgs
   IMPLEMENTED_SOURCE_TYPES = %w[ldrive].freeze
 
   FOLDER_NAME_SEPARATOR_REGEX = /[^a-zA-Z0-9-]+/
+
+  RETAIN_FILES_VALUES = %w[true false].freeze
 
   SOURCE_TYPE_EXAMPLE = 'source_type=ldrive'
   SOURCE_PATH_EXAMPLE = 'source_path="/existing-dir/subdir"'
@@ -23,6 +25,8 @@ class Atc::Stabilization::TaskArgs
   # - collection_name is the name of the collection within the repository (eg. "David Byrne Papers")
   # - bag_name is the name of the bag assembled from the repository name, collection name and current date located
   #   at the root of the stabilization bucket
+  # - retain_stabilization_files is an optional true or false arg that keeps the bag in the stabilization bucket
+  #   after it has been downloaded and validated. Defaults to false.
   attr_reader :source_type, :source_path, :repository_name, :collection_name, :bag_name
 
   def self.from_env(env = ENV)
@@ -30,11 +34,12 @@ class Atc::Stabilization::TaskArgs
       source_type: env['source_type'],
       source_path: env['source_path'],
       repository_name: env['repository_name'],
-      collection_name: env['collection_name']
+      collection_name: env['collection_name'],
+      retain_stabilization_files: env['retain_stabilization_files']
     )
   end
 
-  def initialize(source_type:, source_path:, repository_name:, collection_name:)
+  def initialize(source_type:, source_path:, repository_name:, collection_name:, retain_stabilization_files: nil)
     @source_type = parse_source_type(source_type)
     raise_unimplemented_source_type_error! unless IMPLEMENTED_SOURCE_TYPES.include?(self.source_type)
 
@@ -42,6 +47,11 @@ class Atc::Stabilization::TaskArgs
     @repository_name = parse_name(repository_name, REPOSITORY_NAME_EXAMPLE)
     @collection_name = parse_name(collection_name, COLLECTION_NAME_EXAMPLE)
     @bag_name = assemble_bag_name
+    @retain_stabilization_files = parse_flag(retain_stabilization_files, 'retain_stabilization_files')
+  end
+
+  def retain_stabilization_files?
+    @retain_stabilization_files
   end
 
   def raise_unimplemented_source_type_error!
@@ -60,6 +70,15 @@ class Atc::Stabilization::TaskArgs
 
   def normalize_for_folder_name(name)
     AnyAscii.transliterate(name).gsub(FOLDER_NAME_SEPARATOR_REGEX, '_').gsub(/\A_+|_+\z/, '')
+  end
+
+  def parse_flag(value, name)
+    return false if value.blank?
+
+    normalized_value = value.to_s.strip.downcase
+    return normalized_value == 'true' if RETAIN_FILES_VALUES.include?(normalized_value)
+
+    raise ArgumentError, "Invalid #{name}: #{value.inspect}. Expected #{RETAIN_FILES_VALUES.join(' or ')}."
   end
 
   def parse_name(name, example)

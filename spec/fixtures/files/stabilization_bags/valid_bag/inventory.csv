@@ -1,0 +1,2 @@
+file_path,size,skipped,normalized_path,virus_scan_result
+/file.txt,33,false,file.txt,NO_THREATS_FOUND

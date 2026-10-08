@@ -5,6 +5,10 @@ namespace :atc do
     #   source_path=/existing-dir/subdir       The directory to stabilize on the source drive
     #   repository_name=RBML                   The repository name that will be logged in bag-info.txt; used for assembling name of the bag
     #   collection_name=David Byrne Papers     The collection name that will be logged in bag-info.txt; used for assembling name of the bag
+    #
+    # Optional environment variables:
+    #   retain_stabilization_files=true        Keeps the bag in the stabilization bucket instead of deleting it once it has been downloaded
+    #                                          and validated. Must be true or false; defaults to false.
     def task_args
       @task_args ||= Atc::Stabilization::TaskArgs.from_env
     rescue ArgumentError => e
@@ -49,7 +53,16 @@ namespace :atc do
       end
 
       puts Rainbow("The bag was uploaded to #{s3_uri}").green
+
+      # retrieve_bag aborts unless the downloaded bag is valid
       retrieve_bag(task_args.bag_name)
+
+      if task_args.retain_stabilization_files?
+        puts Rainbow("Retaining the stabilization files at #{s3_uri}").yellow
+      else
+        s3_remover = Atc::Aws::S3Remover.new(STABILIZATION_CONFIG[:stabilization_bucket])
+        s3_remover.delete_directory(task_args.bag_name)
+      end
     rescue Atc::Exceptions::SourceListingError => e
       abort Rainbow("Could not read the source directory: #{e.message}").red
     end
