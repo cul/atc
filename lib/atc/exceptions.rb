@@ -11,6 +11,7 @@ module Atc::Exceptions
   class SourceListingError < AtcError; end
   class SourceDownloadError < AtcError; end
   class SourceFileUnavailable < AtcError; end
+  class DuplicateDirectory < AtcError; end
 
   class DirectoryLoadError < AtcError; end
   class UnreadableFiles < DirectoryLoadError; end

@@ -64,8 +64,6 @@ gem 'devise'
 gem 'omniauth'
 gem 'omniauth-cul', '~> 0.2.0'
 
-gem 'open3'
-
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
 

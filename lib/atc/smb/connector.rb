@@ -13,6 +13,11 @@ class Atc::Smb::Connector
   # Matches the status code that smbclient prints when it can't read an individual file or directory
   NT_STATUS_ERROR_REGEX = /NT_STATUS_(?!OK\b)\w+/
 
+  KNOWN_SKIP_LINE_REGEXES = [
+    /\A\s*\z/, # blank lines
+    /\A\s*\d+ blocks of size \d+\. \d+ blocks available\s*\z/ # disk usage summary
+  ].freeze
+
   # Error codes that indicate a permanent failure; we avoid retrying when these are encountered
   PERMANENT_ERROR_CODES = %w[
     NT_STATUS_OBJECT_NAME_NOT_FOUND
@@ -135,12 +140,18 @@ class Atc::Smb::Connector
     output.each_line do |line|
       if (header = DIR_HEADER_REGEX.match(line))
         relative_dir = normalize_path(header[:path]).delete_prefix(base_dir)
-      elsif (entry = LS_ENTRY_REGEX.match(line)) && !entry[:attributes].include?('D')
-        files << ["#{relative_dir}/#{entry[:name]}", entry[:size].to_i]
+      elsif (entry = LS_ENTRY_REGEX.match(line))
+        files << ["#{relative_dir}/#{entry[:name]}", entry[:size].to_i] unless entry[:attributes].include?('D')
+      elsif !line_matches_known_skip_rule?(line)
+        raise Atc::Exceptions::SourceListingError, "Encountered an unhandled line in the SMB ls output: #{line}"
       end
     end
 
     files
+  end
+
+  def line_matches_known_skip_rule?(line)
+    KNOWN_SKIP_LINE_REGEXES.any? { |regex| regex.match?(line) }
   end
 
   # Converts an SMB path to a "/dir/subdir" form
@@ -176,6 +187,6 @@ class Atc::Smb::Connector
   def smbclient_command(remote_dir, smb_command)
     # Kerberos is not required but no other authentication method is allowed for this command
     ['smbclient', smb_address, '--authentication-file', self.class.auth_file_path.to_s,
-     '-m', 'SMB3', '--use-kerberos=required', '-D', remote_dir, '--command', smb_command]
+     '-m', 'SMB3', '--use-kerberos=required', '-D', "\"#{remote_dir}\"", '--command', smb_command]
   end
 end
