@@ -187,6 +187,6 @@ class Atc::Smb::Connector
   def smbclient_command(remote_dir, smb_command)
     # Kerberos is not required but no other authentication method is allowed for this command
     ['smbclient', smb_address, '--authentication-file', self.class.auth_file_path.to_s,
-     '-m', 'SMB3', '--use-kerberos=required', '-D', "\"#{remote_dir}\"", '--command', smb_command]
+     '-m', 'SMB3', '--use-kerberos=required', '-D', remote_dir, '--command', smb_command]
   end
 end

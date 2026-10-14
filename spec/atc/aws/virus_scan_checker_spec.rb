@@ -56,11 +56,6 @@ describe Atc::Aws::VirusScanChecker do
       }.to yield_successive_args(['key-1', 'NO_THREATS_FOUND'], ['key-2', 'NO_THREATS_FOUND'])
     end
 
-    it 'returns an empty array when all of the objects have been scanned' do
-      stub_object_tags([{ key: 'GuardDutyMalwareScanStatus', value: 'NO_THREATS_FOUND' }])
-      expect(virus_scan_checker.each_scan_result(['key-1', 'key-2']) { |_key, _status| }).to eq([])
-    end
-
     it 'polls again after the poll interval when an object has not been scanned yet' do
       stub_successive_scan_statuses(nil, 'NO_THREATS_FOUND')
       allow(virus_scan_checker).to receive(:sleep)
@@ -70,13 +65,23 @@ describe Atc::Aws::VirusScanChecker do
       expect(virus_scan_checker).to have_received(:sleep).with(described_class::POLL_INTERVAL).once
     end
 
-    it 'returns the keys that are still unscanned when the maximum wait time has elapsed' do
-      stub_object_tags([])
+    context 'when the maximum wait time has elapsed' do
       # Advance the clock so that the poll loop reaches its time limit
-      allow(virus_scan_checker).to receive(:sleep) { |seconds| travel(seconds) }
-      expect { |block|
-        expect(virus_scan_checker.each_scan_result([object_key], &block)).to eq([object_key])
-      }.not_to yield_control
+      before { allow(virus_scan_checker).to receive(:sleep) { |seconds| travel(seconds) } }
+
+      it 'yields the keys that are still unscanned with a timed out status' do
+        stub_object_tags([])
+        expect { |block|
+          virus_scan_checker.each_scan_result([object_key], &block)
+        }.to yield_with_args(object_key, described_class::TIMED_OUT)
+      end
+
+      it 'yields the scanned keys with their status before the timed out ones' do
+        stub_successive_scan_statuses('NO_THREATS_FOUND')
+        expect { |block|
+          virus_scan_checker.each_scan_result(['key-1', 'key-2'], &block)
+        }.to yield_successive_args(['key-1', 'NO_THREATS_FOUND'], ['key-2', described_class::TIMED_OUT])
+      end
     end
   end
 end
