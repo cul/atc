@@ -64,7 +64,6 @@ class Atc::Stabilization::BagRetriever
 
     Rails.logger.info("Bag under the #{@bag_path} path is valid")
     StabilizationMailer.notify('Successfully downloaded bag', "The bag was successfully downloaded to #{@bag_path}.")
-    # TODO: Delete the bag from AWS stabilization directory
     true
   end
 
