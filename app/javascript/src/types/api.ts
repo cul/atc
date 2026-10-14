@@ -15,7 +15,7 @@ export interface S3Prefix {
 }
 
 export interface BucketContentsResponse {
-  objects: S3Object[];
+  files: S3Object[];
   folders: string[];
 }
 

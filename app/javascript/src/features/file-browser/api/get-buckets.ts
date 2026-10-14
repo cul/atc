@@ -11,6 +11,8 @@ export const getBucketsQueryOptions = () => {
   return queryOptions({
     queryKey: ['buckets'],
     queryFn: getBuckets,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30, // 60 minutes
   });
 };
 

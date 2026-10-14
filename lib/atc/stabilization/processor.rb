@@ -32,7 +32,10 @@ class Atc::Stabilization::Processor
   def run
     # Safeguard against overwriting an existing stabilization directory. With the current implementation,
     # this should never happen because each stabilization directory contains a YYYYMMDD_HHMMSS timestamp.
-    abort "Path already exists: #{@layout.bag_root_prefix}" if stabilization_directory_exists?
+    if stabilization_directory_exists?
+      raise Atc::Exceptions::DuplicateDirectory,
+            "Path already exists: #{@layout.bag_root_prefix}"
+    end
 
     # 1. Read from the source directory and log every file into a CSV
     add_source_files_to_csv
@@ -103,7 +106,7 @@ class Atc::Stabilization::Processor
   # Waits for GuardDuty to finish scanning every file uploaded and records the outcome in the CSV
   def scan_files_and_report_results
     Rails.logger.info("Waiting for virus scan results for #{normalized_paths_by_object_key.size} file(s)...")
-    # Files that never got a result stay as 'NOT SCANNED' so can still be reported as failures
+    # Fallback in case the virus checker doesn't yield a status for some file, so it's still reported as a failure
     results = normalized_paths_by_object_key.values.index_with('NOT SCANNED')
 
     @checker.each_scan_result(normalized_paths_by_object_key.keys) do |object_key, status|

@@ -10,7 +10,7 @@ export const toBucketItems = (response: BucketContentsResponse): BucketItem[] =>
     fullPath: prefix,
   }));
 
-  const objectItems: BucketItem[] = response.objects.map((obj) => ({
+  const objectItems: BucketItem[] = response.files.map((obj) => ({
     type: 'object',
     name: extractName(obj.key),
     fullPath: obj.key,

@@ -10,6 +10,7 @@
   <head>
     <meta name="robots" content="noindex" />
     <%= vite_client_tag %>
+    <%= csrf_meta_tags %>
     <%# See: https://vite-ruby.netlify.app/guide/rails.html#enabling-hot-module-reload-%F0%9F%94%A5 %>
     <%= vite_react_refresh_tag %>
     <%= vite_typescript_tag 's3_browser.tsx' %>

@@ -24,14 +24,14 @@ class Atc::Stabilization::BagUploader
     prefix = directory_path.end_with?('/') ? directory_path : "#{directory_path}/"
 
     response = @s3_client.list_objects_v2(bucket: @bucket_name, prefix: prefix, max_keys: 1)
-    directory_exists = response.key_count.positive?
+    dir_exists = response.key_count.positive?
 
-    if directory_exists
+    if dir_exists
       Rails.logger.error("The directory '#{prefix}' exists (or contains files).")
     else
       Rails.logger.info("The directory '#{prefix}' does not exist or is empty.")
     end
 
-    directory_exists
+    dir_exists
   end
 end

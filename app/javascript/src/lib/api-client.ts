@@ -6,6 +6,11 @@ export { ApiError };
 
 const BASE_URL = '/api';
 
+// POST, PUT, PATCH, and DELETE requests require the csrf token to be included in headers
+const getCsrfToken = () => {
+  return (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content;
+};
+
 const isErrorData = (data: unknown): data is ErrorData =>
   typeof data === 'object' &&
   data !== null &&
@@ -82,4 +87,11 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 export const api = {
   get: <T>(endpoint: string, options?: Omit<RequestOptions, 'method'>) =>
     request<T>(endpoint, { ...options, method: 'GET' }),
+  post: <T>(endpoint: string, data?: unknown, options?: Omit<RequestOptions, 'method'>) =>
+    request<T>(endpoint, {
+      ...options,
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: { 'X-CSRF-Token': getCsrfToken() },
+    }),
 };
