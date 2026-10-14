@@ -2,12 +2,17 @@
 
 require 'resque/server'
 
-Rails.application.routes.draw do
+Rails.application.routes.draw do # rubocop:disable Metrics/BlockLength
   devise_for :users, controllers: { omniauth_callbacks: 'users/omniauth_callbacks' }
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   devise_scope :user do
-    get '/users/development/sign_in_developer', to: 'users/development#sign_in_developer' if Rails.env.development?
+    if Rails.env.development?
+      get '/users/development/sign_in_developer_admin',
+          to: 'users/development#sign_in_developer_admin'
+      get '/users/development/sign_in_developer_user',
+          to: 'users/development#sign_in_developer_user'
+    end
   end
 
   # S3 Browser API routes
