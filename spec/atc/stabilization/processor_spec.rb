@@ -42,7 +42,7 @@ describe Atc::Stabilization::Processor do
   after { FileUtils.rm_rf(processor.run_dir) }
 
   describe '#s3_uri' do
-    it 'stores the bag within the stabilization bucket' do
+    it 'returns the expected location within the stabilization bucket' do
       expect(processor.s3_uri).to eq("s3://#{stabilization_bucket}/#{bag_name}")
     end
   end
