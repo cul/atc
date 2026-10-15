@@ -78,6 +78,7 @@ class Atc::Stabilization::Processor
 
   # Downloads each file that was not skipped, then generates checksum, uploads and records it.
   # Files are processed concurrently by multiple threads (THREAD_COUNT at a time).
+  # Once every file is processed, the payload manifest is written in the same order as the inventory.
   def download_and_process_source_files
     @payload_manifest.start
 
@@ -86,6 +87,9 @@ class Atc::Stabilization::Processor
 
     errors = threads.map(&:value).compact
     raise errors.first if errors.any?
+
+    ordered_paths = @inventory.each_transferable.lazy.map(&:normalized_path)
+    @payload_manifest.finalize(ordered_paths)
   end
 
   # Files are written to the root of the run directory for easier cleanup (no empty directories)
