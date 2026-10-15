@@ -9,8 +9,8 @@ require 'fileutils'
 class Atc::Bag::PayloadManifest
   attr_reader :manifest_file, :file_count, :byte_count
 
-  # bag_dir is the local directory that the bag's tag files are written to
-  # layout determines file paths recorded by the manifest
+  # bag_dir is the local directory that the bag's tag files are written to.
+  # layout determines file paths recorded by the manifest.
   def initialize(bag_dir:, layout:)
     @manifest_file = File.join(bag_dir, 'manifest-sha256.txt')
     @unordered_file = File.join(bag_dir, 'unordered-payload-manifest.tmp')
