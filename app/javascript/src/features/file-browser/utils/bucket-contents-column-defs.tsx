@@ -7,6 +7,8 @@ import {
   formatSize,
   formatLastModified,
 } from './format-utils';
+import SelectionCheckbox from '../components/selection-checkbox';
+import SelectAllCheckbox from '../components/select-all-checkbox';
 
 const columnHelper = createColumnHelper<BucketItem>();
 
@@ -28,18 +30,22 @@ const sortByTypeAndExtension = (a: BucketItem, b: BucketItem) => {
   return a.name.localeCompare(b.name);
 };
 
-export const columnDefs = (bucket: string) => [
+export const columnDefs = [
+  columnHelper.display({
+    id: 'select',
+    header: () => <SelectAllCheckbox />,
+    meta: { textAlign: 'center' },
+    cell: (props) => <SelectionCheckbox row={props.row} />,
+  }),
   columnHelper.accessor('name', {
     header: 'Name',
     cell: ({ row }) => {
-      const bucketPath = `/browse/buckets/${bucket}`;
-      const prefix = row.original.fullPath
-        ? `?prefix=${encodeURIComponent(row.original.fullPath)}`
-        : '';
+      const { type, fullPath } = row.original;
+      const search = fullPath ? `?prefix=${encodeURIComponent(fullPath)}` : '';
       const url =
-        row.original.type === 'folder'
-          ? `${bucketPath}${prefix}`
-          : `${bucketPath}/object-details${prefix}`;
+        type === 'folder'
+          ? { search } // stay on :bucketName route with new prefix
+          : { pathname: 'object-details', search }; // relative link to details
 
       return (
         <Link

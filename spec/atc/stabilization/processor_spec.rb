@@ -35,14 +35,13 @@ describe Atc::Stabilization::Processor do
 
     allow(virus_scan_checker).to receive(:each_scan_result) do |object_keys, &block|
       object_keys.each { |object_key| block.call(object_key, scan_status) }
-      []
     end
   end
 
   after { FileUtils.rm_rf(processor.run_dir) }
 
   describe '#s3_uri' do
-    it 'stores the bag within the stabilization bucket' do
+    it 'returns the expected location within the stabilization bucket' do
       expect(processor.s3_uri).to eq("s3://#{stabilization_bucket}/#{bag_name}")
     end
   end
@@ -80,10 +79,10 @@ describe Atc::Stabilization::Processor do
     context 'when the bag has already been uploaded' do
       before { allow(uploader).to receive(:directory_exists).and_return(true) }
 
-      it 'aborts rather than overwriting it' do
-        expect { processor.run }.to raise_error(SystemExit).and output(
-          /Path already exists: #{bag_name}/
-        ).to_stderr
+      it 'raises an error rather than overwriting it' do
+        expect { processor.run }.to raise_error(
+          Atc::Exceptions::DuplicateDirectory, /Path already exists: #{bag_name}/
+        )
       end
     end
 
@@ -125,10 +124,10 @@ describe Atc::Stabilization::Processor do
       end
     end
 
-    context 'when a file is never scanned' do
-      before { allow(virus_scan_checker).to receive(:each_scan_result).and_return([payload_object_key]) }
+    context 'when a file times out waiting for a scan result' do
+      let(:scan_status) { Atc::Aws::VirusScanChecker::TIMED_OUT }
 
-      it 'reports failure, because an unscanned file is treated as a failure' do
+      it 'reports failure, because a timed out file is treated as a failure' do
         expect(processor.run).to eq([false, "s3://#{stabilization_bucket}/#{bag_name}"])
       end
     end

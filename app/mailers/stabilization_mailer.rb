@@ -6,7 +6,7 @@ class StabilizationMailer < ApplicationMailer
       to: STABILIZATION_CONFIG[:notification_email],
       subject: subject,
       body_content: message
-    ).send_mail.deliver
+    ).send_mail.deliver_now
   end
 
   def send_mail

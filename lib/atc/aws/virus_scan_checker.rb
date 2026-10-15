@@ -3,6 +3,7 @@
 class Atc::Aws::VirusScanChecker
   POLL_INTERVAL = 10.seconds
   MAX_WAIT = 30.minutes # TBD
+  TIMED_OUT = 'TIMED_OUT'
 
   def initialize(bucket_name, s3_client = S3_CLIENT)
     @bucket_name = bucket_name
@@ -14,6 +15,8 @@ class Atc::Aws::VirusScanChecker
     response.tag_set.find { |tag| tag.key == 'GuardDutyMalwareScanStatus' }&.value
   end
 
+  # Yields each object key with either its GuardDuty scan status or with TIMED_OUT
+  # if no result arrived within MAX_WAIT
   def each_scan_result(object_keys)
     pending = Set.new(object_keys)
     stop_time = Time.current + MAX_WAIT
@@ -31,6 +34,6 @@ class Atc::Aws::VirusScanChecker
       sleep(POLL_INTERVAL) if pending.any?
     end
 
-    pending.to_a
+    pending.each { |object_key| yield object_key, TIMED_OUT }
   end
 end

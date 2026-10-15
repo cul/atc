@@ -12,6 +12,7 @@ module Atc::Exceptions
   class SourceDownloadError < AtcError; end
   class SourceFileUnavailable < AtcError; end
   class PayloadManifestError < AtcError; end
+  class DuplicateDirectory < AtcError; end
 
   class DirectoryLoadError < AtcError; end
   class UnreadableFiles < DirectoryLoadError; end

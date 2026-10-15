@@ -65,6 +65,8 @@ namespace :atc do
       end
     rescue Atc::Exceptions::SourceListingError => e
       abort Rainbow("Could not read the source directory: #{e.message}").red
+    rescue Atc::Exceptions::DuplicateDirectory => e
+      abort Rainbow("A bag with this name already exists in the stabilization bucket, so nothing was uploaded. #{e.message}").red
     end
 
     desc 'Download a finalized bag from the stabilization bucket and validate it'

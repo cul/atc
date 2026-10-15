@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { buildBucket, mockApi, renderApp, screen, within } from '@/testing/test-utils';
 import BucketList from '@/features/file-browser/components/bucket-list';
 
