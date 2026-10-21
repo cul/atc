@@ -147,4 +147,63 @@ describe Atc::Stabilization::Processor do
       end
     end
   end
+
+  describe '#download_and_process_source_files' do
+    let(:file_paths) { Array.new(10) { |number| "/dir/file-#{number + 1}.txt" } }
+    let(:source_files) { file_paths.map { |file_path| [file_path, 12] } }
+    let(:manifest_file) { File.join(processor.run_dir, 'manifest-sha256.txt') }
+    let(:staging_paths) { Queue.new }
+
+    before do
+      allow(connector).to receive(:download_file) do |_remote_dir, file_path, local_path, **|
+        staging_paths << local_path
+        # The first file finishes last, so the order files finish in differs from the inventory
+        sleep(0.1) if file_path == '/dir/file-1.txt'
+        File.write(local_path, file_path)
+        local_path
+      end
+
+      processor.add_source_files_to_csv
+      processor.normalize_source_paths
+    end
+
+    it 'uploads every file' do
+      processor.download_and_process_source_files
+      file_paths.each do |file_path|
+        expect(uploader).to have_received(:upload_file).with(String, "#{bag_name}/data#{file_path}")
+      end
+    end
+
+    it 'writes the manifest in the order of the inventory, with each file paired with its own checksum' do
+      processor.download_and_process_source_files
+      expect(File.readlines(manifest_file, chomp: true)).to eq(
+        file_paths.map { |file_path| "#{Digest::SHA256.hexdigest(file_path)}  data#{file_path}" }
+      )
+    end
+
+    it 'downloads each file to its own staging path' do
+      processor.download_and_process_source_files
+      paths = Array.new(staging_paths.size) { staging_paths.pop }
+      expect(paths.uniq.size).to eq(10)
+    end
+
+    context 'when a file cannot be downloaded' do
+      before do
+        allow(connector).to receive(:download_file).and_raise(Atc::Exceptions::SourceDownloadError, 'download failed')
+      end
+
+      it 'raises the error, without writing the manifest file' do
+        expect { processor.download_and_process_source_files }.to raise_error(
+          Atc::Exceptions::SourceDownloadError, 'download failed'
+        )
+        expect(File.exist?(manifest_file)).to be(false)
+      end
+
+      it 'stops starting new files once a file fails' do
+        stub_const("#{described_class}::THREAD_COUNT", 1)
+        expect { processor.download_and_process_source_files }.to raise_error(Atc::Exceptions::SourceDownloadError)
+        expect(connector).to have_received(:download_file).once
+      end
+    end
+  end
 end
