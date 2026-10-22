@@ -5,7 +5,6 @@ import { ErrorBoundary } from 'react-error-boundary';
 import Spinner from 'react-bootstrap/Spinner';
 
 import { MainErrorFallback } from '@/components/errors/main';
-import { Notifications } from '@/components/ui/notifications/notifications';
 import { queryConfig } from '@/lib/react-query';
 import { useCurrentUser } from '@/lib/auth';
 
@@ -50,7 +49,6 @@ export const AppProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
       <ErrorBoundary FallbackComponent={MainErrorFallback}>
         <QueryClientProvider client={queryClient}>
           {import.meta.env.DEV && <ReactQueryDevtools />}
-          <Notifications />
           <AuthLoader>{children}</AuthLoader>
         </QueryClientProvider>
       </ErrorBoundary>
