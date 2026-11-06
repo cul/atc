@@ -21,6 +21,8 @@ gem 'cancancan'
 gem 'digest-crc', '~> 0.6.5'
 # Client library for connecting to a websocket endpoint
 gem 'faye-websocket', '~> 0.11.3'
+# Google Drive API
+gem 'google-apis-drive_v3', '~> 0.89'
 # Google Cloud Storage SDK
 gem 'google-cloud-storage', '~> 1.49'
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
