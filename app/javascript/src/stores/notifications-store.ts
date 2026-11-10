@@ -5,6 +5,8 @@ export type Notification = {
   type: 'success' | 'error' | 'info' | 'warning';
   title: string;
   message?: string;
+  linkValue?: string;
+  linkText?: string;
 };
 
 type NotificationsStore = {

@@ -1,12 +1,12 @@
 import { ReactNode } from 'react';
 
-type ObjectDetailFieldProps = {
+type DetailFieldProps = {
   label: string;
   value: ReactNode;
   hint?: string;
 };
 
-const ObjectDetailField = ({ label, value, hint }: ObjectDetailFieldProps) => (
+const DetailField = ({ label, value, hint }: DetailFieldProps) => (
   <div className="mb-3">
     <dt className="fw-semibold text-secondary small text-uppercase mb-1">{label}</dt>
     <dd className="mb-0">
@@ -16,4 +16,4 @@ const ObjectDetailField = ({ label, value, hint }: ObjectDetailFieldProps) => (
   </div>
 );
 
-export default ObjectDetailField;
+export default DetailField;

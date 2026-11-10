@@ -55,3 +55,47 @@ export type User = {
 export type ErrorData = {
   error: string;
 };
+
+// Options matching the statuses in the csv_export model
+export type CsvExportStatus =
+  | 'pending'
+  | 'processing'
+  | 'success'
+  | 'failure'
+  | 'completed_with_errors';
+
+export type ExportPath = {
+  bucket: string;
+  keys: Array<string>;
+  prefixes: Array<string>;
+};
+
+export type CsvExportDetailsResponse = {
+  id: number;
+  exportPaths: Array<ExportPath>;
+  exportErrors: Array<string>;
+  status: string;
+  updatedAt: string;
+};
+
+export type CsvExportSummary = {
+  id: number;
+  status: CsvExportStatus;
+  selectionSummary: {
+    sample: Array<string>;
+    totalCount: number;
+  };
+  updatedAt: string;
+};
+
+export type CsvExportSummariesPagination = {
+  currentPage: number;
+  perPage: number;
+  totalPages: number;
+  totalCount: number;
+};
+
+export type CsvExportSummariesResponse = {
+  csvExports: Array<CsvExportSummary>;
+  pagination: CsvExportSummariesPagination;
+};

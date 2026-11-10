@@ -96,3 +96,10 @@ export const renderAppWithRouter = async (
 export * from '@testing-library/react';
 export { default as userEvent } from '@testing-library/user-event';
 export { screen, waitForElementToBeRemoved, waitFor, within };
+
+// For Object Detail Fields: Each field renders as <div> wrapping label <dt> and value <dd>
+export const fieldByLabel = (label: string) => {
+  const wrapper = screen.getByText(label).closest('div');
+  if (!wrapper) throw new Error(`Could not find field wrapper for label: ${label}`);
+  return within(wrapper);
+};
