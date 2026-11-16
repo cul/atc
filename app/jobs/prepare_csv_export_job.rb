@@ -132,7 +132,7 @@ class PrepareCsvExportJob < ApplicationJob # rubocop:disable Metrics/ClassLength
 
   def storage_tier(obj)
     case obj[:storage_class]
-    when nil
+    when nil, 'STANDARD'
       'STANDARD'
     when 'INTELLIGENT_TIERING'
       case obj[:archive_status]
@@ -143,6 +143,8 @@ class PrepareCsvExportJob < ApplicationJob # rubocop:disable Metrics/ClassLength
       else
         'Intelligent Tiering (Frequent Access, Infrequent Access, or Archive Instant Access tier)'
       end
+    else
+      obj[:storage_class]
     end
   end
 
